@@ -46,10 +46,16 @@
         {% endif %}
 
         <div class="form-group">
-          <label class="form-label" for="labour_charge">Estimated Labour Charge (₹)</label>
-          <input type="number" id="labour_charge" name="labour_charge" class="form-input" 
-                 value="500" min="0" step="50">
-          <span class="form-hint">This is an estimate. Final charge will be confirmed by the technician.</span>
+          <label class="form-label">Diagnostic &amp; Visit Labour Charge</label>
+          <div style="background: var(--cream-100); border: 1px solid var(--cream-300); border-radius: var(--border-radius); padding: var(--space-md); display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <strong style="color: var(--charcoal-800); font-size: 0.95rem;">Standard Visit &amp; Diagnostic Fee</strong><br>
+              <small style="color: var(--steel-400);">Fixed technician inspection fee (spare parts charged at catalogue MRP)</small>
+            </div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: var(--orange-600);">
+              ₹350
+            </div>
+          </div>
         </div>
 
         <div style="background: var(--info-bg); border: 1px solid var(--info); border-radius: var(--border-radius); padding: var(--space-md); margin-bottom: var(--space-xl);">

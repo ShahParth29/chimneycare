@@ -121,18 +121,11 @@ def book_service():
     service_type = sanitize_string(request.form.get("service_type", "one_time"))
     plan_id = request.form.get("plan_id") or None
     notes = sanitize_string(request.form.get("notes", ""), max_length=1000)
-    labour_charge = 0
-
-    # Validation
-    if service_type not in ("amc", "one_time", "cleaning"):
-        flash("Invalid service type.", "error")
-        return redirect(url_for("services.book_service"))
-
-    try:
-        labour_charge_raw = request.form.get("labour_charge", "0")
-        labour_charge = float(labour_charge_raw) if labour_charge_raw else 0
-    except ValueError:
-        labour_charge = 0
+    # Fixed server-side labour charges (cannot be manipulated by client)
+    if service_type == "amc":
+        labour_charge = 0.0
+    else:
+        labour_charge = 299.0
 
     if service_type == "amc" and not plan_id:
         flash("Please select an AMC plan.", "error")

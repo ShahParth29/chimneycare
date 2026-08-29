@@ -56,10 +56,16 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="labour_charge">Labour Charge (₹)</label>
-          <input type="number" id="labour_charge" name="labour_charge" class="form-input" 
-                 value="200" min="0" step="50">
-          <span class="form-hint">Standard labour charge. May be adjusted after confirmation.</span>
+          <label class="form-label">Labour / Service Charge</label>
+          <div style="background: var(--cream-100); border: 1px solid var(--cream-300); border-radius: var(--border-radius); padding: var(--space-md); display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <span id="labour-desc" style="font-size: 0.9rem; font-weight: 600; color: var(--charcoal-800);">One-Time Deep Cleaning Fixed Labour</span><br>
+              <small style="color: var(--steel-400);">Fixed company rate — no hidden fees</small>
+            </div>
+            <div id="labour-amount" style="font-size: 1.15rem; font-weight: 700; color: var(--orange-600);">
+              ₹299
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
@@ -84,7 +90,19 @@
 {% block extra_js %}
 <script>
 function togglePlanSelector(type) {
-  document.getElementById('plan-selector').style.display = type === 'amc' ? 'block' : 'none';
+  const planSelector = document.getElementById('plan-selector');
+  const labourDesc = document.getElementById('labour-desc');
+  const labourAmount = document.getElementById('labour-amount');
+
+  if (type === 'amc') {
+    planSelector.style.display = 'block';
+    if (labourDesc) labourDesc.textContent = 'AMC Plan Labour (Included in Subscription)';
+    if (labourAmount) labourAmount.textContent = '₹0 (Included)';
+  } else {
+    planSelector.style.display = 'none';
+    if (labourDesc) labourDesc.textContent = 'One-Time Deep Cleaning Fixed Labour';
+    if (labourAmount) labourAmount.textContent = '₹299';
+  }
 }
 </script>
 {% endblock %}

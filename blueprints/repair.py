@@ -112,13 +112,8 @@ def book_repair():
             if parts_result.data:
                 total_parts_cost = sum(float(p["price"]) for p in parts_result.data)
 
-        # Labour charge (entered by admin later, default estimate)
-        labour_charge_raw = request.form.get("labour_charge", "500")
-        try:
-            labour_charge = float(labour_charge_raw)
-        except ValueError:
-            labour_charge = 500.0
-
+        # Fixed standard diagnostic & visit inspection fee (customizable only by admin)
+        labour_charge = 350.0
         total_cost = total_parts_cost + labour_charge
 
         repair_data = {
