@@ -7,7 +7,7 @@
   <meta name="description" content="{% block meta_description %}ChimneyCare — Professional chimney cleaning, repair, and installation services. Trusted by thousands of homeowners.{% endblock %}">
   <title>{% block title %}ChimneyCare{% endblock %} — Professional Chimney Services</title>
   
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=4.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=5.0">
   {% block extra_css %}{% endblock %}
   
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
@@ -40,7 +40,7 @@
 
   {% include 'components/whatsapp_widget.html' %}
 
-  <script src="{{ url_for('static', filename='js/main.js') }}?v=4.0"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}?v=5.0"></script>
 
   {# ── Supabase Realtime (only for logged-in customers) ─── #}
   {% if current_user %}

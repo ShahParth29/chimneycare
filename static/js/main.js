@@ -5,14 +5,15 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── Mobile Nav Toggle & Overlay ──────────────
-  const navToggle = document.querySelector('.nav__toggle');
-  const navLinks = document.querySelector('.nav__links');
-  const navOverlay = document.querySelector('.nav__overlay');
+  // ── Mobile Nav Toggle & Drawer ──────────────
+  const navToggle = document.getElementById('nav-toggle') || document.querySelector('.nav__toggle');
+  const mobileDrawer = document.getElementById('mobile-drawer');
+  const navOverlay = document.getElementById('nav-overlay');
 
   function openMobileNav() {
-    if (!navLinks || !navToggle) return;
-    navLinks.classList.add('open');
+    if (!mobileDrawer || !navToggle) return;
+    mobileDrawer.classList.add('open');
+    mobileDrawer.setAttribute('aria-hidden', 'false');
     navToggle.classList.add('active');
     navToggle.setAttribute('aria-expanded', 'true');
     if (navOverlay) navOverlay.classList.add('open');
@@ -20,18 +21,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function closeMobileNav() {
-    if (!navLinks || !navToggle) return;
-    navLinks.classList.remove('open');
+    if (!mobileDrawer || !navToggle) return;
+    mobileDrawer.classList.remove('open');
+    mobileDrawer.setAttribute('aria-hidden', 'true');
     navToggle.classList.remove('active');
     navToggle.setAttribute('aria-expanded', 'false');
     if (navOverlay) navOverlay.classList.remove('open');
     document.body.classList.remove('nav-open');
   }
 
-  if (navToggle && navLinks) {
+  if (navToggle && mobileDrawer) {
     navToggle.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isOpen = navLinks.classList.contains('open');
+      const isOpen = mobileDrawer.classList.contains('open');
       if (isOpen) {
         closeMobileNav();
       } else {
@@ -40,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Close on link or button click inside mobile drawer
-    navLinks.querySelectorAll('a, button').forEach(link => {
+    mobileDrawer.querySelectorAll('a, button').forEach(link => {
       link.addEventListener('click', () => {
         closeMobileNav();
       });
@@ -53,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Close on Escape key
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && navLinks.classList.contains('open')) {
+      if (e.key === 'Escape' && mobileDrawer.classList.contains('open')) {
         closeMobileNav();
       }
     });

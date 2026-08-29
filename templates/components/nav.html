@@ -1,19 +1,21 @@
-<nav class="nav">
+<nav class="nav" id="main-nav">
   <div class="nav__inner">
-    <a href="{{ url_for('services.landing') }}" class="nav__logo">
+    <a href="{{ url_for('services.landing') }}" class="nav__logo" aria-label="ChimneyCare Home">
       <div class="nav__logo-icon">🔥</div>
       <span class="nav__logo-text">ChimneyCare</span>
     </a>
 
-    <button class="nav__toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
-      <span></span>
-      <span></span>
-      <span></span>
+    <!-- Mobile Hamburger Toggle (3 lines morphing to X) -->
+    <button class="nav__toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu">
+      <span class="nav__toggle-line"></span>
+      <span class="nav__toggle-line"></span>
+      <span class="nav__toggle-line"></span>
     </button>
 
+    <!-- Desktop Navigation Links -->
     <ul class="nav__links" id="nav-menu">
       <li class="nav__item"><a href="{{ url_for('services.landing') }}" class="nav__link {% if request.path == '/' %}nav__link--active{% endif %}">Home</a></li>
-      <li class="nav__item"><a href="{{ url_for('services.services_index') }}" class="nav__link {% if '/services' in request.path and '/my-bookings' not in request.path %}nav__link--active{% endif %}">Services</a></li>
+      <li class="nav__item"><a href="{{ url_for('services.services_index') }}" class="nav__link {% if '/services' in request.path and '/my-bookings' not in request.path and '/about' not in request.path and '/contact' not in request.path %}nav__link--active{% endif %}">Services</a></li>
       <li class="nav__item"><a href="{{ url_for('repair.repair_index') }}" class="nav__link {% if '/repair' in request.path %}nav__link--active{% endif %}">Repair</a></li>
       <li class="nav__item"><a href="{{ url_for('marketplace.marketplace_index') }}" class="nav__link {% if '/marketplace' in request.path and '/my-orders' not in request.path %}nav__link--active{% endif %}">Marketplace</a></li>
       <li class="nav__item"><a href="{{ url_for('services.about') }}" class="nav__link {% if '/about' in request.path %}nav__link--active{% endif %}">About</a></li>
@@ -33,5 +35,120 @@
       {% endif %}
     </ul>
   </div>
+
+  <!-- Dedicated Mobile Navigation Drawer -->
+  <div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
+    <div class="mobile-drawer__content">
+      <div class="mobile-drawer__badge">
+        <span class="pulse-dot"></span>
+        <span>Certified Kitchen Chimney Service &bull; Ahmedabad &amp; Gandhinagar</span>
+      </div>
+
+      <div class="mobile-drawer__section-title">Navigation</div>
+
+      <div class="mobile-drawer__menu">
+        <a href="{{ url_for('services.landing') }}" class="mobile-drawer__link {% if request.path == '/' %}mobile-drawer__link--active{% endif %}">
+          <div class="mobile-drawer__icon">🏠</div>
+          <div class="mobile-drawer__text">
+            <strong>Home</strong>
+            <small>Overview &amp; quick booking</small>
+          </div>
+          <div class="mobile-drawer__chevron">›</div>
+        </a>
+
+        <a href="{{ url_for('services.services_index') }}" class="mobile-drawer__link {% if '/services' in request.path and '/my-bookings' not in request.path and '/about' not in request.path and '/contact' not in request.path %}mobile-drawer__link--active{% endif %}">
+          <div class="mobile-drawer__icon">⚡</div>
+          <div class="mobile-drawer__text">
+            <strong>Services &amp; Cleaning</strong>
+            <small>Deep degreasing, ducting &amp; install</small>
+          </div>
+          <div class="mobile-drawer__chevron">›</div>
+        </a>
+
+        <a href="{{ url_for('repair.repair_index') }}" class="mobile-drawer__link {% if '/repair' in request.path %}mobile-drawer__link--active{% endif %}">
+          <div class="mobile-drawer__icon">🔧</div>
+          <div class="mobile-drawer__text">
+            <strong>Chimney Repair</strong>
+            <small>Motor, PCB, filters &amp; OEM spares</small>
+          </div>
+          <div class="mobile-drawer__chevron">›</div>
+        </a>
+
+        <a href="{{ url_for('marketplace.marketplace_index') }}" class="mobile-drawer__link {% if '/marketplace' in request.path and '/my-orders' not in request.path %}mobile-drawer__link--active{% endif %}">
+          <div class="mobile-drawer__icon">🛒</div>
+          <div class="mobile-drawer__text">
+            <strong>Marketplace &amp; Exchange</strong>
+            <small>Buy Faber, Elica, Glen + trade-in</small>
+          </div>
+          <div class="mobile-drawer__chevron">›</div>
+        </a>
+
+        <a href="{{ url_for('services.landing') }}#pricing" class="mobile-drawer__link">
+          <div class="mobile-drawer__icon">🛡️</div>
+          <div class="mobile-drawer__text">
+            <strong>AMC Maintenance Plans</strong>
+            <small>3, 6 &amp; 12-month care protection</small>
+          </div>
+          <div class="mobile-drawer__chevron">›</div>
+        </a>
+
+        <a href="{{ url_for('services.about') }}" class="mobile-drawer__link {% if '/about' in request.path %}mobile-drawer__link--active{% endif %}">
+          <div class="mobile-drawer__icon">🏢</div>
+          <div class="mobile-drawer__text">
+            <strong>About Sobhraj Enterprise</strong>
+            <small>Company history &amp; verified technicians</small>
+          </div>
+          <div class="mobile-drawer__chevron">›</div>
+        </a>
+
+        <a href="{{ url_for('services.contact') }}" class="mobile-drawer__link {% if '/contact' in request.path %}mobile-drawer__link--active{% endif %}">
+          <div class="mobile-drawer__icon">💬</div>
+          <div class="mobile-drawer__text">
+            <strong>Contact &amp; Support</strong>
+            <small>Call desk &amp; online inquiry form</small>
+          </div>
+          <div class="mobile-drawer__chevron">›</div>
+        </a>
+      </div>
+
+      <!-- User Account & Action Buttons -->
+      <div class="mobile-drawer__actions">
+        {% if current_user %}
+          <a href="{{ url_for('services.dashboard') }}" class="btn btn--primary btn--full" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span>📊</span> Customer Dashboard
+          </a>
+          <form action="{{ url_for('auth.logout') }}" method="post" style="width: 100%; margin-top: 8px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="mobile-drawer__logout-btn">
+              <span>🚪</span> Logout of Account
+            </button>
+          </form>
+        {% else %}
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <a href="{{ url_for('auth.login') }}" class="btn btn--secondary btn--full" style="padding: 0.85rem 0.5rem; text-align: center; font-size: 0.95rem;">
+              Log In
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn--primary btn--full" style="padding: 0.85rem 0.5rem; text-align: center; font-size: 0.95rem;">
+              Get Started
+            </a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Quick Contact Strip -->
+      <div class="mobile-drawer__helpline">
+        <a href="https://wa.me/918734002200?text=Hi%20ChimneyCare%2C%20I%20need%20chimney%20service" target="_blank" class="mobile-drawer__whatsapp">
+          <span style="font-size: 1.2rem;">💬</span>
+          <span>WhatsApp: +91 87340 02200</span>
+        </a>
+        <a href="tel:+918734002200" class="mobile-drawer__call">
+          <span style="font-size: 1.1rem;">📞</span>
+          <span>Call Support Desk</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backdrop overlay -->
   <div class="nav__overlay" id="nav-overlay"></div>
 </nav>
