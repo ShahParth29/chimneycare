@@ -1,0 +1,85 @@
+{% extends "admin/base_admin.html" %}
+{% block admin_title %}AMC Plans{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main__header">
+  <h1 class="admin-main__title">AMC Plans</h1>
+  <button class="btn btn--primary" onclick="openModal('add-plan-modal')">+ Add Plan</button>
+</div>
+
+{% if plans %}
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead>
+      <tr><th>Tier</th><th>Duration</th><th>Visits</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for plan in plans %}
+      <tr>
+        <td><strong>{{ plan.tier }}</strong></td>
+        <td>{{ plan.duration_months }} months</td>
+        <td>{{ plan.visits_included }}</td>
+        <td>₹{{ "{:,.0f}".format(plan.price) }}</td>
+        <td><span class="badge {% if plan.active %}badge--confirmed{% else %}badge--cancelled{% endif %}">{{ 'Active' if plan.active else 'Inactive' }}</span></td>
+        <td>
+          {% if plan.active %}
+          <form method="post" action="{{ url_for('admin.delete_amc_plan', plan_id=plan.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="action-btn action-btn--danger" data-confirm="Deactivate this plan?">🗑</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-state__icon">📋</div>
+  <div class="empty-state__title">No AMC plans configured</div>
+</div>
+{% endif %}
+
+<div class="modal-overlay" id="add-plan-modal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title">Add AMC Plan</h3>
+      <button class="modal__close" onclick="closeModal('add-plan-modal')">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('admin.add_amc_plan') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-form">
+        <div class="form-group">
+          <label class="form-label">Tier Name *</label>
+          <input type="text" name="tier" class="form-input" placeholder="e.g., Basic, Standard, Premium" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duration (months) *</label>
+          <select name="duration_months" class="form-select" required>
+            <option value="3">3 Months</option>
+            <option value="6">6 Months</option>
+            <option value="12" selected>12 Months</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Visits Included *</label>
+          <input type="number" name="visits_included" class="form-input" min="1" value="2" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price (₹) *</label>
+          <input type="number" name="price" class="form-input" min="0" step="100" required>
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-textarea" rows="2" placeholder="Optional plan description"></textarea>
+        </div>
+      </div>
+      <div class="mt-xl">
+        <button type="submit" class="btn btn--primary">Add Plan</button>
+        <button type="button" class="btn btn--outline" onclick="closeModal('add-plan-modal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

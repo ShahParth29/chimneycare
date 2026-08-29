@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}2FA OTP Verification{% endblock %}
+{% block nav %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="auth-page" style="background: var(--charcoal-900);">
+  <div class="auth-card">
+    <div class="auth-card__logo">🔥 ChimneyCare</div>
+    <p class="auth-card__subtitle">Two-Factor Authentication (OTP)</p>
+
+    <div style="background: var(--info-bg); border: 1px solid var(--info); border-radius: var(--border-radius); padding: var(--space-md); margin-bottom: var(--space-xl); font-size: 0.85rem; color: var(--info);">
+      Please enter the 6-digit one-time passcode sent to your registered admin phone number.
+    </div>
+
+    <form method="post" action="{{ url_for('auth.verify_otp') }}" data-validate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label class="form-label" for="otp">Enter 6-Digit OTP</label>
+        <input type="text" id="otp" name="otp" class="form-input" 
+               placeholder="123456" maxlength="6" pattern="[0-9]{6}" required 
+               style="letter-spacing: 0.3em; font-size: 1.25rem; text-align: center;">
+        <span class="form-error"></span>
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--full btn--lg">Verify &amp; Proceed</button>
+    </form>
+
+    <div class="auth-card__footer">
+      <a href="{{ url_for('auth.admin_login') }}" style="color: var(--steel-300); font-size: 0.85rem;">← Back to Admin Login</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

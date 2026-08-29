@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Create Account{% endblock %}
+{% block nav %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card" style="max-width: 520px;">
+    <div class="auth-card__logo">🔥 ChimneyCare</div>
+    <p class="auth-card__subtitle">Create your account to book services and track orders.</p>
+
+    <form method="post" action="{{ url_for('auth.register') }}" data-validate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      
+      <div class="form-group">
+        <label class="form-label" for="name">Full Name</label>
+        <input type="text" id="name" name="name" class="form-input" 
+               placeholder="Your full name" required>
+        <span class="form-error"></span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input type="email" id="email" name="email" class="form-input" 
+               placeholder="you@example.com" required autocomplete="email">
+        <span class="form-error"></span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" class="form-input" 
+                 placeholder="+91 98765 43210" required data-validate-phone>
+          <span class="form-error"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="whatsapp_number">WhatsApp (optional)</label>
+          <input type="tel" id="whatsapp_number" name="whatsapp_number" class="form-input" 
+                 placeholder="Same as phone if blank">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="address">Address</label>
+        <textarea id="address" name="address" class="form-textarea" 
+                  placeholder="Your address for service visits" rows="2"></textarea>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-input" 
+                 placeholder="Min 8 characters" required minlength="8" autocomplete="new-password">
+          <span class="form-error"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="confirm_password">Confirm Password</label>
+          <input type="password" id="confirm_password" name="confirm_password" class="form-input" 
+                 placeholder="Re-enter password" required autocomplete="new-password">
+          <span class="form-error"></span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--full btn--lg mt-md">Create Account</button>
+    </form>
+
+    <div class="auth-card__footer">
+      Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Repair Job Details{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / 
+      <a href="{{ url_for('services.dashboard') }}">Dashboard</a> / 
+      <span>Repair Job</span>
+    </div>
+    <h1 class="page-header__title">Repair Job Details</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow">
+    <!-- Job Status Card -->
+    <div style="background: white; border-radius: var(--border-radius-xl); border: 1px solid var(--cream-300); overflow: hidden; margin-bottom: var(--space-xl);">
+      <div style="background: var(--charcoal-800); padding: var(--space-xl); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md);">
+        <div>
+          <span style="color: var(--steel-300); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em;">Service ID</span>
+          <div style="color: var(--cream-100); font-family: var(--font-heading); font-size: 1.3rem;">{{ job.service_id }}</div>
+        </div>
+        <span class="badge badge--{{ job.confirmation_status }}" style="font-size: 0.85rem; padding: 6px 16px;">
+          {{ job.confirmation_status | replace('_', ' ') | title }}
+        </span>
+      </div>
+
+      <div style="padding: var(--space-xl);">
+        <h4 style="margin-bottom: var(--space-md);">Issue Description</h4>
+        <p style="color: var(--charcoal-600); margin-bottom: var(--space-xl);">{{ job.issue_description or '—' }}</p>
+
+        <!-- Cost Breakdown -->
+        <h4 style="margin-bottom: var(--space-md);">Cost Breakdown</h4>
+        <div style="background: var(--cream-100); border-radius: var(--border-radius); padding: var(--space-lg);">
+          {% if parts %}
+          <div style="margin-bottom: var(--space-md);">
+            <strong style="font-size: 0.85rem; color: var(--steel-400); text-transform: uppercase; letter-spacing: 0.06em;">Parts</strong>
+            {% for part in parts %}
+            <div class="order-summary__line">
+              <span>{{ part.name }}</span>
+              <span>₹{{ "{:,.0f}".format(part.price) }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <div class="order-summary__line">
+            <span>Labour charge</span>
+            <span>₹{{ "{:,.0f}".format(job.labour_charge or 0) }}</span>
+          </div>
+          <div class="order-summary__line order-summary__line--total">
+            <span>Total</span>
+            <span>₹{{ "{:,.0f}".format(job.total_cost or 0) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technician Info (conditional on reveal_status) -->
+    {% if technician %}
+    <div class="tech-card reveal">
+      {% if technician.photo_url %}
+      <img src="{{ technician.photo_url }}" alt="{{ technician.name }}" class="tech-card__photo">
+      {% else %}
+      <div class="tech-card__photo" style="background: var(--cream-200); display: flex; align-items: center; justify-content: center; font-size: 2rem;">🔧</div>
+      {% endif %}
+      <div>
+        <div class="tech-card__name">{{ technician.name }}</div>
+        {% if technician.phone %}
+        <div class="tech-card__detail">📞 {{ technician.phone }}</div>
+        {% endif %}
+        {% if technician.email %}
+        <div class="tech-card__detail">✉️ {{ technician.email }}</div>
+        {% endif %}
+        {% if technician.specialization %}
+        <div class="tech-card__detail" style="margin-top: var(--space-xs);">
+          <span class="badge badge--placed">{{ technician.specialization }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% elif job.confirmation_status == 'pending' %}
+    <div class="tech-card tech-card--hidden reveal">
+      <div class="tech-card__photo" style="background: var(--cream-200); display: flex; align-items: center; justify-content: center; font-size: 2rem;">🔒</div>
+      <div>
+        <div class="tech-card__name">Technician Not Yet Assigned</div>
+        <div class="tech-card__detail">Technician details will be shared after telephonic confirmation.</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="mt-xl text-center">
+      <a href="{{ url_for('services.dashboard') }}" class="btn btn--outline">← Back to Dashboard</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

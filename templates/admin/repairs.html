@@ -1,0 +1,52 @@
+{% extends "admin/base_admin.html" %}
+{% block admin_title %}Repairs{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main__header">
+  <h1 class="admin-main__title">Repair Jobs</h1>
+  <div><input type="text" id="table-search" class="form-input" placeholder="Search repairs..." style="width:250px;"></div>
+</div>
+
+{% if repairs %}
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead><tr><th>Service ID</th><th>Customer</th><th>Issue</th><th>Labour</th><th>Total</th><th>Status</th><th>Technician</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for r in repairs %}
+      <tr>
+        <td><strong>{{ r.service_id }}</strong></td>
+        <td>{{ r.profiles.name if r.profiles else '—' }}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ r.issue_description or '' }}">{{ r.issue_description[:50] if r.issue_description else '—' }}{% if r.issue_description and r.issue_description|length > 50 %}...{% endif %}</td>
+        <td>₹{{ "{:,.0f}".format(r.labour_charge or 0) }}</td>
+        <td>₹{{ "{:,.0f}".format(r.total_cost or 0) }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.update_repair', repair_id=r.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select name="status" class="status-select" style="font-size:0.8rem;padding:4px 8px;border-radius:4px;border:1px solid var(--cream-300);">
+              {% for s in ['pending','confirmed','in_progress','completed','cancelled'] %}
+              <option value="{{ s }}" {% if r.confirmation_status == s %}selected{% endif %}>{{ s | replace('_', ' ') | title }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="{{ url_for('admin.update_repair', repair_id=r.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select name="technician_id" class="status-select" style="font-size:0.8rem;padding:4px 8px;border-radius:4px;border:1px solid var(--cream-300);">
+              <option value="">Unassigned</option>
+              {% for tech in technicians %}
+              <option value="{{ tech.id }}" {% if r.technician_id == tech.id %}selected{% endif %}>{{ tech.name }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </td>
+        <td style="font-size:0.8rem;color:var(--steel-400);">{{ r.created_at[:10] if r.created_at else '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state"><div class="empty-state__icon">🔧</div><div class="empty-state__title">No repair jobs yet</div></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Services{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / <span>Services</span>
+    </div>
+    <h1 class="page-header__title">Our Services</h1>
+  </div>
+</section>
+
+<!-- ═══ One-Time Cleaning ═══ -->
+<section class="section">
+  <div class="container">
+    <div class="grid-editorial">
+      <div class="reveal">
+        <span class="section__label">One-Time Service</span>
+        <h2 class="section__title">Deep chimney cleaning</h2>
+        <p class="section__desc">
+          A thorough cleaning of your kitchen chimney — filters, duct, motor housing, 
+          and exterior. We disassemble, degrease, and reassemble to factory-fresh condition.
+        </p>
+        <div style="background: var(--cream-200); border-radius: var(--border-radius); padding: var(--space-lg); margin: var(--space-lg) 0; max-width: 360px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
+            <span style="color: var(--steel-400);">Service charge</span>
+            <span style="font-weight: 600;">₹499</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--steel-400);">Labour charge</span>
+            <span style="font-weight: 600;">₹200</span>
+          </div>
+          <hr style="border: none; border-top: 1px solid var(--cream-300); margin: var(--space-sm) 0;">
+          <div style="display: flex; justify-content: space-between;">
+            <strong>Total</strong>
+            <strong style="color: var(--orange-500);">₹699</strong>
+          </div>
+        </div>
+        <a href="{{ url_for('services.book_service', type='one_time') }}" class="btn btn--primary">Book One-Time Cleaning</a>
+      </div>
+      <div class="reveal stagger-2" style="background: var(--charcoal-800); border-radius: var(--border-radius-xl); padding: var(--space-3xl); color: var(--cream-100);">
+        <h3 style="color: var(--cream-100); margin-bottom: var(--space-lg);">What's included</h3>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: var(--space-md);">
+          <li style="display: flex; gap: var(--space-sm); align-items: flex-start;">
+            <span style="color: var(--orange-400);">✓</span>
+            <span>Complete filter removal & degreasing</span>
+          </li>
+          <li style="display: flex; gap: var(--space-sm); align-items: flex-start;">
+            <span style="color: var(--orange-400);">✓</span>
+            <span>Motor & fan blade cleaning</span>
+          </li>
+          <li style="display: flex; gap: var(--space-sm); align-items: flex-start;">
+            <span style="color: var(--orange-400);">✓</span>
+            <span>Oil collector tray servicing</span>
+          </li>
+          <li style="display: flex; gap: var(--space-sm); align-items: flex-start;">
+            <span style="color: var(--orange-400);">✓</span>
+            <span>Duct & exhaust inspection</span>
+          </li>
+          <li style="display: flex; gap: var(--space-sm); align-items: flex-start;">
+            <span style="color: var(--orange-400);">✓</span>
+            <span>Exterior wipe-down & polish</span>
+          </li>
+          <li style="display: flex; gap: var(--space-sm); align-items: flex-start;">
+            <span style="color: var(--orange-400);">✓</span>
+            <span>Performance check & report</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ AMC Plans ═══ -->
+<section class="section section--cream" id="amc">
+  <div class="container">
+    <div class="section__header text-center reveal">
+      <span class="section__label">Annual Maintenance Contracts</span>
+      <h2 class="section__title" style="margin: 0 auto;">Plans tailored to your usage.</h2>
+      <p class="section__desc" style="margin: var(--space-md) auto 0;">
+        Save more with scheduled maintenance. Every plan includes labour charges — no surprises.
+      </p>
+    </div>
+
+    <div class="pricing-grid">
+      {% for plan in amc_plans %}
+      <div class="plan-card {% if loop.index == 2 %}plan-card--featured{% endif %} reveal stagger-{{ loop.index }}">
+        <div class="plan-card__tier">{{ plan.tier }}</div>
+        <div class="plan-card__price">
+          ₹{{ "{:,.0f}".format(plan.price) }}
+          <span>/ {{ plan.duration_months }} months</span>
+        </div>
+        <div class="plan-card__duration">{{ plan.visits_included }} service visits included</div>
+        
+        <ul class="plan-card__features">
+          <li>{{ plan.visits_included }} scheduled cleaning visits</li>
+          <li>Labour charges included</li>
+          <li>Filter & motor servicing</li>
+          <li>Priority scheduling</li>
+          {% if plan.duration_months >= 6 %}
+          <li>Free duct inspection</li>
+          {% endif %}
+          {% if plan.duration_months == 12 %}
+          <li>1 emergency visit included</li>
+          <li>10% off repair parts</li>
+          {% endif %}
+        </ul>
+
+        {% if plan.description %}
+        <p style="font-size: 0.85rem; color: var(--steel-400); margin-bottom: var(--space-lg);">{{ plan.description }}</p>
+        {% endif %}
+
+        <a href="{{ url_for('services.book_service', type='amc', plan_id=plan.id) }}" class="btn btn--primary btn--full">
+          Choose {{ plan.tier }}
+        </a>
+      </div>
+      {% else %}
+      <div class="plan-card" style="grid-column: 1 / -1;">
+        <div class="empty-state">
+          <div class="empty-state__icon">📋</div>
+          <div class="empty-state__title">AMC Plans Coming Soon</div>
+          <p>Our admin team is setting up maintenance plans. Check back shortly.</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

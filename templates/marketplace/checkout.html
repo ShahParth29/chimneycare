@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Checkout — {{ product.brand }} {{ product.model }}{% endblock %}
+
+{% block extra_css %}
+<script src="{{ url_for('static', filename='js/marketplace.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / 
+      <a href="{{ url_for('marketplace.marketplace_index') }}">Marketplace</a> / 
+      <span>Checkout</span>
+    </div>
+    <h1 class="page-header__title">Checkout</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <form method="post" action="{{ url_for('marketplace.checkout', product_id=product.id) }}" data-validate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" id="promo-code-hidden" name="promo_code" value="">
+
+      <div class="checkout-layout">
+        <!-- Left: Form -->
+        <div>
+          <div style="background: white; border-radius: var(--border-radius-xl); padding: var(--space-2xl); border: 1px solid var(--cream-300); margin-bottom: var(--space-xl);">
+            <h3 style="margin-bottom: var(--space-xl);">Promo Code</h3>
+            <div style="display: flex; gap: var(--space-sm);">
+              <input type="text" id="promo-code" class="form-input" placeholder="Enter promo code" style="flex: 1;">
+              <button type="button" id="apply-promo" class="btn btn--dark">Apply</button>
+            </div>
+            <div id="promo-result" style="margin-top: var(--space-sm); font-size: 0.85rem;"></div>
+          </div>
+
+          <div style="background: white; border-radius: var(--border-radius-xl); padding: var(--space-2xl); border: 1px solid var(--cream-300);">
+            <h3 style="margin-bottom: var(--space-xl);">Exchange Offer</h3>
+            <label class="form-checkbox mb-lg">
+              <input type="checkbox" id="has-exchange" name="has_exchange">
+              <span>I have an old chimney to exchange</span>
+            </label>
+            <div id="exchange-fields" style="display: none;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                <div class="form-group">
+                  <label class="form-label">Old Chimney Brand</label>
+                  <input type="text" name="exchange_brand" class="form-input" placeholder="e.g., Elica">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Model</label>
+                  <input type="text" name="exchange_model" class="form-input" placeholder="e.g., WD HAC 90">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Condition</label>
+                <select name="exchange_condition" class="form-select">
+                  <option value="working">Working — minor wear</option>
+                  <option value="needs_repair">Needs repair</option>
+                  <option value="non_working">Non-working / for parts</option>
+                </select>
+              </div>
+              <div style="background: var(--warning-bg); border-radius: var(--border-radius); padding: var(--space-md); font-size: 0.85rem; color: var(--warning);">
+                Exchange value will be evaluated after order placement. Our team will contact you.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Order Summary -->
+        <div class="order-summary">
+          <h3 class="order-summary__title">Order Summary</h3>
+          
+          <div style="display: flex; gap: var(--space-md); margin-bottom: var(--space-lg); padding-bottom: var(--space-lg); border-bottom: 1px solid var(--cream-300);">
+            {% if product.image_url %}
+            <img src="{{ product.image_url }}" alt="" style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--border-radius);">
+            {% endif %}
+            <div>
+              <strong>{{ product.brand }} {{ product.model }}</strong>
+              <div style="font-size: 0.8rem; color: var(--steel-300);">
+                {% if product.type %}{{ product.type }}{% endif %}
+                {% if product.size %} · {{ product.size }}{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="order-summary__line">
+            <span>Subtotal</span>
+            <span id="order-subtotal" data-value="{{ product.price }}">₹{{ "{:,.0f}".format(product.price) }}</span>
+          </div>
+
+          <div class="order-summary__line order-summary__line--discount" id="discount-row" style="display:none;">
+            <span>Discount</span>
+            <span id="discount-amount">−₹0</span>
+          </div>
+
+          <div class="order-summary__line order-summary__line--total">
+            <span>Total</span>
+            <span id="order-total">₹{{ "{:,.0f}".format(product.price) }}</span>
+          </div>
+
+          <button type="submit" class="btn btn--primary btn--lg btn--full mt-lg">Place Order</button>
+
+          <p style="text-align: center; font-size: 0.75rem; color: var(--steel-300); margin-top: var(--space-md);">
+            No payment required in this phase.<br>
+            Order ends at "Order Placed" status.
+          </p>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

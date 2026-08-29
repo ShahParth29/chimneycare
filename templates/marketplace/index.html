@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Chimney Marketplace{% endblock %}
+
+{% block extra_css %}
+<script src="{{ url_for('static', filename='js/marketplace.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / <span>Marketplace</span>
+    </div>
+    <h1 class="page-header__title">Chimney Marketplace</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Filters -->
+    <div class="filter-bar reveal">
+      <form id="filter-form" method="get" action="{{ url_for('marketplace.marketplace_index') }}">
+        <div class="filter-bar__inner">
+          <div class="filter-bar__group">
+            <label class="filter-bar__label">Brand</label>
+            <select name="brand" class="filter-bar__select">
+              <option value="">All Brands</option>
+              {% for b in brands %}
+              <option value="{{ b }}" {% if filters.brand == b %}selected{% endif %}>{{ b }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-bar__group">
+            <label class="filter-bar__label">Type</label>
+            <select name="type" class="filter-bar__select">
+              <option value="">All Types</option>
+              {% for t in types %}
+              <option value="{{ t }}" {% if filters.type == t %}selected{% endif %}>{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-bar__group">
+            <label class="filter-bar__label">Size</label>
+            <select name="size" class="filter-bar__select">
+              <option value="">All Sizes</option>
+              {% for s in sizes %}
+              <option value="{{ s }}" {% if filters.size == s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-bar__group">
+            <label class="filter-bar__label">Suction</label>
+            <select name="suction" class="filter-bar__select">
+              <option value="">All</option>
+              {% for sc in suctions %}
+              <option value="{{ sc }}" {% if filters.suction == sc %}selected{% endif %}>{{ sc }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-bar__group">
+            <label class="filter-bar__label">Sort By</label>
+            <select name="sort" class="filter-bar__select">
+              <option value="price_asc" {% if filters.sort == 'price_asc' %}selected{% endif %}>Price: Low → High</option>
+              <option value="price_desc" {% if filters.sort == 'price_desc' %}selected{% endif %}>Price: High → Low</option>
+              <option value="brand" {% if filters.sort == 'brand' %}selected{% endif %}>Brand A-Z</option>
+              <option value="name" {% if filters.sort == 'name' %}selected{% endif %}>Model A-Z</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Results count -->
+    <p class="text-muted mb-lg">{{ products | length }} product{{ 's' if products | length != 1 else '' }} found</p>
+
+    <!-- Product Grid -->
+    {% if products %}
+    <div class="product-grid">
+      {% for product in products %}
+      <div class="product-card reveal stagger-{{ (loop.index0 % 4) + 1 }}">
+        {% if product.image_url %}
+        <img src="{{ product.image_url }}" alt="{{ product.brand }} {{ product.model }}" class="product-card__image">
+        {% else %}
+        <div class="product-card__image" style="display: flex; align-items: center; justify-content: center; font-size: 3rem; background: linear-gradient(135deg, var(--cream-200), var(--cream-300));">🏠</div>
+        {% endif %}
+        <div class="product-card__body">
+          <span class="product-card__brand">{{ product.brand }}</span>
+          <h4 class="product-card__name">{{ product.model }}</h4>
+          <div class="product-card__specs">
+            {% if product.type %}{{ product.type }}{% endif %}
+            {% if product.size %} · {{ product.size }}{% endif %}
+            {% if product.suction_capacity %} · {{ product.suction_capacity }}{% endif %}
+          </div>
+          <div class="product-card__footer">
+            <span class="product-card__price">₹{{ "{:,.0f}".format(product.price) }}</span>
+            <a href="{{ url_for('marketplace.product_detail', product_id=product.id) }}" class="btn btn--primary btn--sm">View</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state reveal">
+      <div class="empty-state__icon">🏪</div>
+      <div class="empty-state__title">No products found</div>
+      <p>Try adjusting your filters, or check back later as our catalogue grows.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

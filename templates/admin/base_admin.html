@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block admin_title %}Admin{% endblock %} — ChimneyCare Admin</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+</head>
+<body>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+      <div class="flash flash--{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <a href="{{ url_for('admin.dashboard') }}" class="admin-sidebar__brand">🔥 ChimneyCare</a>
+      <span class="admin-sidebar__label">Overview</span>
+      <ul class="admin-sidebar__nav">
+        <li><a href="{{ url_for('admin.dashboard') }}" class="admin-sidebar__link"><span>📊</span> Dashboard</a></li>
+      </ul>
+      <span class="admin-sidebar__label">Management</span>
+      <ul class="admin-sidebar__nav">
+        <li><a href="{{ url_for('admin.technicians') }}" class="admin-sidebar__link"><span>👷</span> Technicians</a></li>
+        <li><a href="{{ url_for('admin.amc_plans') }}" class="admin-sidebar__link"><span>📋</span> AMC Plans</a></li>
+        <li><a href="{{ url_for('admin.parts') }}" class="admin-sidebar__link"><span>🔩</span> Repair Parts</a></li>
+        <li><a href="{{ url_for('admin.products') }}" class="admin-sidebar__link"><span>🏠</span> Products</a></li>
+        <li><a href="{{ url_for('admin.promo_codes') }}" class="admin-sidebar__link"><span>🏷️</span> Promo Codes</a></li>
+      </ul>
+      <span class="admin-sidebar__label">Operations</span>
+      <ul class="admin-sidebar__nav">
+        <li><a href="{{ url_for('admin.bookings') }}" class="admin-sidebar__link"><span>📅</span> Bookings</a></li>
+        <li><a href="{{ url_for('admin.repairs') }}" class="admin-sidebar__link"><span>🔧</span> Repairs</a></li>
+        <li><a href="{{ url_for('admin.orders') }}" class="admin-sidebar__link"><span>📦</span> Orders</a></li>
+      </ul>
+      <span class="admin-sidebar__label">Account</span>
+      <ul class="admin-sidebar__nav">
+        <li>
+          <form action="{{ url_for('auth.logout') }}" method="post" style="margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="admin-sidebar__link" style="background:none;border:none;cursor:pointer;width:100%;text-align:left;font:inherit;color:inherit;padding:var(--space-sm) var(--space-xl);">
+              <span>🚪</span> Logout
+            </button>
+          </form>
+        </li>
+      </ul>
+    </aside>
+
+    <main class="admin-main">
+      {% block admin_content %}{% endblock %}
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

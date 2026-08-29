@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Book a Repair{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / 
+      <a href="{{ url_for('repair.repair_index') }}">Repair</a> / 
+      <span>Book Repair</span>
+    </div>
+    <h1 class="page-header__title">Book a Repair</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow">
+    <div style="background: white; border-radius: var(--border-radius-xl); padding: var(--space-3xl); border: 1px solid var(--cream-300);">
+      <form method="post" action="{{ url_for('repair.book_repair') }}" data-validate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+          <label class="form-label" for="issue_description">Describe Your Issue *</label>
+          <textarea id="issue_description" name="issue_description" class="form-textarea" required
+                    placeholder="Tell us what's wrong with your chimney — unusual noise, smoke not venting, grease buildup, etc." 
+                    rows="4"></textarea>
+          <span class="form-error"></span>
+        </div>
+
+        {% if parts %}
+        <div class="form-group">
+          <label class="form-label">Select Required Parts (optional)</label>
+          <p class="form-hint mb-md">If you know which parts need replacing, select them below. Our technician will confirm during the visit.</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); max-height: 300px; overflow-y: auto; padding: var(--space-sm);">
+            {% for part in parts %}
+            <label class="form-checkbox" style="padding: var(--space-sm); border: 1px solid var(--cream-300); border-radius: var(--border-radius); cursor: pointer;">
+              <input type="checkbox" name="parts" value="{{ part.id }}">
+              <div>
+                <strong style="font-size: 0.85rem;">{{ part.name }}</strong><br>
+                <small style="color: var(--orange-500);">₹{{ "{:,.0f}".format(part.price) }}</small>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label class="form-label" for="labour_charge">Estimated Labour Charge (₹)</label>
+          <input type="number" id="labour_charge" name="labour_charge" class="form-input" 
+                 value="500" min="0" step="50">
+          <span class="form-hint">This is an estimate. Final charge will be confirmed by the technician.</span>
+        </div>
+
+        <div style="background: var(--info-bg); border: 1px solid var(--info); border-radius: var(--border-radius); padding: var(--space-md); margin-bottom: var(--space-xl);">
+          <p style="font-size: 0.85rem; color: var(--info); margin: 0;">
+            <strong>📱 What happens next?</strong><br>
+            After submitting, you'll receive a WhatsApp message confirming we've received your request. 
+            We will contact you within 24 hours for telephonic confirmation. 
+            Technician details will be shared only after confirmation.
+          </p>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--lg btn--full">Submit Repair Request</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

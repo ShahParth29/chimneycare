@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Repair &amp; Parts{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / <span>Repair &amp; Parts</span>
+    </div>
+    <h1 class="page-header__title">Repair &amp; Parts</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- CTA Banner -->
+    <div style="background: linear-gradient(135deg, var(--charcoal-800), var(--charcoal-700)); border-radius: var(--border-radius-xl); padding: var(--space-2xl) var(--space-3xl); margin-bottom: var(--space-3xl); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-lg);" class="reveal">
+      <div>
+        <h3 style="color: var(--cream-100); margin-bottom: var(--space-xs);">Need a repair?</h3>
+        <p style="color: var(--steel-300); margin: 0;">Describe your issue, pick parts if you know what you need, and we'll handle the rest.</p>
+      </div>
+      <a href="{{ url_for('repair.book_repair') }}" class="btn btn--primary btn--lg">Book Repair</a>
+    </div>
+
+    <!-- Search & Filter -->
+    {% if categories_list is defined %}
+    <div class="filter-bar reveal">
+      <form id="filter-form" method="get" action="{{ url_for('repair.parts_catalogue') }}">
+        <div class="filter-bar__inner">
+          <div class="filter-bar__group" style="flex: 2;">
+            <label class="filter-bar__label">Search</label>
+            <input type="text" name="search" class="form-input" placeholder="Search parts..." 
+                   value="{{ search or '' }}" style="padding: 0.5rem 0.75rem;">
+          </div>
+          <div class="filter-bar__group">
+            <label class="filter-bar__label">Category</label>
+            <select name="category" class="filter-bar__select">
+              <option value="">All Categories</option>
+              {% for cat in categories_list %}
+              <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-bar__group" style="flex: 0;">
+            <button type="submit" class="btn btn--dark btn--sm">Filter</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- Parts Grid -->
+    <h3 class="mb-lg reveal" style="margin-top: var(--space-xl);">Parts Catalogue</h3>
+    <p class="text-muted mb-xl reveal">Transparent pricing — every part cost is separate from labour charges.</p>
+
+    {% if parts %}
+    <div class="product-grid">
+      {% for part in parts %}
+      <div class="product-card reveal stagger-{{ (loop.index0 % 4) + 1 }}">
+        <div class="product-card__body">
+          {% if part.category %}
+          <span class="card__tag">{{ part.category }}</span>
+          {% endif %}
+          <h4 class="product-card__name">{{ part.name }}</h4>
+          {% if part.description %}
+          <p class="product-card__specs">{{ part.description }}</p>
+          {% endif %}
+          {% if part.source %}
+          <p style="font-size: 0.75rem; color: var(--steel-200); margin-bottom: var(--space-sm);">Source: {{ part.source }}</p>
+          {% endif %}
+          <div class="product-card__footer">
+            <span class="product-card__price">₹{{ "{:,.0f}".format(part.price) }}</span>
+            <span style="font-size: 0.75rem; color: var(--steel-300);">+ labour</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state reveal">
+      <div class="empty-state__icon">🔧</div>
+      <div class="empty-state__title">No parts found</div>
+      <p>{% if search %}No results for "{{ search }}". Try a different search.{% else %}Parts catalogue will be populated by the admin.{% endif %}</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

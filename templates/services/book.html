@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Book a Service{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / 
+      <a href="{{ url_for('services.services_index') }}">Services</a> / 
+      <span>Book</span>
+    </div>
+    <h1 class="page-header__title">Book a Service</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow">
+    <div style="background: white; border-radius: var(--border-radius-xl); padding: var(--space-3xl); border: 1px solid var(--cream-300);">
+      <form method="post" action="{{ url_for('services.book_service') }}" data-validate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+          <label class="form-label">Service Type</label>
+          <div style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
+            <label class="form-checkbox" style="flex: 1; min-width: 200px; padding: var(--space-md); border: 2px solid var(--cream-300); border-radius: var(--border-radius); cursor: pointer; transition: border-color 0.2s;">
+              <input type="radio" name="service_type" value="one_time" 
+                     {% if service_type == 'one_time' %}checked{% endif %} required
+                     onchange="togglePlanSelector(this.value)">
+              <div>
+                <strong>One-Time Cleaning</strong><br>
+                <small style="color: var(--steel-300);">Single deep cleaning session</small>
+              </div>
+            </label>
+            <label class="form-checkbox" style="flex: 1; min-width: 200px; padding: var(--space-md); border: 2px solid var(--cream-300); border-radius: var(--border-radius); cursor: pointer; transition: border-color 0.2s;">
+              <input type="radio" name="service_type" value="amc" 
+                     {% if service_type == 'amc' %}checked{% endif %}
+                     onchange="togglePlanSelector(this.value)">
+              <div>
+                <strong>AMC Plan</strong><br>
+                <small style="color: var(--steel-300);">Scheduled maintenance contract</small>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div id="plan-selector" class="form-group" style="{% if service_type != 'amc' %}display:none;{% endif %}">
+          <label class="form-label" for="plan_id">Select AMC Plan</label>
+          <select name="plan_id" id="plan_id" class="form-select">
+            <option value="">Choose a plan...</option>
+            {% for plan in amc_plans %}
+            <option value="{{ plan.id }}" {% if plan_id == plan.id %}selected{% endif %}>
+              {{ plan.tier }} — ₹{{ "{:,.0f}".format(plan.price) }} / {{ plan.duration_months }} months ({{ plan.visits_included }} visits)
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="labour_charge">Labour Charge (₹)</label>
+          <input type="number" id="labour_charge" name="labour_charge" class="form-input" 
+                 value="200" min="0" step="50">
+          <span class="form-hint">Standard labour charge. May be adjusted after confirmation.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="notes">Additional Notes</label>
+          <textarea id="notes" name="notes" class="form-textarea" 
+                    placeholder="Any specific requirements or access instructions..." rows="3"></textarea>
+        </div>
+
+        <div style="background: var(--success-bg); border: 1px solid var(--success); border-radius: var(--border-radius); padding: var(--space-md); margin-bottom: var(--space-xl); display: flex; align-items: center; gap: var(--space-sm);">
+          <span style="font-size: 1.2rem;">⚡</span>
+          <span style="font-size: 0.9rem; color: var(--success);">
+            <strong>Instant confirmation</strong> — your booking will be confirmed immediately upon submission.
+          </span>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--lg btn--full">Confirm Booking</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+{% block extra_js %}
+<script>
+function togglePlanSelector(type) {
+  document.getElementById('plan-selector').style.display = type === 'amc' ? 'block' : 'none';
+}
+</script>
+{% endblock %}
+{% endblock %}

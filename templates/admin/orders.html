@@ -1,0 +1,42 @@
+{% extends "admin/base_admin.html" %}
+{% block admin_title %}Orders{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main__header">
+  <h1 class="admin-main__title">Marketplace Orders</h1>
+  <div><input type="text" id="table-search" class="form-input" placeholder="Search orders..." style="width:250px;"></div>
+</div>
+
+{% if orders %}
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Total</th><th>Promo</th><th>Exchange</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td><strong>{{ o.order_id }}</strong></td>
+        <td>{{ o.profiles.name if o.profiles else '—' }}<br><small style="color:var(--steel-300);">{{ o.profiles.phone if o.profiles else '' }}</small></td>
+        <td>{% if o.chimney_products %}{{ o.chimney_products.brand }} {{ o.chimney_products.model }}{% else %}—{% endif %}</td>
+        <td>₹{{ "{:,.0f}".format(o.total_price) }}</td>
+        <td>{% if o.promo_code %}<code style="background:var(--success-bg);color:var(--success);padding:2px 6px;border-radius:4px;font-size:0.75rem;">{{ o.promo_code }}</code>{% else %}—{% endif %}</td>
+        <td>{% if o.exchange_offer %}<span class="badge badge--processing">Yes</span>{% else %}—{% endif %}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.update_order_status', order_id=o.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select name="status" class="status-select" style="font-size:0.8rem;padding:4px 8px;border-radius:4px;border:1px solid var(--cream-300);">
+              {% for s in ['placed','processing','shipped','delivered','cancelled'] %}
+              <option value="{{ s }}" {% if o.status == s %}selected{% endif %}>{{ s | title }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </td>
+        <td style="font-size:0.8rem;color:var(--steel-400);">{{ o.created_at[:10] if o.created_at else '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state"><div class="empty-state__icon">📦</div><div class="empty-state__title">No orders yet</div></div>
+{% endif %}
+{% endblock %}

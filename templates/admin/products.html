@@ -1,0 +1,66 @@
+{% extends "admin/base_admin.html" %}
+{% block admin_title %}Products{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main__header">
+  <h1 class="admin-main__title">Chimney Products</h1>
+  <button class="btn btn--primary" onclick="openModal('add-product-modal')">+ Add Product</button>
+</div>
+
+{% if products %}
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead><tr><th>Brand</th><th>Model</th><th>Type</th><th>Size</th><th>Suction</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td><strong>{{ p.brand }}</strong></td>
+        <td>{{ p.model }}</td>
+        <td>{{ p.type or '—' }}</td>
+        <td>{{ p.size or '—' }}</td>
+        <td>{{ p.suction_capacity or '—' }}</td>
+        <td>₹{{ "{:,.0f}".format(p.price) }}</td>
+        <td><span class="badge {% if p.active %}badge--confirmed{% else %}badge--cancelled{% endif %}">{{ 'Active' if p.active else 'Inactive' }}</span></td>
+        <td>
+          {% if p.active %}
+          <form method="post" action="{{ url_for('admin.delete_product', product_id=p.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="action-btn action-btn--danger" data-confirm="Deactivate this product?">🗑</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state"><div class="empty-state__icon">🏠</div><div class="empty-state__title">No products listed</div></div>
+{% endif %}
+
+<div class="modal-overlay" id="add-product-modal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title">Add Chimney Product</h3>
+      <button class="modal__close" onclick="closeModal('add-product-modal')">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('admin.add_product') }}" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-form">
+        <div class="form-group"><label class="form-label">Brand *</label><input type="text" name="brand" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Model *</label><input type="text" name="model" class="form-input" required></div>
+        <div class="form-group"><label class="form-label">Price (₹) *</label><input type="number" name="price" class="form-input" min="0" step="100" required></div>
+        <div class="form-group"><label class="form-label">Type</label><input type="text" name="type" class="form-input" placeholder="e.g., Wall Mounted, Island"></div>
+        <div class="form-group"><label class="form-label">Size</label><input type="text" name="size" class="form-input" placeholder="e.g., 60cm, 90cm"></div>
+        <div class="form-group"><label class="form-label">Suction Capacity</label><input type="text" name="suction_capacity" class="form-input" placeholder="e.g., 1200 m³/hr"></div>
+        <div class="form-group form-group--full"><label class="form-label">Description</label><textarea name="description" class="form-textarea" rows="2"></textarea></div>
+        <div class="form-group form-group--full"><label class="form-label">Product Image</label><input type="file" name="image" accept="image/*" data-preview="product-preview"><img id="product-preview" style="display:none;max-width:200px;margin-top:var(--space-sm);border-radius:var(--border-radius);"></div>
+      </div>
+      <div class="mt-xl">
+        <button type="submit" class="btn btn--primary">Add Product</button>
+        <button type="button" class="btn btn--outline" onclick="closeModal('add-product-modal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <div class="footer__brand">🔥 ChimneyCare</div>
+        <p class="footer__desc">
+          Professional chimney cleaning, repair, and installation services. 
+          Trusted by homeowners since 2018. Licensed, insured, and committed 
+          to keeping your kitchen safe and efficient.
+        </p>
+      </div>
+      <div>
+        <h4 class="footer__heading">Services</h4>
+        <ul class="footer__links">
+          <li><a href="{{ url_for('services.services_index') }}">Chimney Cleaning</a></li>
+          <li><a href="{{ url_for('services.amc_plans') }}">AMC Plans</a></li>
+          <li><a href="{{ url_for('repair.repair_index') }}">Repair &amp; Parts</a></li>
+          <li><a href="{{ url_for('marketplace.marketplace_index') }}">Buy a Chimney</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer__heading">Company</h4>
+        <ul class="footer__links">
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Our Technicians</a></li>
+          <li><a href="#">Service Areas</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer__heading">Support</h4>
+        <ul class="footer__links">
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>&copy; {{ "2026" }} ChimneyCare. All rights reserved.</span>
+      <span>Serving Mumbai, Delhi, Bangalore &amp; more</span>
+    </div>
+  </div>
+</footer>

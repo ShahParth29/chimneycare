@@ -1,0 +1,99 @@
+{% extends "admin/base_admin.html" %}
+{% block admin_title %}Technicians{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main__header">
+  <h1 class="admin-main__title">Technicians</h1>
+  <button class="btn btn--primary" onclick="openModal('add-tech-modal')">+ Add Technician</button>
+</div>
+
+{% if technicians %}
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead>
+      <tr><th>Name</th><th>Phone</th><th>Email</th><th>Specialization</th><th>Reveal Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for tech in technicians %}
+      <tr>
+        <td>
+          <div style="display:flex; align-items:center; gap:var(--space-sm);">
+            {% if tech.photo_url %}
+            <img src="{{ tech.photo_url }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+            {% else %}
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--cream-200);display:flex;align-items:center;justify-content:center;">👷</div>
+            {% endif %}
+            <strong>{{ tech.name }}</strong>
+          </div>
+        </td>
+        <td>{{ tech.phone or '—' }}</td>
+        <td>{{ tech.email or '—' }}</td>
+        <td>{{ tech.specialization or '—' }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.toggle_reveal', tech_id=tech.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="badge {% if tech.reveal_status %}badge--confirmed{% else %}badge--pending{% endif %}" 
+                    style="cursor:pointer;border:none;">
+              {{ 'Revealed' if tech.reveal_status else 'Hidden' }}
+            </button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="{{ url_for('admin.delete_technician', tech_id=tech.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="action-btn action-btn--danger" data-confirm="Delete this technician?">🗑</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-state__icon">👷</div>
+  <div class="empty-state__title">No technicians added</div>
+  <p>Add your first technician to start assigning service jobs.</p>
+</div>
+{% endif %}
+
+<!-- Add Technician Modal -->
+<div class="modal-overlay" id="add-tech-modal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title">Add Technician</h3>
+      <button class="modal__close" onclick="closeModal('add-tech-modal')">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('admin.add_technician') }}" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-form">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input type="text" name="name" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Specialization</label>
+          <input type="text" name="specialization" class="form-input" placeholder="e.g., Motor Repair">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input type="tel" name="phone" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-input">
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Photo</label>
+          <input type="file" name="photo" accept="image/*" data-preview="photo-preview">
+          <img id="photo-preview" style="display:none;max-width:120px;margin-top:var(--space-sm);border-radius:var(--border-radius);">
+        </div>
+      </div>
+      <div class="mt-xl">
+        <button type="submit" class="btn btn--primary">Add Technician</button>
+        <button type="button" class="btn btn--outline" onclick="closeModal('add-tech-modal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

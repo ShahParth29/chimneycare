@@ -1,0 +1,69 @@
+{% extends "admin/base_admin.html" %}
+{% block admin_title %}Promo Codes{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main__header">
+  <h1 class="admin-main__title">Promo Codes</h1>
+  <button class="btn btn--primary" onclick="openModal('add-promo-modal')">+ Add Code</button>
+</div>
+
+{% if promos %}
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead><tr><th>Code</th><th>Discount</th><th>Min Order</th><th>Usage</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for promo in promos %}
+      <tr>
+        <td><code style="background:var(--cream-200);padding:4px 10px;border-radius:4px;font-weight:700;">{{ promo.code }}</code></td>
+        <td>
+          {% if promo.discount_type == 'percentage' %}{{ promo.value }}%{% else %}₹{{ "{:,.0f}".format(promo.value) }}{% endif %}
+          <span style="color:var(--steel-300);font-size:0.75rem;">{{ promo.discount_type }}</span>
+        </td>
+        <td>₹{{ "{:,.0f}".format(promo.min_order_amount or 0) }}</td>
+        <td>{{ promo.current_uses or 0 }}{% if promo.max_uses %} / {{ promo.max_uses }}{% endif %}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.toggle_promo', promo_id=promo.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="badge {% if promo.active %}badge--confirmed{% else %}badge--cancelled{% endif %}" style="cursor:pointer;border:none;">
+              {{ 'Active' if promo.active else 'Inactive' }}
+            </button>
+          </form>
+        </td>
+        <td>—</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state"><div class="empty-state__icon">🏷️</div><div class="empty-state__title">No promo codes</div></div>
+{% endif %}
+
+<div class="modal-overlay" id="add-promo-modal">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title">Add Promo Code</h3>
+      <button class="modal__close" onclick="closeModal('add-promo-modal')">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('admin.add_promo_code') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-form">
+        <div class="form-group"><label class="form-label">Code *</label><input type="text" name="code" class="form-input" placeholder="e.g., SAVE20" required style="text-transform:uppercase;"></div>
+        <div class="form-group"><label class="form-label">Discount Type *</label>
+          <select name="discount_type" class="form-select" required>
+            <option value="percentage">Percentage (%)</option>
+            <option value="flat">Flat Amount (₹)</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Value *</label><input type="number" name="value" class="form-input" min="0" step="1" required></div>
+        <div class="form-group"><label class="form-label">Min Order (₹)</label><input type="number" name="min_order_amount" class="form-input" value="0" min="0"></div>
+        <div class="form-group"><label class="form-label">Max Uses (blank = unlimited)</label><input type="number" name="max_uses" class="form-input" min="1" placeholder="∞"></div>
+      </div>
+      <div class="mt-xl">
+        <button type="submit" class="btn btn--primary">Create Code</button>
+        <button type="button" class="btn btn--outline" onclick="closeModal('add-promo-modal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

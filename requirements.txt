@@ -1,0 +1,5 @@
+flask>=3.0
+supabase>=2.0
+python-dotenv>=1.0
+flask-wtf>=1.2
+flask-limiter>=3.5

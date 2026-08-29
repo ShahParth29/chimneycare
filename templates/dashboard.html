@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <h1 class="page-header__title">Welcome, {{ current_user.name or 'there' }}</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Quick Actions -->
+    <div class="dashboard-grid mb-xl">
+      <a href="{{ url_for('services.book_service') }}" class="dash-card" style="text-decoration: none; border-left: 4px solid var(--orange-500);">
+        <div class="dash-card__header">
+          <span class="dash-card__label">Quick Action</span>
+          <span style="font-size: 1.5rem;">🧹</span>
+        </div>
+        <div class="dash-card__value" style="font-size: 1.2rem;">Book a Cleaning</div>
+      </a>
+      <a href="{{ url_for('repair.book_repair') }}" class="dash-card" style="text-decoration: none; border-left: 4px solid var(--info);">
+        <div class="dash-card__header">
+          <span class="dash-card__label">Quick Action</span>
+          <span style="font-size: 1.5rem;">🔧</span>
+        </div>
+        <div class="dash-card__value" style="font-size: 1.2rem;">Request a Repair</div>
+      </a>
+      <a href="{{ url_for('marketplace.marketplace_index') }}" class="dash-card" style="text-decoration: none; border-left: 4px solid var(--success);">
+        <div class="dash-card__header">
+          <span class="dash-card__label">Quick Action</span>
+          <span style="font-size: 1.5rem;">🏪</span>
+        </div>
+        <div class="dash-card__value" style="font-size: 1.2rem;">Browse Marketplace</div>
+      </a>
+    </div>
+
+    <!-- Recent Bookings -->
+    <div style="background: white; border-radius: var(--border-radius-lg); border: 1px solid var(--cream-300); margin-bottom: var(--space-xl);">
+      <div style="padding: var(--space-lg) var(--space-xl); border-bottom: 1px solid var(--cream-200); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1.1rem;">Recent Bookings</h3>
+        <a href="{{ url_for('services.my_bookings') }}" class="btn btn--sm btn--outline">View All</a>
+      </div>
+      <div style="padding: 0 var(--space-xl);">
+        {% if bookings %}
+        <table class="data-table">
+          <thead>
+            <tr><th>Order ID</th><th>Type</th><th>Status</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            {% for b in bookings %}
+            <tr>
+              <td><strong>{{ b.order_id }}</strong></td>
+              <td>{{ b.type | replace('_', ' ') | title }}</td>
+              <td><span class="badge badge--{{ b.status }}">{{ b.status | replace('_', ' ') | title }}</span></td>
+              <td style="color: var(--steel-400); font-size: 0.85rem;">{{ b.created_at[:10] if b.created_at else '—' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state" style="padding: var(--space-xl);">
+          <p class="text-muted">No bookings yet</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Recent Repair Jobs -->
+    <div style="background: white; border-radius: var(--border-radius-lg); border: 1px solid var(--cream-300); margin-bottom: var(--space-xl);">
+      <div style="padding: var(--space-lg) var(--space-xl); border-bottom: 1px solid var(--cream-200); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1.1rem;">Recent Repair Jobs</h3>
+      </div>
+      <div style="padding: 0 var(--space-xl);">
+        {% if repair_jobs %}
+        <table class="data-table">
+          <thead>
+            <tr><th>Service ID</th><th>Status</th><th>Total</th><th>Date</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for rj in repair_jobs %}
+            <tr>
+              <td><strong>{{ rj.service_id }}</strong></td>
+              <td><span class="badge badge--{{ rj.confirmation_status }}">{{ rj.confirmation_status | replace('_', ' ') | title }}</span></td>
+              <td>₹{{ "{:,.0f}".format(rj.total_cost or 0) }}</td>
+              <td style="color: var(--steel-400); font-size: 0.85rem;">{{ rj.created_at[:10] if rj.created_at else '—' }}</td>
+              <td><a href="{{ url_for('repair.job_detail', job_id=rj.id) }}" class="btn btn--sm btn--outline">View</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state" style="padding: var(--space-xl);">
+          <p class="text-muted">No repair jobs yet</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div style="background: white; border-radius: var(--border-radius-lg); border: 1px solid var(--cream-300);">
+      <div style="padding: var(--space-lg) var(--space-xl); border-bottom: 1px solid var(--cream-200); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1.1rem;">Recent Orders</h3>
+        <a href="{{ url_for('marketplace.my_orders') }}" class="btn btn--sm btn--outline">View All</a>
+      </div>
+      <div style="padding: 0 var(--space-xl);">
+        {% if orders %}
+        <table class="data-table">
+          <thead>
+            <tr><th>Order ID</th><th>Total</th><th>Status</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            {% for o in orders %}
+            <tr>
+              <td><strong>{{ o.order_id }}</strong></td>
+              <td>₹{{ "{:,.0f}".format(o.total_price) }}</td>
+              <td><span class="badge badge--{{ o.status }}">{{ o.status | title }}</span></td>
+              <td style="color: var(--steel-400); font-size: 0.85rem;">{{ o.created_at[:10] if o.created_at else '—' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state" style="padding: var(--space-xl);">
+          <p class="text-muted">No orders yet</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

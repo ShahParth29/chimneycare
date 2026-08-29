@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="description" content="{% block meta_description %}ChimneyCare — Professional chimney cleaning, repair, and installation services. Trusted by thousands of homeowners.{% endblock %}">
+  <title>{% block title %}ChimneyCare{% endblock %} — Professional Chimney Services</title>
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  {% block extra_css %}{% endblock %}
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+</head>
+<body>
+  {% block nav %}
+  {% include 'components/nav.html' %}
+  {% endblock %}
+
+  {# ── Flash Messages ─────────────────── #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+      <div class="flash flash--{{ category }}">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}
+  {% include 'components/footer.html' %}
+  {% endblock %}
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  {# ── Supabase Realtime (only for logged-in customers) ─── #}
+  {% if current_user %}
+  <script>
+    window.__SUPABASE_URL__ = '{{ config.get("SUPABASE_URL", "") }}';
+    window.__SUPABASE_ANON_KEY__ = '{{ config.get("SUPABASE_ANON_KEY", "") }}';
+    window.__CURRENT_USER_ID__ = '{{ current_user.id }}';
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="{{ url_for('static', filename='js/realtime.js') }}"></script>
+  {% endif %}
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

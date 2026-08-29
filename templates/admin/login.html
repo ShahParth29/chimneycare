@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Admin Login{% endblock %}
+{% block nav %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="auth-page" style="background: var(--charcoal-900);">
+  <div class="auth-card">
+    <div class="auth-card__logo">🔥 ChimneyCare</div>
+    <p class="auth-card__subtitle">Admin Portal — authorized access only</p>
+
+    <form method="post" action="{{ url_for('auth.admin_login') }}" data-validate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label class="form-label" for="email">Admin Email</label>
+        <input type="email" id="email" name="email" class="form-input" 
+               placeholder="admin@chimneycare.com" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-input" 
+               placeholder="Enter admin password" required>
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--full btn--lg">Sign In</button>
+    </form>
+
+    <div class="auth-card__footer">
+      <a href="{{ url_for('auth.login') }}" style="color: var(--steel-300); font-size: 0.85rem;">← Customer Login</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

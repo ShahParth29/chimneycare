@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}AMC Plans{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / 
+      <a href="{{ url_for('services.services_index') }}">Services</a> / 
+      <span>AMC Plans</span>
+    </div>
+    <h1 class="page-header__title">AMC Plans</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="pricing-grid">
+      {% for plan in amc_plans %}
+      <div class="plan-card {% if loop.index == 2 %}plan-card--featured{% endif %} reveal stagger-{{ loop.index }}">
+        <div class="plan-card__tier">{{ plan.tier }}</div>
+        <div class="plan-card__price">
+          ₹{{ "{:,.0f}".format(plan.price) }}
+          <span>/ {{ plan.duration_months }} months</span>
+        </div>
+        <div class="plan-card__duration">{{ plan.visits_included }} service visits included</div>
+        
+        <ul class="plan-card__features">
+          <li>{{ plan.visits_included }} scheduled cleaning visits</li>
+          <li>Labour charges included in plan price</li>
+          <li>Filter & motor servicing</li>
+          <li>Priority scheduling</li>
+          {% if plan.duration_months >= 6 %}
+          <li>Free duct inspection</li>
+          {% endif %}
+          {% if plan.duration_months == 12 %}
+          <li>1 emergency visit included</li>
+          <li>10% off repair parts</li>
+          {% endif %}
+        </ul>
+
+        {% if plan.description %}
+        <p style="font-size: 0.85rem; color: var(--steel-400); margin-bottom: var(--space-lg);">{{ plan.description }}</p>
+        {% endif %}
+
+        <a href="{{ url_for('services.book_service', type='amc', plan_id=plan.id) }}" class="btn btn--primary btn--full">
+          Choose {{ plan.tier }}
+        </a>
+      </div>
+      {% else %}
+      <div class="plan-card" style="grid-column: 1 / -1;">
+        <div class="empty-state">
+          <div class="empty-state__icon">📋</div>
+          <div class="empty-state__title">AMC Plans Coming Soon</div>
+          <p>Plans will be set up by the admin team. Check back shortly.</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

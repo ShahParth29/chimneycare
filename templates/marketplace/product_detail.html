@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ product.brand }} {{ product.model }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / 
+      <a href="{{ url_for('marketplace.marketplace_index') }}">Marketplace</a> / 
+      <span>{{ product.brand }} {{ product.model }}</span>
+    </div>
+    <h1 class="page-header__title">{{ product.brand }} {{ product.model }}</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="grid-editorial">
+      <div class="reveal">
+        {% if product.image_url %}
+        <img src="{{ product.image_url }}" alt="{{ product.brand }} {{ product.model }}" 
+             style="border-radius: var(--border-radius-xl); width: 100%; max-height: 500px; object-fit: cover;">
+        {% else %}
+        <div style="width: 100%; height: 400px; background: linear-gradient(135deg, var(--cream-200), var(--cream-300)); border-radius: var(--border-radius-xl); display: flex; align-items: center; justify-content: center; font-size: 5rem;">🏠</div>
+        {% endif %}
+      </div>
+
+      <div class="reveal stagger-2">
+        <span class="card__tag">{{ product.brand }}</span>
+        <h2 style="margin-bottom: var(--space-sm);">{{ product.model }}</h2>
+
+        <div style="display: flex; gap: var(--space-lg); margin-bottom: var(--space-xl); flex-wrap: wrap;">
+          {% if product.type %}
+          <div>
+            <span style="font-size: 0.75rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.06em; display: block;">Type</span>
+            <strong>{{ product.type }}</strong>
+          </div>
+          {% endif %}
+          {% if product.size %}
+          <div>
+            <span style="font-size: 0.75rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.06em; display: block;">Size</span>
+            <strong>{{ product.size }}</strong>
+          </div>
+          {% endif %}
+          {% if product.suction_capacity %}
+          <div>
+            <span style="font-size: 0.75rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.06em; display: block;">Suction</span>
+            <strong>{{ product.suction_capacity }}</strong>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if product.description %}
+        <p style="color: var(--charcoal-600); margin-bottom: var(--space-xl);">{{ product.description }}</p>
+        {% endif %}
+
+        {% if product.specs %}
+        <h4 style="margin-bottom: var(--space-md);">Specifications</h4>
+        <div style="background: var(--cream-100); border-radius: var(--border-radius); padding: var(--space-lg); margin-bottom: var(--space-xl);">
+          {% for key, value in product.specs.items() %}
+          <div style="display: flex; justify-content: space-between; padding: var(--space-xs) 0; {% if not loop.last %}border-bottom: 1px solid var(--cream-300);{% endif %}">
+            <span style="color: var(--steel-400); text-transform: capitalize;">{{ key | replace('_', ' ') }}</span>
+            <strong>{{ value }}</strong>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="border-top: 2px solid var(--cream-300); padding-top: var(--space-xl); margin-top: var(--space-lg);">
+          <div style="font-family: var(--font-heading); font-size: 2.5rem; color: var(--charcoal-800); margin-bottom: var(--space-lg);">
+            ₹{{ "{:,.0f}".format(product.price) }}
+          </div>
+          <a href="{{ url_for('marketplace.checkout', product_id=product.id) }}" class="btn btn--primary btn--lg">Buy Now</a>
+          <a href="{{ url_for('marketplace.marketplace_index') }}" class="btn btn--outline btn--lg" style="margin-left: var(--space-md);">Back to Catalogue</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

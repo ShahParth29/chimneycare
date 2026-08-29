@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+{% block meta_description %}ChimneyCare — Expert chimney cleaning, repair, and new chimney installations. Book AMC plans, get transparent repair pricing, and shop from our curated chimney marketplace.{% endblock %}
+
+{% block content %}
+<!-- ═══ Hero ═══ -->
+<section class="hero">
+  <div class="hero__bg" style="background-image: url('{{ url_for('static', filename='images/hero.jpg') }}');"></div>
+  <div class="hero__overlay"></div>
+  <div class="hero__content">
+    <div class="hero__text">
+      <div class="hero__badge">✦ Trusted by 5,000+ Homeowners</div>
+      <h1 class="hero__title">
+        Your chimney deserves<br>
+        <span>expert care.</span>
+      </h1>
+      <p class="hero__desc">
+        From deep cleaning to full installations, ChimneyCare brings certified 
+        technicians, transparent pricing, and hassle-free service to your kitchen. 
+        No hidden charges. No guesswork.
+      </p>
+      <div class="hero__actions">
+        <a href="{{ url_for('services.services_index') }}" class="btn btn--primary btn--lg">Book a Service</a>
+        <a href="{{ url_for('marketplace.marketplace_index') }}" class="btn btn--secondary btn--lg">Browse Chimneys</a>
+      </div>
+    </div>
+
+    <div class="hero__stats">
+      <div class="hero__stat reveal stagger-1">
+        <span class="hero__stat-number">5,000+</span>
+        <span class="hero__stat-label">Happy Customers</span>
+      </div>
+      <div class="hero__stat reveal stagger-2">
+        <span class="hero__stat-number">12,000+</span>
+        <span class="hero__stat-label">Services Done</span>
+      </div>
+      <div class="hero__stat reveal stagger-3">
+        <span class="hero__stat-number">50+</span>
+        <span class="hero__stat-label">Expert Technicians</span>
+      </div>
+      <div class="hero__stat reveal stagger-4">
+        <span class="hero__stat-number">98%</span>
+        <span class="hero__stat-label">Satisfaction Rate</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Trust Strip ═══ -->
+<section class="trust-strip">
+  <div class="container">
+    <div class="trust-strip__grid">
+      <div class="trust-item reveal stagger-1">
+        <div class="trust-item__icon">🛡️</div>
+        <div class="trust-item__title">Insured Service</div>
+        <div class="trust-item__desc">Every job is covered by our service guarantee</div>
+      </div>
+      <div class="trust-item reveal stagger-2">
+        <div class="trust-item__icon">💰</div>
+        <div class="trust-item__title">Transparent Pricing</div>
+        <div class="trust-item__desc">Labour & parts shown separately — no surprises</div>
+      </div>
+      <div class="trust-item reveal stagger-3">
+        <div class="trust-item__icon">🔧</div>
+        <div class="trust-item__title">Certified Technicians</div>
+        <div class="trust-item__desc">Background-checked, trained professionals</div>
+      </div>
+      <div class="trust-item reveal stagger-4">
+        <div class="trust-item__icon">⚡</div>
+        <div class="trust-item__title">Instant Confirmation</div>
+        <div class="trust-item__desc">Book now, get confirmed in seconds</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Services Overview ═══ -->
+<section class="section" id="services">
+  <div class="container">
+    <div class="grid-editorial">
+      <div class="reveal">
+        <span class="section__label">Our Services</span>
+        <h2 class="section__title">Maintenance plans that<br>actually make sense.</h2>
+        <p class="section__desc">
+          Choose from our Annual Maintenance Contracts designed around 
+          how often your chimney actually needs attention — not 
+          arbitrary schedules. One-time cleanings also available.
+        </p>
+        <div class="mt-xl" style="display:flex; gap:1rem; flex-wrap:wrap;">
+          <a href="{{ url_for('services.amc_plans') }}" class="btn btn--primary">View AMC Plans</a>
+          <a href="{{ url_for('services.book_service', type='one_time') }}" class="btn btn--outline">One-Time Cleaning</a>
+        </div>
+      </div>
+      <div class="reveal stagger-2">
+        <div class="pricing-grid" style="grid-template-columns: 1fr;">
+          {% for plan in amc_plans[:3] %}
+          <div class="plan-card {% if loop.index == 2 %}plan-card--featured{% endif %}" style="padding: var(--space-lg);">
+            <div class="plan-card__tier">{{ plan.tier }}</div>
+            <div class="plan-card__price">₹{{ "{:,.0f}".format(plan.price) }}</div>
+            <div class="plan-card__duration">{{ plan.duration_months }} months • {{ plan.visits_included }} visits</div>
+            <a href="{{ url_for('services.book_service', type='amc', plan_id=plan.id) }}" class="btn btn--primary btn--sm btn--full">Choose Plan</a>
+          </div>
+          {% else %}
+          <div class="plan-card" style="padding: var(--space-lg);">
+            <div class="plan-card__tier">Plans coming soon</div>
+            <p style="color: var(--steel-400); font-size: 0.9rem;">AMC plans will be configured by the admin. Check back shortly.</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Repair Section ═══ -->
+<section class="section section--cream">
+  <div class="container">
+    <div class="grid-editorial grid-editorial--reverse">
+      <div class="reveal">
+        <span class="section__label">Repair & Parts</span>
+        <h2 class="section__title">Genuine parts,<br>honest labour charges.</h2>
+        <p class="section__desc">
+          We show you exactly what each part costs and what the labour charges 
+          are — separately. Browse our parts catalogue, book a repair, and 
+          we'll have a certified technician reach out within 24 hours.
+        </p>
+        <div class="mt-xl">
+          <a href="{{ url_for('repair.repair_index') }}" class="btn btn--primary">Browse Parts & Repair</a>
+        </div>
+      </div>
+      <div class="reveal stagger-2">
+        <div style="background: white; border-radius: var(--border-radius-xl); padding: var(--space-2xl); border: 1px solid var(--cream-300);">
+          <h4 style="margin-bottom: var(--space-lg);">How Repair Works</h4>
+          <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
+            <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+              <div style="width: 36px; height: 36px; background: var(--orange-100); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; color: var(--orange-600);">1</div>
+              <div>
+                <strong style="display: block;">Describe Your Issue</strong>
+                <span style="color: var(--steel-400); font-size: 0.85rem;">Tell us what's wrong with your chimney</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+              <div style="width: 36px; height: 36px; background: var(--orange-100); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; color: var(--orange-600);">2</div>
+              <div>
+                <strong style="display: block;">Telephonic Confirmation</strong>
+                <span style="color: var(--steel-400); font-size: 0.85rem;">We'll call you within 24 hours to confirm details</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: var(--space-md); align-items: flex-start;">
+              <div style="width: 36px; height: 36px; background: var(--orange-100); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; color: var(--orange-600);">3</div>
+              <div>
+                <strong style="display: block;">Technician Visit</strong>
+                <span style="color: var(--steel-400); font-size: 0.85rem;">Our expert will fix it with genuine parts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Marketplace Teaser ═══ -->
+<section class="section section--dark">
+  <div class="container text-center">
+    <div class="reveal">
+      <span class="section__label" style="color: var(--orange-300);">Chimney Marketplace</span>
+      <h2 style="color: var(--cream-100); max-width: 600px; margin: 0 auto var(--space-md);">Looking for a new chimney?</h2>
+      <p style="color: var(--steel-300); max-width: 500px; margin: 0 auto var(--space-xl);">
+        Browse our curated selection of kitchen chimneys from top brands. 
+        Filter by size, suction power, and budget. Exchange offers available.
+      </p>
+      <a href="{{ url_for('marketplace.marketplace_index') }}" class="btn btn--primary btn--lg">Shop Chimneys</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="section">
+  <div class="container">
+    <div style="background: var(--charcoal-800); border-radius: var(--border-radius-xl); padding: var(--space-4xl) var(--space-3xl); text-align: center;" class="reveal">
+      <h2 style="color: var(--cream-100); margin-bottom: var(--space-md);">Ready to book your service?</h2>
+      <p style="color: var(--steel-300); max-width: 480px; margin: 0 auto var(--space-xl);">
+        Join thousands of homeowners who trust ChimneyCare for 
+        clean, efficient, and safe kitchen chimneys.
+      </p>
+      <div style="display: flex; justify-content: center; gap: var(--space-md); flex-wrap: wrap;">
+        <a href="{{ url_for('auth.register') }}" class="btn btn--primary btn--lg">Create Free Account</a>
+        <a href="tel:+919999999999" class="btn btn--secondary btn--lg">📞 Call Us</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
