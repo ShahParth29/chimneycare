@@ -1,13 +1,19 @@
 /* ═══════════════════════════════════════════════════════════════
    ChimneyCare — Admin Portal Styles
+   Clean, responsive, non-overlapping dashboard layout
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Admin Layout ────────────────────────────── */
 
+body {
+  background: var(--cream-100);
+}
+
 .admin-layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
+  display: block;
   min-height: 100vh;
+  width: 100%;
+  position: relative;
 }
 
 /* ── Sidebar ─────────────────────────────────── */
@@ -21,7 +27,8 @@
   bottom: 0;
   width: 260px;
   overflow-y: auto;
-  z-index: 100;
+  z-index: 1000;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
 }
 
 .admin-sidebar__brand {
@@ -49,6 +56,8 @@
 
 .admin-sidebar__nav {
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .admin-sidebar__link {
@@ -65,14 +74,15 @@
 }
 
 .admin-sidebar__link:hover {
-  background: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.06);
   color: var(--cream-100);
 }
 
 .admin-sidebar__link--active {
-  background: rgba(212, 98, 43, 0.1);
+  background: rgba(212, 98, 43, 0.15);
   color: var(--orange-400);
   border-left-color: var(--orange-500);
+  font-weight: 600;
 }
 
 .admin-sidebar__link span {
@@ -85,9 +95,20 @@
 
 .admin-main {
   margin-left: 260px;
-  padding: var(--space-2xl);
+  width: calc(100% - 260px);
+  padding: 2rem 2.5rem;
   background: var(--cream-100);
   min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.admin-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--cream-300);
 }
 
 .admin-main__header {
@@ -95,11 +116,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-2xl);
+  flex-wrap: wrap;
+  gap: var(--space-md);
 }
 
 .admin-main__title {
   font-size: 1.8rem;
   color: var(--charcoal-800);
+  margin: 0;
 }
 
 .admin-main__user {
@@ -126,6 +150,7 @@
   border: 1px solid var(--cream-300);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .stat-card::after {
@@ -172,6 +197,8 @@
   border-radius: var(--border-radius-lg);
   border: 1px solid var(--cream-300);
   margin-bottom: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
 .admin-panel__header {
@@ -180,16 +207,60 @@
   align-items: center;
   padding: var(--space-lg) var(--space-xl);
   border-bottom: 1px solid var(--cream-200);
+  background: white;
 }
 
 .admin-panel__title {
   font-family: var(--font-heading);
   font-size: 1.2rem;
   color: var(--charcoal-800);
+  margin: 0;
 }
 
 .admin-panel__body {
   padding: var(--space-xl);
+}
+
+/* ── Tables ──────────────────────────────────── */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--cream-300);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-xl);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 750px;
+  font-size: 0.9rem;
+}
+
+.data-table th {
+  background: var(--cream-100);
+  color: var(--charcoal-800);
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--cream-300);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.data-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--cream-200);
+  color: var(--charcoal-700);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+  background: var(--cream-50);
 }
 
 /* ── Admin Forms ─────────────────────────────── */
@@ -215,10 +286,12 @@
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 9000;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
   align-items: center;
   justify-content: center;
+  padding: var(--space-md);
 }
 
 .modal-overlay.active {
@@ -229,16 +302,16 @@
   background: white;
   border-radius: var(--border-radius-xl);
   padding: var(--space-2xl);
-  width: 90%;
+  width: 100%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow-xl);
-  animation: modal-in 0.3s var(--ease-out);
+  animation: modal-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes modal-in {
-  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  from { opacity: 0; transform: scale(0.95) translateY(16px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
@@ -247,11 +320,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--cream-200);
+  padding-bottom: var(--space-md);
 }
 
 .modal__title {
   font-family: var(--font-heading);
-  font-size: 1.4rem;
+  font-size: 1.3rem;
+  margin: 0;
 }
 
 .modal__close {
@@ -260,7 +336,7 @@
   font-size: 1.5rem;
   cursor: pointer;
   color: var(--steel-300);
-  padding: var(--space-xs);
+  padding: 4px 8px;
   transition: color var(--transition-fast);
 }
 
@@ -309,30 +385,26 @@
 /* ── Responsive Admin ────────────────────────── */
 
 @media (max-width: 1024px) {
-  .admin-form {
-    grid-template-columns: 1fr;
+  .admin-main {
+    padding: 1.5rem;
   }
 }
 
 @media (max-width: 768px) {
-  .admin-layout {
-    grid-template-columns: 1fr;
-  }
-  
   .admin-sidebar {
-    display: none;
-    width: 100%;
-    position: fixed;
-    z-index: 999;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 260px;
   }
   
   .admin-sidebar.open {
-    display: block;
+    transform: translateX(0);
   }
   
   .admin-main {
     margin-left: 0;
-    padding: var(--space-lg);
+    width: 100%;
+    padding: 1rem;
   }
   
   .admin-stats {

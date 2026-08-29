@@ -39,7 +39,7 @@ def dashboard():
     try:
         bookings = (
             sb.table("services")
-            .select("*")
+            .select("*, amc_plans(*), technicians(*)")
             .eq("customer_id", user["id"])
             .order("created_at", desc=True)
             .limit(5)
@@ -47,7 +47,7 @@ def dashboard():
         )
         repair_jobs = (
             sb.table("repair_jobs")
-            .select("*")
+            .select("*, technicians(*)")
             .eq("customer_id", user["id"])
             .order("created_at", desc=True)
             .limit(5)
@@ -183,7 +183,7 @@ def my_bookings():
     try:
         result = (
             sb.table("services")
-            .select("*, amc_plans(*)")
+            .select("*, amc_plans(*), technicians(*)")
             .eq("customer_id", user["id"])
             .order("created_at", desc=True)
             .execute()

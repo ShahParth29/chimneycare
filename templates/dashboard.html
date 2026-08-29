@@ -45,7 +45,7 @@
         {% if bookings %}
         <table class="data-table">
           <thead>
-            <tr><th>Order ID</th><th>Type</th><th>Status</th><th>Date</th></tr>
+            <tr><th>Order ID</th><th>Type</th><th>Status</th><th>Technician</th><th>Date</th></tr>
           </thead>
           <tbody>
             {% for b in bookings %}
@@ -53,6 +53,17 @@
               <td><strong>{{ b.order_id }}</strong></td>
               <td>{{ b.type | replace('_', ' ') | title }}</td>
               <td><span class="badge badge--{{ b.status }}">{{ b.status | replace('_', ' ') | title }}</span></td>
+              <td>
+                {% if b.technicians %}
+                  {% if b.technicians.reveal_status %}
+                    <span style="font-size: 0.8rem; font-weight: 600;">👷 {{ b.technicians.name }}</span>
+                  {% else %}
+                    <span style="font-size: 0.8rem; color: var(--steel-400);">🔒 Assigned</span>
+                  {% endif %}
+                {% else %}
+                  <span style="font-size: 0.8rem; color: var(--steel-300);">⏳ Pending</span>
+                {% endif %}
+              </td>
               <td style="color: var(--steel-400); font-size: 0.85rem;">{{ b.created_at[:10] if b.created_at else '—' }}</td>
             </tr>
             {% endfor %}
@@ -75,13 +86,24 @@
         {% if repair_jobs %}
         <table class="data-table">
           <thead>
-            <tr><th>Service ID</th><th>Status</th><th>Total</th><th>Date</th><th></th></tr>
+            <tr><th>Service ID</th><th>Status</th><th>Technician</th><th>Total</th><th>Date</th><th></th></tr>
           </thead>
           <tbody>
             {% for rj in repair_jobs %}
             <tr>
               <td><strong>{{ rj.service_id }}</strong></td>
               <td><span class="badge badge--{{ rj.confirmation_status }}">{{ rj.confirmation_status | replace('_', ' ') | title }}</span></td>
+              <td>
+                {% if rj.technicians %}
+                  {% if rj.technicians.reveal_status %}
+                    <span style="font-size: 0.8rem; font-weight: 600;">👷 {{ rj.technicians.name }}</span>
+                  {% else %}
+                    <span style="font-size: 0.8rem; color: var(--steel-400);">🔒 Assigned</span>
+                  {% endif %}
+                {% else %}
+                  <span style="font-size: 0.8rem; color: var(--steel-300);">⏳ Pending</span>
+                {% endif %}
+              </td>
               <td>₹{{ "{:,.0f}".format(rj.total_cost or 0) }}</td>
               <td style="color: var(--steel-400); font-size: 0.85rem;">{{ rj.created_at[:10] if rj.created_at else '—' }}</td>
               <td><a href="{{ url_for('repair.job_detail', job_id=rj.id) }}" class="btn btn--sm btn--outline">View</a></td>

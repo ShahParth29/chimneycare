@@ -21,7 +21,7 @@
   {% endwith %}
 
   <div class="admin-layout">
-    <aside class="admin-sidebar">
+    <aside class="admin-sidebar" id="admin-sidebar">
       <a href="{{ url_for('admin.dashboard') }}" class="admin-sidebar__brand">🔥 ChimneyCare</a>
       <span class="admin-sidebar__label">Overview</span>
       <ul class="admin-sidebar__nav">
@@ -43,6 +43,7 @@
       </ul>
       <span class="admin-sidebar__label">Account</span>
       <ul class="admin-sidebar__nav">
+        <li><a href="{{ url_for('services.landing') }}" target="_blank" class="admin-sidebar__link"><span>🌐</span> View Storefront</a></li>
         <li>
           <form action="{{ url_for('auth.logout') }}" method="post" style="margin:0;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -55,6 +56,16 @@
     </aside>
 
     <main class="admin-main">
+      <div class="admin-topbar">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <button id="sidebar-toggle" style="display:none; background:white; border:1px solid var(--cream-300); border-radius:4px; padding:6px 10px; cursor:pointer; font-size:1.1rem;">☰</button>
+          <span style="font-size: 0.85rem; color: var(--steel-400);">ChimneyCare Operations &bull; Sobharaj Enterprise Pvt Ltd</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <span style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-800);">admin.chimneycare@gmail.com</span>
+          <span class="badge badge--confirmed">Administrator</span>
+        </div>
+      </div>
       {% block admin_content %}{% endblock %}
     </main>
   </div>
