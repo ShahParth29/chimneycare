@@ -194,21 +194,24 @@ body {
   -webkit-overflow-scrolling: touch;
   box-shadow: var(--shadow-sm);
   margin-bottom: var(--space-2xl);
+  width: 100%;
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
-  min-width: 650px;
+  min-width: 800px;
+  table-layout: auto;
 }
 
 .data-table th,
 .data-table td {
-  padding: 0.9rem 1.2rem;
+  padding: 1rem 1.25rem;
   text-align: left;
   border-bottom: 1px solid var(--cream-200);
   vertical-align: middle;
+  box-sizing: border-box;
 }
 
 .data-table th {
@@ -227,6 +230,25 @@ body {
 
 .data-table tbody tr:hover {
   background: var(--cream-50);
+}
+
+.cell--nowrap {
+  white-space: nowrap !important;
+}
+
+.cell--description {
+  min-width: 220px;
+  max-width: 320px;
+  white-space: normal !important;
+  word-break: break-word;
+  color: var(--steel-400);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.cell--actions {
+  white-space: nowrap !important;
+  width: 1%;
 }
 
 /* ── Badges ──────────────────────────────────── */

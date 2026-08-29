@@ -15,32 +15,32 @@
   <table class="data-table">
     <thead>
       <tr>
-        <th>Tier Name</th>
-        <th>Duration</th>
-        <th>Visits</th>
-        <th>Price</th>
-        <th>Description</th>
-        <th>Status</th>
-        <th>Actions</th>
+        <th style="min-width: 140px;">Tier Name</th>
+        <th style="min-width: 110px;">Duration</th>
+        <th style="min-width: 90px;">Visits</th>
+        <th style="min-width: 100px;">Price</th>
+        <th style="min-width: 260px;">Description</th>
+        <th style="min-width: 120px;">Status</th>
+        <th style="min-width: 100px;">Actions</th>
       </tr>
     </thead>
     <tbody>
       {% for plan in plans %}
       <tr>
-        <td><strong>{{ plan.tier }}</strong></td>
-        <td>{{ plan.duration_months }} Months</td>
-        <td>{{ plan.visits_included }} Visits</td>
-        <td><strong>₹{{ "{:,.0f}".format(plan.price) }}</strong></td>
-        <td style="max-width:200px; color:var(--steel-400); font-size:0.85rem;">{{ plan.description or '—' }}</td>
-        <td>
+        <td class="cell--nowrap"><strong>{{ plan.tier }}</strong></td>
+        <td class="cell--nowrap">{{ plan.duration_months }} Months</td>
+        <td class="cell--nowrap">{{ plan.visits_included }} Visits</td>
+        <td class="cell--nowrap"><strong>₹{{ "{:,.0f}".format(plan.price) }}</strong></td>
+        <td class="cell--description">{{ plan.description or '—' }}</td>
+        <td class="cell--nowrap">
           <form method="post" action="{{ url_for('admin.toggle_amc_plan', plan_id=plan.id) }}" style="display:inline;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="badge {% if plan.active %}badge--confirmed{% else %}badge--cancelled{% endif %}" style="cursor:pointer; border:none; padding:6px 12px;">
-              {{ '✓ Active' if plan.active else '✗ Inactive' }}
+            <button type="submit" class="badge {% if plan.active %}badge--confirmed{% else %}badge--cancelled{% endif %}" style="cursor:pointer; border:none; padding:6px 14px; font-size:0.75rem; font-weight:600;">
+              {{ '✓ ACTIVE' if plan.active else '✗ INACTIVE' }}
             </button>
           </form>
         </td>
-        <td>
+        <td class="cell--actions">
           <div class="action-group">
             <button type="button" class="action-btn" title="Edit Plan" onclick="openModal('edit-plan-modal-{{ plan.id }}')">✏️</button>
             <form method="post" action="{{ url_for('admin.delete_amc_plan', plan_id=plan.id) }}" style="display:inline;">
