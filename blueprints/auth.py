@@ -65,9 +65,15 @@ def login():
 
         # Check if 2FA is enabled for this account
         import time
-        admin_sb = get_admin_client()
-        tfa_check = admin_sb.table("user_two_factor").select("is_enabled").eq("user_id", user_id).execute()
-        if tfa_check.data and tfa_check.data[0].get("is_enabled"):
+        is_2fa_active = False
+        try:
+            admin_sb = get_admin_client()
+            tfa_check = admin_sb.table("user_two_factor").select("is_enabled").eq("user_id", user_id).execute()
+            is_2fa_active = bool(tfa_check.data and tfa_check.data[0].get("is_enabled"))
+        except Exception as tfa_err:
+            logger.info(f"2FA check bypassed for customer (table may not exist yet): {tfa_err}")
+
+        if is_2fa_active:
             access_tok = auth_response.session.access_token if hasattr(auth_response, 'session') and auth_response.session else None
             sb.auth.sign_out()
             session["pending_2fa_login"] = {
@@ -82,6 +88,7 @@ def login():
                 "attempts": 0,
             }
             return redirect(url_for("two_factor.challenge"))
+
 
         session["user"] = {
             "id": user_id,
@@ -253,8 +260,14 @@ def admin_login():
 
         # Check if Admin has 2FA enabled
         import time
-        tfa_check = admin_sb.table("user_two_factor").select("is_enabled").eq("user_id", user_id).execute()
-        if tfa_check.data and tfa_check.data[0].get("is_enabled"):
+        is_admin_2fa_active = False
+        try:
+            tfa_check = admin_sb.table("user_two_factor").select("is_enabled").eq("user_id", user_id).execute()
+            is_admin_2fa_active = bool(tfa_check.data and tfa_check.data[0].get("is_enabled"))
+        except Exception as tfa_err:
+            logger.info(f"2FA check bypassed for admin (table may not exist yet): {tfa_err}")
+
+        if is_admin_2fa_active:
             sb.auth.sign_out()
             session["pending_2fa_login"] = {
                 "user_id": user_id,
@@ -266,6 +279,7 @@ def admin_login():
                 "attempts": 0,
             }
             return redirect(url_for("two_factor.challenge"))
+
 
         session["user"] = {
             "id": user_id,
