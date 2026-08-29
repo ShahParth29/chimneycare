@@ -1,7 +1,7 @@
 -- ============================================================
---  ChimneyCare — Full Database Schema for Supabase
---  Run this in the Supabase SQL Editor to create all tables,
---  indexes, and Row Level Security policies.
+--  ChimneyCare — Full Database Schema for Supabase (Idempotent)
+--  Run this in the Supabase SQL Editor to create or update all
+--  tables, indexes, Row Level Security policies, and Realtime.
 -- ============================================================
 
 -- Enable UUID generation
@@ -11,19 +11,22 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 --  1. PROFILES
 -- ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS profiles (
-    id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    role        TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('customer', 'admin')),
-    name        TEXT NOT NULL,
-    phone       TEXT,
+    id              UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    role            TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('customer', 'admin')),
+    name            TEXT NOT NULL,
+    phone           TEXT,
     whatsapp_number TEXT,
-    email       TEXT,
-    address     TEXT,
-    created_at  TIMESTAMPTZ DEFAULT NOW()
+    email           TEXT,
+    address         TEXT,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- Customers see only their own profile; admins see all.
+DROP POLICY IF EXISTS "profiles_select" ON profiles;
+DROP POLICY IF EXISTS "profiles_insert" ON profiles;
+DROP POLICY IF EXISTS "profiles_update" ON profiles;
+
 CREATE POLICY "profiles_select" ON profiles FOR SELECT USING (
     id = auth.uid()
     OR EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin')
@@ -48,15 +51,15 @@ CREATE TABLE IF NOT EXISTS technicians (
 
 ALTER TABLE technicians ENABLE ROW LEVEL SECURITY;
 
--- CRITICAL: Customers see name only. Phone, email, photo hidden until reveal_status = true.
--- We use a security-definer view for safe customer access (see below).
--- Direct table access: admin-only.
+DROP POLICY IF EXISTS "technicians_admin_full" ON technicians;
+DROP POLICY IF EXISTS "technicians_customer_revealed" ON technicians;
+
+-- Admin full access
 CREATE POLICY "technicians_admin_full" ON technicians FOR ALL USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
 
--- Customers can SELECT but only see limited columns via RLS + view.
--- When reveal_status = true, they can see full details.
+-- Customer can only see full details when reveal_status = TRUE
 CREATE POLICY "technicians_customer_revealed" ON technicians FOR SELECT USING (
     reveal_status = TRUE
 );
@@ -77,6 +80,9 @@ CREATE TABLE IF NOT EXISTS amc_plans (
 );
 
 ALTER TABLE amc_plans ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "amc_plans_read" ON amc_plans;
+DROP POLICY IF EXISTS "amc_plans_admin" ON amc_plans;
 
 CREATE POLICY "amc_plans_read" ON amc_plans FOR SELECT USING (TRUE);
 CREATE POLICY "amc_plans_admin" ON amc_plans FOR ALL USING (
@@ -104,6 +110,10 @@ CREATE TABLE IF NOT EXISTS services (
 
 ALTER TABLE services ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "services_customer" ON services;
+DROP POLICY IF EXISTS "services_insert" ON services;
+DROP POLICY IF EXISTS "services_admin_update" ON services;
+
 CREATE POLICY "services_customer" ON services FOR SELECT USING (
     customer_id = auth.uid()
     OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
@@ -130,6 +140,9 @@ CREATE TABLE IF NOT EXISTS repair_parts (
 
 ALTER TABLE repair_parts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "repair_parts_read" ON repair_parts;
+DROP POLICY IF EXISTS "repair_parts_admin" ON repair_parts;
+
 CREATE POLICY "repair_parts_read" ON repair_parts FOR SELECT USING (TRUE);
 CREATE POLICY "repair_parts_admin" ON repair_parts FOR ALL USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
@@ -154,6 +167,10 @@ CREATE TABLE IF NOT EXISTS repair_jobs (
 );
 
 ALTER TABLE repair_jobs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "repair_jobs_customer" ON repair_jobs;
+DROP POLICY IF EXISTS "repair_jobs_insert" ON repair_jobs;
+DROP POLICY IF EXISTS "repair_jobs_admin_update" ON repair_jobs;
 
 CREATE POLICY "repair_jobs_customer" ON repair_jobs FOR SELECT USING (
     customer_id = auth.uid()
@@ -185,6 +202,9 @@ CREATE TABLE IF NOT EXISTS chimney_products (
 
 ALTER TABLE chimney_products ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "chimney_products_read" ON chimney_products;
+DROP POLICY IF EXISTS "chimney_products_admin" ON chimney_products;
+
 CREATE POLICY "chimney_products_read" ON chimney_products FOR SELECT USING (active = TRUE);
 CREATE POLICY "chimney_products_admin" ON chimney_products FOR ALL USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
@@ -208,6 +228,10 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "orders_customer" ON orders;
+DROP POLICY IF EXISTS "orders_insert" ON orders;
+DROP POLICY IF EXISTS "orders_admin_update" ON orders;
 
 CREATE POLICY "orders_customer" ON orders FOR SELECT USING (
     customer_id = auth.uid()
@@ -236,7 +260,9 @@ CREATE TABLE IF NOT EXISTS promo_codes (
 
 ALTER TABLE promo_codes ENABLE ROW LEVEL SECURITY;
 
--- Customers can only validate codes (read active ones), not see all.
+DROP POLICY IF EXISTS "promo_codes_validate" ON promo_codes;
+DROP POLICY IF EXISTS "promo_codes_admin" ON promo_codes;
+
 CREATE POLICY "promo_codes_validate" ON promo_codes FOR SELECT USING (active = TRUE);
 CREATE POLICY "promo_codes_admin" ON promo_codes FOR ALL USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
@@ -257,16 +283,28 @@ CREATE INDEX IF NOT EXISTS idx_chimney_products_type ON chimney_products(type);
 
 
 -- ──────────────────────────────────────────────
---  ENABLE REALTIME on key tables
+--  ENABLE REALTIME safely (idempotent)
 -- ──────────────────────────────────────────────
-ALTER PUBLICATION supabase_realtime ADD TABLE services;
-ALTER PUBLICATION supabase_realtime ADD TABLE repair_jobs;
-ALTER PUBLICATION supabase_realtime ADD TABLE orders;
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' AND tablename = 'services'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE services;
+    END IF;
 
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' AND tablename = 'repair_jobs'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE repair_jobs;
+    END IF;
 
--- ──────────────────────────────────────────────
---  STORAGE BUCKET for technician photos & product images
--- ──────────────────────────────────────────────
--- Run via Supabase Dashboard or API:
---   Create bucket "chimnecare-assets" with public access for reading.
---   Folders: technicians/, products/
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' AND tablename = 'orders'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE orders;
+    END IF;
+END $$;
