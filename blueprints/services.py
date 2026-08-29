@@ -221,44 +221,13 @@ def about():
 
 @services_bp.route("/contact", methods=["GET", "POST"])
 def contact():
-    """Contact page with direct WhatsApp, email and strict validated inquiry form."""
-    if request.method == "POST":
-        name = sanitize_string(request.form.get("name", ""), max_length=100)
-        email = sanitize_string(request.form.get("email", ""), max_length=254)
-        phone = sanitize_string(request.form.get("phone", ""), max_length=20)
-        message = sanitize_string(request.form.get("message", ""), max_length=1000)
-
-        # Strict validation checks
-        is_valid_name, name_err = validate_name_strict(name, "Your Name")
-        is_valid_email, email_err = validate_email_strict(email)
-        is_valid_msg, msg_err = validate_text_field(message, min_len=5, max_len=1000, field_name="Message")
-
-        errors = []
-        if not is_valid_name:
-            errors.append(name_err)
-        if not is_valid_email:
-            errors.append(email_err)
-        if phone:
-            is_valid_phone, phone_err = validate_phone_strict(phone)
-            if not is_valid_phone:
-                errors.append(phone_err)
-        if not is_valid_msg:
-            errors.append(msg_err)
-
-        if errors:
-            for err in errors:
-                flash(err, "error")
-            return render_template("pages/contact.html"), 400
-
-        # Send WhatsApp alert to support
-        send_whatsapp_message(
-            "8734002200",
-            f"New Inquiry from {name} ({phone or email}): {message}"
-        )
-        flash("Thank you for reaching out! Our team will contact you shortly.", "success")
+    """Contact page with direct WhatsApp, email and Web3Forms inquiry form."""
+    if request.args.get("status") == "success":
+        flash("Thank you for reaching out! Your message has been sent successfully. Our team will contact you shortly.", "success")
         return redirect(url_for("services.contact"))
 
-    return render_template("pages/contact.html")
+    web3forms_key = os.environ.get("WEB3FORMS_ACCESS_KEY", "07fac542-1cfc-4794-bcd7-1a9a11ae9b2a")
+    return render_template("pages/contact.html", web3forms_key=web3forms_key)
 
 
 @services_bp.route("/service-areas")

@@ -73,35 +73,35 @@
             Fill out the details below and a service coordinator will call you back.
           </p>
 
-          <form method="post" action="{{ url_for('services.contact') }}" data-validate>
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <form action="https://api.web3forms.com/submit" method="POST">
+            <input type="hidden" name="access_key" value="{{ web3forms_key }}">
+            <input type="hidden" name="subject" value="New ChimneyCare Service Inquiry">
+            <input type="hidden" name="from_name" value="ChimneyCare Website">
+            <input type="hidden" name="redirect" value="{{ url_for('services.contact', _external=True) }}?status=success">
+            <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
 
             <div class="form-group">
               <label class="form-label" for="name">Your Name *</label>
               <input type="text" id="name" name="name" class="form-input" placeholder="e.g., Rajesh Kumar" required>
-              <span class="form-error"></span>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label" for="email">Email Address *</label>
                 <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required>
-                <span class="form-error"></span>
               </div>
               <div class="form-group">
                 <label class="form-label" for="phone">Phone / WhatsApp</label>
-                <input type="tel" id="phone" name="phone" class="form-input" placeholder="+91 87340 02200" data-validate-phone>
-                <span class="form-error"></span>
+                <input type="tel" id="phone" name="phone" class="form-input" placeholder="+91 87340 02200">
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="message">Message / Inquiry Details *</label>
               <textarea id="message" name="message" class="form-textarea" rows="4" placeholder="Tell us about your chimney model or service requirement..." required></textarea>
-              <span class="form-error"></span>
             </div>
 
-            <button type="submit" class="btn btn--primary btn--full btn--lg">Submit Inquiry</button>
+            <button type="submit" class="btn btn--primary btn--full btn--lg">Send Message Instantly</button>
           </form>
         </div>
       </div>
