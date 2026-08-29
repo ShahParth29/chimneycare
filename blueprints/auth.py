@@ -59,6 +59,8 @@ def login():
             "role": user_data.get("role", "customer"),
             "phone": user_data.get("phone", ""),
         }
+        if hasattr(auth_response, 'session') and auth_response.session:
+            session["access_token"] = auth_response.session.access_token
 
         flash(f"Welcome back, {user_data.get('name', 'there')}!", "success")
         next_url = request.args.get("next", url_for("services.dashboard"))

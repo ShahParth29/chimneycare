@@ -138,7 +138,8 @@ def book_service():
     service_id = generate_service_id()
 
     try:
-        sb = get_supabase_client()
+        from supabase_client import get_admin_client
+        sb = get_admin_client()
 
         booking_data = {
             "customer_id": user["id"],

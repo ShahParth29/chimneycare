@@ -165,6 +165,8 @@ def checkout(product_id):
     order_id = generate_order_id()
 
     try:
+        from supabase_client import get_admin_client
+        admin_sb = get_admin_client()
         order_data = {
             "customer_id": user["id"],
             "product_id": product_id,
@@ -175,7 +177,7 @@ def checkout(product_id):
             "status": "placed",
         }
 
-        result = sb.table("orders").insert(order_data).execute()
+        result = admin_sb.table("orders").insert(order_data).execute()
 
         if result.data:
             # Increment promo code usage

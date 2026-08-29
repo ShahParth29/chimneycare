@@ -102,7 +102,8 @@ def book_repair():
     service_id = generate_service_id()
 
     try:
-        sb = get_supabase_client()
+        from supabase_client import get_admin_client
+        sb = get_admin_client()
 
         # Calculate total parts cost
         total_parts_cost = 0
