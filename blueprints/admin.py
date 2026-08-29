@@ -418,9 +418,12 @@ def bookings():
             .execute()
         )
         all_bookings = result.data or []
+        techs_res = sb.table("technicians").select("id, name").execute()
+        techs = techs_res.data or []
     except Exception:
         all_bookings = []
-    return render_template("admin/bookings.html", bookings=all_bookings)
+        techs = []
+    return render_template("admin/bookings.html", bookings=all_bookings, technicians=techs)
 
 
 @admin_bp.route("/admin/bookings/<booking_id>/status", methods=["POST"])
@@ -429,17 +432,17 @@ def update_booking_status(booking_id):
     new_status = sanitize_string(request.form.get("status", ""))
     technician_id = request.form.get("technician_id") or None
 
-    if new_status not in ("pending", "confirmed", "in_progress", "completed", "cancelled"):
-        flash("Invalid status.", "error")
-        return redirect(url_for("admin.bookings"))
-
     try:
         sb = get_admin_client()
-        update_data = {"status": new_status}
-        if technician_id:
+        update_data = {}
+        if new_status in ("pending", "confirmed", "in_progress", "completed", "cancelled"):
+            update_data["status"] = new_status
+        if "technician_id" in request.form:
             update_data["technician_id"] = technician_id
-        sb.table("services").update(update_data).eq("id", booking_id).execute()
-        flash("Booking status updated.", "success")
+
+        if update_data:
+            sb.table("services").update(update_data).eq("id", booking_id).execute()
+            flash("Booking updated.", "success")
     except Exception as e:
         flash(f"Error: {str(e)}", "error")
 
@@ -476,9 +479,9 @@ def update_repair(repair_id):
     try:
         sb = get_admin_client()
         update_data = {}
-        if status:
+        if status in ("pending", "confirmed", "in_progress", "completed", "cancelled"):
             update_data["confirmation_status"] = status
-        if technician_id:
+        if "technician_id" in request.form:
             update_data["technician_id"] = technician_id
         if labour_charge:
             update_data["labour_charge"] = float(labour_charge)

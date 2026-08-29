@@ -1,164 +1,146 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>Admin Dashboard — ChimneyCare</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
-</head>
-<body>
-  {# ── Flash Messages ─── #}
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="flash-messages">
-      {% for category, message in messages %}
-      <div class="flash flash--{{ category }}">{{ message }}</div>
-      {% endfor %}
+{% extends "admin/base_admin.html" %}
+
+{% block admin_title %}Dashboard Overview{% endblock %}
+
+{% block admin_content %}
+<div class="admin-main__header">
+  <div>
+    <h1 class="admin-main__title">Dashboard Overview</h1>
+    <p style="color: var(--steel-400); font-size: 0.9rem; margin: 4px 0 0;">
+      Welcome to ChimneyCare Operations Portal (Sobharaj Enterprise Pvt Ltd)
+    </p>
+  </div>
+  <div class="admin-main__user">
+    <span>{{ current_user.name if current_user else 'Admin' }}</span>
+    <span class="badge badge--confirmed">Admin</span>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="admin-stats">
+  <div class="stat-card">
+    <span class="stat-card__icon">👷</span>
+    <div class="stat-card__label">Technicians</div>
+    <div class="stat-card__value">{{ stats.technicians }}</div>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card__icon">📅</span>
+    <div class="stat-card__label">Total Bookings</div>
+    <div class="stat-card__value">{{ stats.services }}</div>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card__icon">🔧</span>
+    <div class="stat-card__label">Repair Jobs</div>
+    <div class="stat-card__value">{{ stats.repairs }}</div>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card__icon">📦</span>
+    <div class="stat-card__label">Marketplace Orders</div>
+    <div class="stat-card__value">{{ stats.orders }}</div>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card__icon">🏠</span>
+    <div class="stat-card__label">Products Listed</div>
+    <div class="stat-card__value">{{ stats.products }}</div>
+  </div>
+</div>
+
+<!-- Quick Actions Toolbar -->
+<div style="display: flex; gap: var(--space-md); flex-wrap: wrap; margin-bottom: var(--space-2xl);">
+  <a href="{{ url_for('admin.technicians') }}" class="btn btn--primary btn--sm">+ Add Technician</a>
+  <a href="{{ url_for('admin.parts') }}" class="btn btn--secondary btn--sm">+ Add Spare Part</a>
+  <a href="{{ url_for('admin.products') }}" class="btn btn--secondary btn--sm">+ Add Product</a>
+  <a href="{{ url_for('admin.promo_codes') }}" class="btn btn--secondary btn--sm">+ Add Promo Code</a>
+  <a href="{{ url_for('admin.bookings') }}" class="btn btn--outline btn--sm">View All Bookings</a>
+  <a href="{{ url_for('admin.repairs') }}" class="btn btn--outline btn--sm">View Repairs</a>
+</div>
+
+<!-- Recent Activity Panels -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: var(--space-xl);">
+  <!-- Recent Bookings -->
+  <div class="admin-panel">
+    <div class="admin-panel__header">
+      <h3 class="admin-panel__title">Recent Bookings</h3>
+      <a href="{{ url_for('admin.bookings') }}" class="btn btn--sm btn--outline">View All</a>
     </div>
-    {% endif %}
-  {% endwith %}
-
-  <div class="admin-layout">
-    <!-- ═══ Sidebar ═══ -->
-    <aside class="admin-sidebar">
-      <a href="{{ url_for('admin.dashboard') }}" class="admin-sidebar__brand">
-        🔥 ChimneyCare
-      </a>
-
-      <span class="admin-sidebar__label">Overview</span>
-      <ul class="admin-sidebar__nav">
-        <li><a href="{{ url_for('admin.dashboard') }}" class="admin-sidebar__link"><span>📊</span> Dashboard</a></li>
-      </ul>
-
-      <span class="admin-sidebar__label">Management</span>
-      <ul class="admin-sidebar__nav">
-        <li><a href="{{ url_for('admin.technicians') }}" class="admin-sidebar__link"><span>👷</span> Technicians</a></li>
-        <li><a href="{{ url_for('admin.amc_plans') }}" class="admin-sidebar__link"><span>📋</span> AMC Plans</a></li>
-        <li><a href="{{ url_for('admin.parts') }}" class="admin-sidebar__link"><span>🔩</span> Repair Parts</a></li>
-        <li><a href="{{ url_for('admin.products') }}" class="admin-sidebar__link"><span>🏠</span> Products</a></li>
-        <li><a href="{{ url_for('admin.promo_codes') }}" class="admin-sidebar__link"><span>🏷️</span> Promo Codes</a></li>
-      </ul>
-
-      <span class="admin-sidebar__label">Operations</span>
-      <ul class="admin-sidebar__nav">
-        <li><a href="{{ url_for('admin.bookings') }}" class="admin-sidebar__link"><span>📅</span> Bookings</a></li>
-        <li><a href="{{ url_for('admin.repairs') }}" class="admin-sidebar__link"><span>🔧</span> Repairs</a></li>
-        <li><a href="{{ url_for('admin.orders') }}" class="admin-sidebar__link"><span>📦</span> Orders</a></li>
-      </ul>
-
-      <span class="admin-sidebar__label">Account</span>
-      <ul class="admin-sidebar__nav">
-        <li>
-          <form action="{{ url_for('auth.logout') }}" method="post" style="margin:0;">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="admin-sidebar__link" style="background:none;border:none;cursor:pointer;width:100%;text-align:left;font:inherit;color:inherit;padding: var(--space-sm) var(--space-xl);">
-              <span>🚪</span> Logout
-            </button>
-          </form>
-        </li>
-      </ul>
-    </aside>
-
-    <!-- ═══ Main Content ═══ -->
-    <main class="admin-main">
-      <div class="admin-main__header">
-        <h1 class="admin-main__title">Dashboard</h1>
-        <div class="admin-main__user">
-          <span>{{ current_user.name if current_user else 'Admin' }}</span>
-          <span class="badge badge--confirmed">Admin</span>
-        </div>
+    <div class="admin-panel__body" style="padding: 0;">
+      {% if recent_bookings %}
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for b in recent_bookings[:5] %}
+            <tr>
+              <td style="font-size: 0.8rem;"><strong>{{ b.order_id }}</strong></td>
+              <td style="font-size: 0.8rem;">{{ b.profiles.name if b.profiles else '—' }}</td>
+              <td><span class="badge badge--{{ b.status }}">{{ b.status | replace('_', ' ') | title }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-
-      <!-- Stats Cards -->
-      <div class="admin-stats">
-        <div class="stat-card">
-          <span class="stat-card__icon">👷</span>
-          <div class="stat-card__label">Technicians</div>
-          <div class="stat-card__value">{{ stats.technicians }}</div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__icon">📅</span>
-          <div class="stat-card__label">Total Bookings</div>
-          <div class="stat-card__value">{{ stats.services }}</div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__icon">🔧</span>
-          <div class="stat-card__label">Repair Jobs</div>
-          <div class="stat-card__value">{{ stats.repairs }}</div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__icon">📦</span>
-          <div class="stat-card__label">Marketplace Orders</div>
-          <div class="stat-card__value">{{ stats.orders }}</div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__icon">🏠</span>
-          <div class="stat-card__label">Products Listed</div>
-          <div class="stat-card__value">{{ stats.products }}</div>
-        </div>
-      </div>
-
-      <!-- Recent Activity Panels -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl);">
-        <!-- Recent Bookings -->
-        <div class="admin-panel">
-          <div class="admin-panel__header">
-            <h3 class="admin-panel__title">Recent Bookings</h3>
-            <a href="{{ url_for('admin.bookings') }}" class="btn btn--sm btn--outline">View All</a>
-          </div>
-          <div class="admin-panel__body" style="padding: 0;">
-            {% if recent_bookings %}
-            <table class="data-table">
-              <thead><tr><th>Order ID</th><th>Customer</th><th>Status</th></tr></thead>
-              <tbody>
-                {% for b in recent_bookings[:5] %}
-                <tr>
-                  <td style="font-size: 0.8rem;"><strong>{{ b.order_id }}</strong></td>
-                  <td style="font-size: 0.8rem;">{{ b.profiles.name if b.profiles else '—' }}</td>
-                  <td><span class="badge badge--{{ b.status }}">{{ b.status | title }}</span></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            {% else %}
-            <div class="empty-state" style="padding: var(--space-lg);"><p class="text-muted">No bookings yet</p></div>
-            {% endif %}
-          </div>
-        </div>
-
-        <!-- Recent Orders -->
-        <div class="admin-panel">
-          <div class="admin-panel__header">
-            <h3 class="admin-panel__title">Recent Orders</h3>
-            <a href="{{ url_for('admin.orders') }}" class="btn btn--sm btn--outline">View All</a>
-          </div>
-          <div class="admin-panel__body" style="padding: 0;">
-            {% if recent_orders %}
-            <table class="data-table">
-              <thead><tr><th>Order ID</th><th>Product</th><th>Status</th></tr></thead>
-              <tbody>
-                {% for o in recent_orders[:5] %}
-                <tr>
-                  <td style="font-size: 0.8rem;"><strong>{{ o.order_id }}</strong></td>
-                  <td style="font-size: 0.8rem;">{{ o.chimney_products.brand if o.chimney_products else '' }} {{ o.chimney_products.model if o.chimney_products else '—' }}</td>
-                  <td><span class="badge badge--{{ o.status }}">{{ o.status | title }}</span></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            {% else %}
-            <div class="empty-state" style="padding: var(--space-lg);"><p class="text-muted">No orders yet</p></div>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </main>
+      {% else %}
+      <p style="padding: var(--space-lg); color: var(--steel-400); margin: 0;">No bookings yet.</p>
+      {% endif %}
+    </div>
   </div>
 
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
-</body>
-</html>
+  <!-- Recent Repairs -->
+  <div class="admin-panel">
+    <div class="admin-panel__header">
+      <h3 class="admin-panel__title">Recent Repairs</h3>
+      <a href="{{ url_for('admin.repairs') }}" class="btn btn--sm btn--outline">View All</a>
+    </div>
+    <div class="admin-panel__body" style="padding: 0;">
+      {% if recent_repairs %}
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead><tr><th>Service ID</th><th>Customer</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for r in recent_repairs[:5] %}
+            <tr>
+              <td style="font-size: 0.8rem;"><code>{{ r.service_id }}</code></td>
+              <td style="font-size: 0.8rem;">{{ r.profiles.name if r.profiles else '—' }}</td>
+              <td><span class="badge badge--{{ r.confirmation_status }}">{{ r.confirmation_status | replace('_', ' ') | title }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p style="padding: var(--space-lg); color: var(--steel-400); margin: 0;">No repair jobs yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Orders -->
+  <div class="admin-panel" style="grid-column: 1 / -1;">
+    <div class="admin-panel__header">
+      <h3 class="admin-panel__title">Recent Marketplace Orders</h3>
+      <a href="{{ url_for('admin.orders') }}" class="btn btn--sm btn--outline">View All</a>
+    </div>
+    <div class="admin-panel__body" style="padding: 0;">
+      {% if recent_orders %}
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for o in recent_orders[:5] %}
+            <tr>
+              <td style="font-size: 0.8rem;"><strong>{{ o.order_id }}</strong></td>
+              <td style="font-size: 0.8rem;">{{ o.profiles.name if o.profiles else '—' }}</td>
+              <td style="font-size: 0.8rem;">{{ o.chimney_products.brand ~ ' ' ~ o.chimney_products.model if o.chimney_products else '—' }}</td>
+              <td style="font-size: 0.8rem; font-weight: 600;">₹{{ "{:,.0f}".format(o.total_price) }}</td>
+              <td><span class="badge badge--{{ o.status }}">{{ o.status | title }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p style="padding: var(--space-lg); color: var(--steel-400); margin: 0;">No orders yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
