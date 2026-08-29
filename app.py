@@ -28,7 +28,7 @@ from flask_limiter.util import get_remote_address
 # ── App Factory ──────────────────────────────────
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "chimneycare-secure-random-secret-key-2026")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY") or os.urandom(32).hex()
 
 # Session & Upload Security Config
 app.config["SESSION_COOKIE_HTTPONLY"] = True
