@@ -122,7 +122,7 @@ def seed():
             sb.table("promo_codes").insert(p).execute()
             print(f"  + Added Promo Code: {p['code']}")
 
-    print("\n✅ Seed complete! All initial catalogue data is in Supabase.")
+    print("\n[OK] Seed complete! All initial catalogue data is in Supabase.")
 
 if __name__ == "__main__":
     seed()
