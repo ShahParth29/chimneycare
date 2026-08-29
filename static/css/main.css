@@ -1412,10 +1412,16 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* ── Responsive ──────────────────────────────── */
 
+/* ── Tablet Landscape (≤1024px) ──────────────── */
 @media (max-width: 1024px) {
   .hero__content {
     grid-template-columns: 1fr;
     gap: var(--space-2xl);
+    padding: var(--space-3xl) var(--space-xl);
+  }
+  
+  .hero__text {
+    max-width: 100%;
   }
   
   .hero__stats {
@@ -1433,6 +1439,7 @@ img { max-width: 100%; height: auto; display: block; }
   
   .footer__grid {
     grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
   }
   
   .checkout-layout {
@@ -1442,9 +1449,27 @@ img { max-width: 100%; height: auto; display: block; }
   .order-summary {
     position: static;
   }
+  
+  .services-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+  
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  
+  .pricing-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
 }
 
+/* ── Tablet Portrait (≤768px) ───────────────── */
 @media (max-width: 768px) {
+  /* Navigation - fullscreen overlay */
   .nav__links {
     display: none;
     position: fixed;
@@ -1458,6 +1483,8 @@ img { max-width: 100%; height: auto; display: block; }
     align-items: center;
     gap: var(--space-xl);
     z-index: 999;
+    padding: var(--space-3xl) var(--space-xl);
+    overflow-y: auto;
   }
   
   .nav__links.open {
@@ -1466,6 +1493,12 @@ img { max-width: 100%; height: auto; display: block; }
   
   .nav__link {
     font-size: 1.2rem;
+    padding: var(--space-sm) var(--space-md);
+  }
+  
+  .nav__cta {
+    padding: var(--space-md) var(--space-xl);
+    font-size: 1rem;
   }
   
   .nav__toggle {
@@ -1473,17 +1506,58 @@ img { max-width: 100%; height: auto; display: block; }
     z-index: 1001;
   }
   
-  .hero__stats {
-    grid-template-columns: 1fr 1fr;
+  .nav__inner {
+    padding: var(--space-md) var(--space-md);
   }
   
+  /* Hero section */
+  .hero {
+    min-height: auto;
+    padding-top: 70px;
+    padding-bottom: var(--space-xl);
+  }
+  
+  .hero__content {
+    padding: var(--space-2xl) var(--space-md);
+    gap: var(--space-xl);
+  }
+  
+  .hero__title {
+    font-size: clamp(1.8rem, 6vw, 2.8rem);
+  }
+  
+  .hero__desc {
+    font-size: 1rem;
+    max-width: 100%;
+  }
+  
+  .hero__stats {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+  }
+  
+  .hero__stat {
+    padding: var(--space-lg);
+  }
+  
+  .hero__stat-number {
+    font-size: 1.8rem;
+  }
+  
+  .hero__stat-label {
+    font-size: 0.75rem;
+  }
+  
+  /* Trust strip */
   .trust-strip__grid {
     grid-template-columns: 1fr 1fr;
     gap: var(--space-lg);
   }
   
+  /* Footer */
   .footer__grid {
     grid-template-columns: 1fr;
+    gap: var(--space-xl);
   }
   
   .footer__bottom {
@@ -1492,34 +1566,464 @@ img { max-width: 100%; height: auto; display: block; }
     text-align: center;
   }
   
+  .footer {
+    padding: var(--space-2xl) 0 var(--space-lg);
+  }
+  
+  /* Filter bar stacked */
   .filter-bar__inner {
     flex-direction: column;
   }
   
+  .filter-bar__group {
+    min-width: 100%;
+  }
+  
+  /* Container padding */
   .container {
     padding: 0 var(--space-md);
   }
+  
+  /* Page header */
+  .page-header {
+    padding: calc(70px + var(--space-xl)) 0 var(--space-xl);
+  }
+  
+  .page-header__title {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+  }
+  
+  /* Section spacing */
+  .section {
+    padding: var(--space-2xl) 0;
+  }
+  
+  .section__header {
+    margin-bottom: var(--space-xl);
+  }
+  
+  /* Cards */
+  .card__body {
+    padding: var(--space-lg);
+  }
+  
+  .card__title {
+    font-size: 1.1rem;
+  }
+  
+  /* Product cards */
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-md);
+  }
+  
+  .product-card__image {
+    height: 160px;
+  }
+  
+  .product-card__body {
+    padding: var(--space-md);
+  }
+  
+  .product-card__name {
+    font-size: 1rem;
+  }
+  
+  .product-card__footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+  
+  /* Plan cards */
+  .plan-card {
+    padding: var(--space-xl);
+  }
+  
+  .plan-card__price {
+    font-size: 2.2rem;
+  }
+  
+  /* Checkout layout */
+  .checkout-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+  
+  .order-summary {
+    position: static;
+  }
+  
+  /* Tables - horizontal scroll */
+  .table-wrapper {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+  
+  /* Dashboard grid */
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+  }
+  
+  .dash-card {
+    padding: var(--space-lg);
+  }
+  
+  .dash-card__value {
+    font-size: 1.5rem;
+  }
+  
+  /* Tech card */
+  .tech-card {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-lg);
+  }
+  
+  /* Auth card */
+  .auth-card {
+    padding: var(--space-xl);
+    margin: var(--space-md);
+    max-width: 100%;
+  }
+  
+  .auth-card__logo {
+    font-size: 1.5rem;
+  }
+  
+  /* Flash messages */
+  .flash-messages {
+    right: var(--space-md);
+    left: var(--space-md);
+    max-width: 100%;
+    top: 70px;
+  }
+  
+  .flash {
+    font-size: 0.85rem;
+    padding: var(--space-sm) var(--space-md);
+  }
+  
+  /* Realtime toast */
+  .realtime-toast {
+    right: var(--space-md);
+    left: var(--space-md);
+    max-width: 100%;
+    bottom: var(--space-lg);
+  }
+  
+  /* Buttons - touch friendly */
+  .btn {
+    padding: 0.7rem 1.5rem;
+    font-size: 0.85rem;
+    min-height: 44px;
+  }
+  
+  .btn--lg {
+    padding: 0.85rem 2rem;
+    font-size: 0.95rem;
+  }
+  
+  .btn--sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    min-height: 36px;
+  }
+  
+  /* Form inputs - touch friendly */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    padding: 0.7rem 0.85rem;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Services grid */
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  /* Error page */
+  .error-page__code {
+    font-size: 5rem;
+  }
+  
+  .error-page__title {
+    font-size: 1.2rem;
+  }
 }
 
+/* ── Mobile (≤480px) ─────────────────────────── */
 @media (max-width: 480px) {
+  /* Typography */
+  h1 { font-size: clamp(1.5rem, 6vw, 2rem); }
+  h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); }
+  h3 { font-size: clamp(1.1rem, 3vw, 1.4rem); }
+  
+  /* Hero */
   .hero__actions {
     flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .hero__actions .btn {
+    width: 100%;
+    justify-content: center;
   }
   
   .hero__stats {
     grid-template-columns: 1fr;
+    gap: var(--space-sm);
   }
   
+  .hero__stat {
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    text-align: left;
+  }
+  
+  .hero__stat-number {
+    font-size: 1.5rem;
+    min-width: 80px;
+  }
+  
+  .hero__badge {
+    font-size: 0.7rem;
+    padding: var(--space-xs) var(--space-sm);
+  }
+  
+  /* Trust strip single column */
   .trust-strip__grid {
     grid-template-columns: 1fr;
+    gap: var(--space-md);
   }
   
+  .trust-item {
+    flex-direction: row;
+    text-align: left;
+    gap: var(--space-md);
+  }
+  
+  /* Pricing cards */
   .pricing-grid {
     grid-template-columns: 1fr;
   }
   
+  .plan-card {
+    padding: var(--space-lg);
+  }
+  
+  .plan-card__price {
+    font-size: 2rem;
+  }
+  
+  /* Auth */
+  .auth-page {
+    padding: var(--space-md);
+    align-items: flex-start;
+    padding-top: calc(70px + var(--space-xl));
+  }
+  
   .auth-card {
-    padding: var(--space-xl);
+    padding: var(--space-lg);
+    border-radius: var(--border-radius-lg);
+  }
+  
+  .auth-card__subtitle {
+    font-size: 0.85rem;
+  }
+  
+  /* Dashboard */
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Product grid */
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+  
+  .product-card__footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+  
+  /* Container tighter */
+  .container {
+    padding: 0 var(--space-sm);
+  }
+  
+  /* Footer */
+  .footer__brand {
+    font-size: 1.3rem;
+  }
+  
+  .footer__heading {
+    margin-bottom: var(--space-md);
+  }
+  
+  /* Filter bar */
+  .filter-bar {
+    padding: var(--space-md);
+  }
+  
+  /* Buttons full width on smallest screens */
+  .btn--full-mobile {
+    width: 100%;
+  }
+  
+  /* Error page */
+  .error-page__code {
+    font-size: 4rem;
+  }
+  
+  /* Section spacing compact */
+  .section {
+    padding: var(--space-xl) 0;
+  }
+  
+  .section__header {
+    margin-bottom: var(--space-lg);
+  }
+  
+  /* Tables compact */
+  .data-table th,
+  .data-table td {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.75rem;
+  }
+}
+
+/* ── Small Mobile (≤360px) ───────────────────── */
+@media (max-width: 360px) {
+  .nav__logo {
+    font-size: 1.2rem;
+  }
+  
+  .nav__logo-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+  
+  .hero__title {
+    font-size: 1.5rem;
+  }
+  
+  .hero__desc {
+    font-size: 0.9rem;
+  }
+  
+  .plan-card__price {
+    font-size: 1.8rem;
+  }
+  
+  .auth-card {
+    padding: var(--space-md);
+  }
+  
+  .btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* ── Touch Device Enhancements ──────────────── */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices (prevents sticky hover) */
+  .card:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .product-card:hover {
+    transform: none;
+  }
+  
+  .plan-card:hover {
+    transform: none;
+  }
+  
+  .btn:hover {
+    transform: none;
+  }
+  
+  /* Larger touch targets */
+  .nav__link {
+    padding: var(--space-sm) var(--space-md);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .form-checkbox input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+  }
+  
+  /* Better scrolling */
+  .table-wrapper {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ── Landscape Mobile Fix ───────────────────── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero {
+    min-height: auto;
+    padding-top: 60px;
+  }
+  
+  .hero__content {
+    padding: var(--space-lg) var(--space-md);
+  }
+  
+  .auth-page {
+    min-height: auto;
+    padding-top: 70px;
+    align-items: flex-start;
+  }
+  
+  .nav__links {
+    padding: var(--space-xl) var(--space-md);
+    gap: var(--space-md);
+    overflow-y: auto;
+  }
+  
+  .nav__link {
+    font-size: 1rem;
+  }
+}
+
+/* ── Print Styles ────────────────────────────── */
+@media print {
+  .nav, .footer, .whatsapp-float, .flash-messages,
+  .realtime-toast, .nav__toggle {
+    display: none !important;
+  }
+  
+  .hero {
+    min-height: auto;
+    padding-top: 0;
+  }
+  
+  body {
+    background: white;
+    color: black;
   }
 }
 
@@ -1545,6 +2049,15 @@ img { max-width: 100%; height: auto; display: block; }
 .gap-sm { gap: var(--space-sm); }
 .gap-md { gap: var(--space-md); }
 .gap-lg { gap: var(--space-lg); }
+
+/* Mobile-specific visibility utilities */
+.hide-mobile { display: block; }
+.show-mobile { display: none; }
+
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: block !important; }
+}
 
 /* ── Floating WhatsApp Widget ──────────────── */
 .whatsapp-float {
@@ -1595,6 +2108,23 @@ img { max-width: 100%; height: auto; display: block; }
   }
   .whatsapp-float__text {
     display: none;
+  }
+}
+
+/* ── Safe Area (Notched phones) ──────────────── */
+@supports(padding: max(0px)) {
+  .nav__inner {
+    padding-left: max(var(--space-md), env(safe-area-inset-left));
+    padding-right: max(var(--space-md), env(safe-area-inset-right));
+  }
+  
+  .footer {
+    padding-bottom: max(var(--space-xl), env(safe-area-inset-bottom));
+  }
+  
+  .whatsapp-float {
+    bottom: max(20px, env(safe-area-inset-bottom));
+    right: max(20px, env(safe-area-inset-right));
   }
 }
 
