@@ -187,6 +187,15 @@ def checkout(product_id):
             # Stub payment
             handle_payment(order_id, total_price)
 
+            # Trigger WhatsApp confirmation message
+            whatsapp_number = user.get("phone", "")
+            if whatsapp_number:
+                send_whatsapp_message(
+                    whatsapp_number,
+                    f"ChimneyCare Order Placed! Order ID: {order_id} | Total: ₹{total_price:,.0f}. "
+                    "Thank you for shopping with ChimneyCare."
+                )
+
             flash(f"Order placed successfully! Order ID: {order_id}", "success")
             return redirect(url_for("marketplace.my_orders"))
 

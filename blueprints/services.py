@@ -156,6 +156,15 @@ def book_service():
         result = sb.table("services").insert(booking_data).execute()
 
         if result.data:
+            # Trigger WhatsApp confirmation message
+            whatsapp_number = user.get("phone", "")
+            if whatsapp_number:
+                send_whatsapp_message(
+                    whatsapp_number,
+                    f"ChimneyCare Booking Confirmed! Order ID: {order_id} | Service ID: {service_id}. "
+                    "We will contact you within 24 hours to schedule your service visit."
+                )
+
             flash(f"Booking confirmed! Order ID: {order_id} | Service ID: {service_id}", "success")
             return redirect(url_for("services.my_bookings"))
         else:
