@@ -49,7 +49,7 @@ def handle_payment(order_id: str, amount: float, currency: str = "INR") -> dict:
 OFFICIAL_WHATSAPP_NUMBER = "8734002200"
 OFFICIAL_CONTACT_EMAIL = "chimneycare.in@gmail.com"
 OFFICIAL_ADMIN_EMAIL = "admin.chimneycare@gmail.com"
-PARENT_COMPANY = "Sobharaj Enterprise Pvt Ltd"
+PARENT_COMPANY = "Sobhraj Enterprise Pvt Ltd"
 
 
 def generate_whatsapp_url(phone: str = OFFICIAL_WHATSAPP_NUMBER, message: str = "") -> str:

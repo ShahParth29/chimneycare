@@ -201,7 +201,7 @@ def my_bookings():
 
 @services_bp.route("/about")
 def about():
-    """About ChimneyCare & Parent Company Sobharaj Enterprise Pvt Ltd."""
+    """About ChimneyCare & Parent Company Sobhraj Enterprise Pvt Ltd."""
     return render_template("pages/about.html")
 
 
