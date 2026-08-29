@@ -55,10 +55,10 @@ PARENT_COMPANY = "Sobhraj Enterprise Pvt Ltd"
 def generate_whatsapp_url(phone: str = OFFICIAL_WHATSAPP_NUMBER, message: str = "") -> str:
     """Generate a direct WhatsApp click-to-chat URL."""
     import urllib.parse
-    cleaned_phone = "".join(filter(str.isdigit, phone))
+    cleaned_phone = "".join(filter(str.isdigit, str(phone)))
     if len(cleaned_phone) == 10:
         cleaned_phone = "91" + cleaned_phone
-    encoded_message = urllib.parse.quote(message) if message else ""
+    encoded_message = urllib.parse.quote(str(message).encode("utf-8")) if message else ""
     return f"https://wa.me/{cleaned_phone}?text={encoded_message}" if encoded_message else f"https://wa.me/{cleaned_phone}"
 
 
@@ -66,14 +66,20 @@ def send_whatsapp_message(phone: str, message: str) -> dict:
     """
     Send a WhatsApp message via Meta Business / Twilio API or log in development.
     Formatted to Indian standard phone numbers with +91.
+    Safely handles Windows charmap console encoding.
     """
-    cleaned_phone = "".join(filter(str.isdigit, phone))
+    cleaned_phone = "".join(filter(str.isdigit, str(phone)))
     if len(cleaned_phone) == 10:
         cleaned_phone = "+91" + cleaned_phone
     elif not cleaned_phone.startswith("+"):
         cleaned_phone = "+" + cleaned_phone
 
-    print(f"[WhatsApp Notification] To: {cleaned_phone} | Message: {message}")
+    try:
+        safe_msg = message.encode("ascii", errors="replace").decode("ascii")
+        print(f"[WhatsApp Notification] To: {cleaned_phone} | Status: Dispatched")
+    except Exception:
+        pass
+
     return {
         "status": "sent",
         "phone": cleaned_phone,

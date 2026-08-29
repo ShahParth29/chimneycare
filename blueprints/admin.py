@@ -630,6 +630,64 @@ def delete_promo_code(promo_id):
 #  Bookings, Repairs & Orders Management (Full Edit)
 # ═══════════════════════════════════════════════════
 
+def format_booking_whatsapp(b):
+    """Format professional clean WhatsApp confirmation message for booking."""
+    cust_name = (b.get("profiles") or {}).get("name") or "Customer"
+    order_id = b.get("order_id") or "—"
+    service_id = b.get("service_id") or "—"
+    stype = str(b.get("type", "Service")).replace("_", " ").title()
+    status = str(b.get("status", "Confirmed")).replace("_", " ").title()
+    tech_name = (b.get("technicians") or {}).get("name") or "Assigning shortly"
+    labour = int(b.get("labour_charge") or 0)
+
+    return (
+        f"*CHIMNEYCARE SERVICE CONFIRMATION*\n"
+        f"(A unit of Sobhraj Enterprise Pvt Ltd)\n"
+        f"========================================\n"
+        f"Dear *{cust_name}*,\n\n"
+        f"Your kitchen chimney service request has been confirmed!\n\n"
+        f"* Service ID: {service_id}\n"
+        f"* Order ID: {order_id}\n"
+        f"* Service Type: {stype}\n"
+        f"* Current Status: {status}\n"
+        f"* Assigned Technician: {tech_name}\n"
+        f"* Labour Charge: Rs. {labour}\n\n"
+        f"========================================\n"
+        f"* Live Tracking: http://localhost:5000/dashboard\n"
+        f"* Customer Helpline: +91 87340 02200\n"
+        f"* Support Email: chimneycare.in@gmail.com\n\n"
+        f"_Thank you for choosing ChimneyCare!_"
+    )
+
+
+def format_repair_whatsapp(r):
+    """Format professional clean WhatsApp confirmation message for repair job."""
+    cust_name = (r.get("profiles") or {}).get("name") or "Customer"
+    service_id = r.get("service_id") or "—"
+    status = str(r.get("confirmation_status", "Confirmed")).replace("_", " ").title()
+    tech_name = (r.get("technicians") or {}).get("name") or "Diagnostic Specialist"
+    labour = int(r.get("labour_charge") or 0)
+    total = int(r.get("total_cost") or 0)
+
+    return (
+        f"*CHIMNEYCARE REPAIR CONFIRMATION*\n"
+        f"(A unit of Sobhraj Enterprise Pvt Ltd)\n"
+        f"========================================\n"
+        f"Dear *{cust_name}*,\n\n"
+        f"Your chimney diagnostic & repair job has been scheduled!\n\n"
+        f"* Service ID: {service_id}\n"
+        f"* Job Status: {status}\n"
+        f"* Assigned Technician: {tech_name}\n"
+        f"* Diagnostic Labour Fee: Rs. {labour}\n"
+        f"* Total Estimated Cost: Rs. {total}\n\n"
+        f"========================================\n"
+        f"* Live Tracking: http://localhost:5000/dashboard\n"
+        f"* Customer Helpline: +91 87340 02200\n"
+        f"* Support Email: chimneycare.in@gmail.com\n\n"
+        f"_Thank you for choosing ChimneyCare!_"
+    )
+
+
 @admin_bp.route("/admin/bookings")
 @admin_required
 def bookings():
@@ -648,23 +706,7 @@ def bookings():
         # Enrich each booking with direct WhatsApp message link
         for b in all_bookings:
             cust_phone = (b.get("profiles") or {}).get("whatsapp_number") or (b.get("profiles") or {}).get("phone") or ""
-            cust_name = (b.get("profiles") or {}).get("name") or "Customer"
-            tech_name = (b.get("technicians") or {}).get("name") or "Assigning soon"
-            
-            msg = (
-                f"🔥 *ChimneyCare Booking Confirmation*\n"
-                f"🏢 _Sobhraj Enterprise Pvt Ltd_\n\n"
-                f"Hello {cust_name},\n"
-                f"Your ChimneyCare booking has been confirmed!\n\n"
-                f"📋 *Order ID:* `{b.get('order_id')}`\n"
-                f"🆔 *Service ID:* `{b.get('service_id')}`\n"
-                f"🏷️ *Type:* {str(b.get('type', 'Service')).replace('_', ' ').title()}\n"
-                f"📅 *Status:* {str(b.get('status', 'Confirmed')).replace('_', ' ').title()}\n"
-                f"👷 *Assigned Technician:* {tech_name}\n"
-                f"💰 *Labour Charge:* ₹{int(b.get('labour_charge') or 0)}\n\n"
-                f"Track live: http://localhost:5000/dashboard\n"
-                f"Helpline: +91 87340 02200"
-            )
+            msg = format_booking_whatsapp(b)
             b["whatsapp_url"] = generate_whatsapp_url(cust_phone, msg) if cust_phone else ""
             b["whatsapp_phone"] = cust_phone
 
@@ -683,24 +725,8 @@ def send_booking_confirmation(booking_id):
         if b_res.data:
             b = b_res.data[0]
             cust_phone = (b.get("profiles") or {}).get("whatsapp_number") or (b.get("profiles") or {}).get("phone")
-            cust_name = (b.get("profiles") or {}).get("name") or "Customer"
-            tech_name = (b.get("technicians") or {}).get("name") or "Operations Team"
-            
             if cust_phone:
-                msg = (
-                    f"🔥 *ChimneyCare Booking Confirmation*\n"
-                    f"🏢 _Sobhraj Enterprise Pvt Ltd_\n\n"
-                    f"Hello {cust_name},\n"
-                    f"Your ChimneyCare booking has been confirmed!\n\n"
-                    f"📋 *Order ID:* `{b.get('order_id')}`\n"
-                    f"🆔 *Service ID:* `{b.get('service_id')}`\n"
-                    f"🏷️ *Type:* {str(b.get('type', 'Service')).replace('_', ' ').title()}\n"
-                    f"📅 *Status:* {str(b.get('status', 'Confirmed')).replace('_', ' ').title()}\n"
-                    f"👷 *Technician:* {tech_name}\n"
-                    f"💰 *Labour:* ₹{int(b.get('labour_charge') or 0)}\n\n"
-                    f"Track live: http://localhost:5000/dashboard\n"
-                    f"Helpline: +91 87340 02200"
-                )
+                msg = format_booking_whatsapp(b)
                 send_whatsapp_message(cust_phone, msg)
                 flash(f"Confirmation WhatsApp dispatched to {cust_phone}.", "success")
             else:
@@ -758,22 +784,7 @@ def repairs():
         # Enrich each repair with direct WhatsApp message link
         for r in all_repairs:
             cust_phone = (r.get("profiles") or {}).get("whatsapp_number") or (r.get("profiles") or {}).get("phone") or ""
-            cust_name = (r.get("profiles") or {}).get("name") or "Customer"
-            tech_name = (r.get("technicians") or {}).get("name") or "Assigning after confirmation"
-
-            msg = (
-                f"🔥 *ChimneyCare Repair Job Confirmation*\n"
-                f"🏢 _Sobhraj Enterprise Pvt Ltd_\n\n"
-                f"Hello {cust_name},\n"
-                f"Your chimney repair request has been processed!\n\n"
-                f"🆔 *Service ID:* `{r.get('service_id')}`\n"
-                f"📅 *Status:* {str(r.get('confirmation_status', 'Pending')).replace('_', ' ').title()}\n"
-                f"👷 *Technician:* {tech_name}\n"
-                f"💰 *Diagnostic Fee:* ₹{int(r.get('labour_charge') or 0)}\n"
-                f"💵 *Total Cost:* ₹{int(r.get('total_cost') or 0)}\n\n"
-                f"Track live: http://localhost:5000/dashboard\n"
-                f"Helpline: +91 87340 02200"
-            )
+            msg = format_repair_whatsapp(r)
             r["whatsapp_url"] = generate_whatsapp_url(cust_phone, msg) if cust_phone else ""
             r["whatsapp_phone"] = cust_phone
 
@@ -792,23 +803,8 @@ def send_repair_confirmation(repair_id):
         if r_res.data:
             r = r_res.data[0]
             cust_phone = (r.get("profiles") or {}).get("whatsapp_number") or (r.get("profiles") or {}).get("phone")
-            cust_name = (r.get("profiles") or {}).get("name") or "Customer"
-            tech_name = (r.get("technicians") or {}).get("name") or "Operations Specialist"
-
             if cust_phone:
-                msg = (
-                    f"🔥 *ChimneyCare Repair Confirmation*\n"
-                    f"🏢 _Sobhraj Enterprise Pvt Ltd_\n\n"
-                    f"Hello {cust_name},\n"
-                    f"Your chimney repair request has been confirmed!\n\n"
-                    f"🆔 *Service ID:* `{r.get('service_id')}`\n"
-                    f"📅 *Status:* {str(r.get('confirmation_status', 'Confirmed')).replace('_', ' ').title()}\n"
-                    f"👷 *Technician:* {tech_name}\n"
-                    f"💰 *Diagnostic Labour:* ₹{int(r.get('labour_charge') or 0)}\n"
-                    f"💵 *Total Estimate:* ₹{int(r.get('total_cost') or 0)}\n\n"
-                    f"Track live: http://localhost:5000/dashboard\n"
-                    f"Helpline: +91 87340 02200"
-                )
+                msg = format_repair_whatsapp(r)
                 send_whatsapp_message(cust_phone, msg)
                 flash(f"Confirmation WhatsApp dispatched to {cust_phone}.", "success")
             else:
