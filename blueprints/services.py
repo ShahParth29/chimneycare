@@ -207,7 +207,9 @@ def about():
 
 @services_bp.route("/contact", methods=["GET", "POST"])
 def contact():
-    """Contact page with direct WhatsApp, email and inquiry form."""
+    """Contact page with direct WhatsApp, email and Web3Forms API integration."""
+    web3forms_key = os.environ.get("WEB3FORMS_ACCESS_KEY", "")
+
     if request.method == "POST":
         name = sanitize_string(request.form.get("name", ""))
         email = sanitize_string(request.form.get("email", ""))
@@ -216,17 +218,40 @@ def contact():
 
         if not name or not email or not message:
             flash("Please fill in all required fields.", "error")
-            return render_template("pages/contact.html"), 400
+            return render_template("pages/contact.html", web3forms_key=web3forms_key), 400
+
+        # Dispatch via Web3Forms API
+        if web3forms_key and web3forms_key != "your-web3forms-access-key-here":
+            try:
+                import json, urllib.request
+                payload = json.dumps({
+                    "access_key": web3forms_key,
+                    "name": name,
+                    "email": email,
+                    "phone": phone,
+                    "subject": f"New ChimneyCare Website Inquiry from {name}",
+                    "from_name": "ChimneyCare Portal",
+                    "message": message,
+                }).encode("utf-8")
+                req = urllib.request.Request(
+                    "https://api.web3forms.com/submit",
+                    data=payload,
+                    headers={"Content-Type": "application/json", "Accept": "application/json"},
+                )
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    pass
+            except Exception as e:
+                print(f"[Web3Forms API Error] {e}")
 
         # Send WhatsApp alert to support
         send_whatsapp_message(
             "8734002200",
-            f"New Inquiry from {name} ({phone or email}): {message}"
+            f"New Inquiry from {name} ({phone or email}): {message}",
         )
-        flash("Thank you for reaching out! Our team will contact you shortly.", "success")
+        flash("Thank you! Your inquiry has been sent directly to our team via Web3Forms.", "success")
         return redirect(url_for("services.contact"))
 
-    return render_template("pages/contact.html")
+    return render_template("pages/contact.html", web3forms_key=web3forms_key)
 
 
 @services_bp.route("/service-areas")

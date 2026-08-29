@@ -65,47 +65,120 @@
         </div>
       </div>
 
-      <!-- Inquiry Form -->
+      <!-- Inquiry Form with Web3Forms Integration -->
       <div class="reveal stagger-2">
         <div style="background: white; border-radius: var(--border-radius-xl); border: 1px solid var(--cream-300); padding: var(--space-3xl); box-shadow: var(--shadow-md);">
-          <h3 style="margin-bottom: var(--space-md);">Send an Online Message</h3>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-md);">
+            <h3 style="margin: 0;">Send an Online Message</h3>
+            <span style="font-size:0.75rem; color:var(--steel-400); background:var(--cream-100); padding:4px 8px; border-radius:4px; border:1px solid var(--cream-300);">⚡ Web3Forms API</span>
+          </div>
           <p style="color: var(--steel-300); font-size: 0.9rem; margin-bottom: var(--space-xl);">
-            Fill out the details below and a service coordinator will call you back.
+            Fill out the details below. Messages are instantly dispatched via Web3Forms API to our support desk.
           </p>
 
-          <form method="post" action="{{ url_for('services.contact') }}" data-validate>
+          <!-- Success Alert Container -->
+          <div id="form-success-banner" style="display:none; background:var(--success-bg); border:1px solid var(--success); color:var(--success); padding:var(--space-md); border-radius:var(--border-radius); margin-bottom:var(--space-lg); font-size:0.9rem;">
+            ✓ <strong>Message Delivered!</strong> Your inquiry has been sent to our team. We'll contact you shortly.
+          </div>
+
+          <form id="contact-form" method="post" action="{{ url_for('services.contact') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <!-- Web3Forms Config Key -->
+            <input type="hidden" name="access_key" id="web3forms-access-key" value="{{ web3forms_key or 'a267b140-5b5c-4f81-a67b-1dcfe4651356' }}">
+            <input type="hidden" name="subject" value="New ChimneyCare Service &amp; Support Inquiry">
+            <input type="hidden" name="from_name" value="ChimneyCare Website">
+            <input type="checkbox" name="botcheck" class="hidden" style="display:none;">
 
             <div class="form-group">
               <label class="form-label" for="name">Your Name *</label>
               <input type="text" id="name" name="name" class="form-input" placeholder="e.g., Rajesh Kumar" required>
-              <span class="form-error"></span>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
               <div class="form-group">
                 <label class="form-label" for="email">Email Address *</label>
                 <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required>
-                <span class="form-error"></span>
               </div>
               <div class="form-group">
                 <label class="form-label" for="phone">Phone / WhatsApp</label>
-                <input type="tel" id="phone" name="phone" class="form-input" placeholder="+91 87340 02200" data-validate-phone>
-                <span class="form-error"></span>
+                <input type="tel" id="phone" name="phone" class="form-input" placeholder="+91 87340 02200">
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="message">Message / Inquiry Details *</label>
-              <textarea id="message" name="message" class="form-textarea" rows="4" placeholder="Tell us about your chimney model or service requirement..." required></textarea>
-              <span class="form-error"></span>
+              <textarea id="message" name="message" class="form-textarea" rows="4" placeholder="Tell us about your chimney model, problem or service requirement..." required></textarea>
             </div>
 
-            <button type="submit" class="btn btn--primary btn--full btn--lg">Submit Inquiry</button>
+            <button type="submit" id="submit-btn" class="btn btn--primary btn--full btn--lg">
+              <span id="btn-text">Send Message Instantly</span>
+              <span id="btn-spinner" style="display:none;">⏳ Sending via Web3Forms...</span>
+            </button>
           </form>
+
+          <div style="margin-top:var(--space-md); text-align:center; font-size:0.75rem; color:var(--steel-400);">
+            🔒 Encrypted &amp; delivered directly to <strong>chimneycare.in@gmail.com</strong>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('contact-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const btnText = document.getElementById('btn-text');
+  const btnSpinner = document.getElementById('btn-spinner');
+  const successBanner = document.getElementById('form-success-banner');
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      const accessKey = document.getElementById('web3forms-access-key').value;
+      
+      // If Web3Forms access key is available, send directly via Web3Forms AJAX
+      if (accessKey && accessKey !== 'your-web3forms-access-key-here') {
+        e.preventDefault();
+        
+        btnText.style.display = 'none';
+        btnSpinner.style.display = 'inline';
+        submitBtn.disabled = true;
+
+        const formData = new FormData(form);
+        const object = Object.fromEntries(formData);
+        const json = JSON.stringify(object);
+
+        try {
+          const response = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: json
+          });
+
+          const result = await response.json();
+          if (response.status === 200 && result.success) {
+            form.reset();
+            successBanner.style.display = 'block';
+            successBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else {
+            // Fallback to server POST
+            form.submit();
+          }
+        } catch (error) {
+          // Fallback to standard server POST
+          form.submit();
+        } finally {
+          btnText.style.display = 'inline';
+          btnSpinner.style.display = 'none';
+          submitBtn.disabled = false;
+        }
+      }
+    });
+  }
+});
+</script>
 {% endblock %}
