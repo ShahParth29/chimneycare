@@ -280,8 +280,42 @@ CREATE POLICY "promo_codes_admin" ON public.promo_codes FOR ALL USING (
 
 
 -- ──────────────────────────────────────────────
+--  10. TWO FACTOR AUTHENTICATION (TOTP & BACKUP CODES)
+-- ──────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.user_two_factor (
+    user_id             UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    secret_encrypted    TEXT NOT NULL,
+    is_enabled          BOOLEAN NOT NULL DEFAULT FALSE,
+    backup_codes        JSONB NOT NULL DEFAULT '[]'::jsonb,
+    last_verified_at    TIMESTAMPTZ,
+    updated_at          TIMESTAMPTZ DEFAULT NOW(),
+    created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.user_two_factor ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "user_two_factor_select" ON public.user_two_factor;
+DROP POLICY IF EXISTS "user_two_factor_insert" ON public.user_two_factor;
+DROP POLICY IF EXISTS "user_two_factor_update" ON public.user_two_factor;
+DROP POLICY IF EXISTS "user_two_factor_delete" ON public.user_two_factor;
+
+CREATE POLICY "user_two_factor_select" ON public.user_two_factor FOR SELECT USING (
+    user_id = auth.uid() OR public.is_admin()
+);
+CREATE POLICY "user_two_factor_insert" ON public.user_two_factor FOR INSERT WITH CHECK (
+    user_id = auth.uid() OR public.is_admin()
+);
+CREATE POLICY "user_two_factor_update" ON public.user_two_factor FOR UPDATE USING (
+    user_id = auth.uid() OR public.is_admin()
+);
+CREATE POLICY "user_two_factor_delete" ON public.user_two_factor FOR DELETE USING (
+    user_id = auth.uid() OR public.is_admin()
+);
+
+-- ──────────────────────────────────────────────
 --  INDEXES for performance
 -- ──────────────────────────────────────────────
+CREATE INDEX IF NOT EXISTS idx_user_two_factor_user_id ON public.user_two_factor(user_id);
 CREATE INDEX IF NOT EXISTS idx_services_customer ON public.services(customer_id);
 CREATE INDEX IF NOT EXISTS idx_services_order_id ON public.services(order_id);
 CREATE INDEX IF NOT EXISTS idx_repair_jobs_customer ON public.repair_jobs(customer_id);
@@ -318,3 +352,4 @@ BEGIN
         ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
     END IF;
 END $$;
+

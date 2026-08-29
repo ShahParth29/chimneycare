@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Two-Factor Authentication{% endblock %}
+{% block nav %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="auth-page" style="background: var(--charcoal-900);">
+  <div class="auth-card" style="max-width: 440px;">
+    <div class="auth-card__logo">🔥 ChimneyCare</div>
+    <p class="auth-card__subtitle">Two-Step Verification Required</p>
+
+    <div style="background: rgba(255, 107, 0, 0.1); border: 1px solid var(--orange-500); border-radius: var(--border-radius); padding: var(--space-md); margin-bottom: var(--space-lg); font-size: 0.88rem; color: var(--steel-200); line-height: 1.4;">
+      Enter the <strong>6-digit security code</strong> from your Authenticator app (Google Authenticator, Authy, 1Password) or an <strong>8-character recovery backup code</strong>.
+    </div>
+
+    <form method="post" action="{{ url_for('two_factor.challenge') }}" data-validate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label class="form-label" for="code">Security / Recovery Code</label>
+        <input type="text" id="code" name="code" class="form-input" 
+               placeholder="123456 or XXXX-XXXX" maxlength="12" required autofocus autocomplete="one-time-code"
+               style="letter-spacing: 0.25em; font-size: 1.35rem; text-align: center; font-weight: bold; background: #1e293b; color: white; border-color: #334155;">
+        <span class="form-error"></span>
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--full btn--lg" style="margin-top: var(--space-md);">
+        Verify &amp; Continue
+      </button>
+    </form>
+
+    <div class="auth-card__footer" style="margin-top: var(--space-xl); display: flex; justify-content: space-between; align-items: center;">
+      <a href="{{ url_for('auth.login') }}" style="color: var(--steel-300); font-size: 0.85rem; text-decoration: none;">
+        ← Back to Login
+      </a>
+      <span style="color: var(--steel-400); font-size: 0.8rem;">🔒 Encrypted Session</span>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -65,18 +65,23 @@ def dashboard():
             .limit(5)
             .execute()
         )
+        tfa = sb.table("user_two_factor").select("is_enabled").eq("user_id", user["id"]).execute()
+        two_factor_enabled = bool(tfa.data and tfa.data[0].get("is_enabled"))
     except Exception as e:
         logger.error(f"Error loading dashboard for user {user.get('id')}: {e}")
         bookings = type("obj", (object,), {"data": []})()
         repair_jobs = type("obj", (object,), {"data": []})()
         orders = type("obj", (object,), {"data": []})()
+        two_factor_enabled = False
 
     return render_template(
         "dashboard.html",
         bookings=bookings.data or [],
         repair_jobs=repair_jobs.data or [],
         orders=orders.data or [],
+        two_factor_enabled=two_factor_enabled,
     )
+
 
 
 @services_bp.route("/services")

@@ -165,6 +165,68 @@ class ChimneyCareSecurityTests(unittest.TestCase):
             res = self.client.get(route)
             self.assertEqual(res.status_code, 200, f"Failed on route: {route}")
 
+    # ── 2FA TOTP Security Test Cases ──────────────────────────────
+
+    def test_totp_secret_encryption_and_decryption(self):
+        """Verify AES-256 Fernet encryption and decryption round-trip."""
+        from totp_utils import generate_totp_secret, encrypt_secret, decrypt_secret
+        secret = generate_totp_secret()
+        self.assertTrue(len(secret) >= 16)
+
+        encrypted = encrypt_secret(secret)
+        self.assertNotEqual(secret, encrypted)
+        self.assertTrue(len(encrypted) > 20)
+
+        decrypted = decrypt_secret(encrypted)
+        self.assertEqual(secret, decrypted)
+
+    def test_totp_verification_valid_and_invalid_codes(self):
+        """Verify RFC 6238 TOTP verification passes with valid token and rejects invalid token."""
+        import pyotp
+        from totp_utils import generate_totp_secret, verify_totp_code
+        secret = generate_totp_secret()
+        totp = pyotp.TOTP(secret)
+        current_token = totp.now()
+
+        # Valid token
+        self.assertTrue(verify_totp_code(secret, current_token))
+
+        # Invalid token
+        self.assertFalse(verify_totp_code(secret, "000000" if current_token != "000000" else "999999"))
+        self.assertFalse(verify_totp_code(secret, "abc"))
+        self.assertFalse(verify_totp_code(secret, ""))
+
+    def test_backup_codes_generation_and_consumption(self):
+        """Verify generation, hashing, and single-use consumption of backup codes."""
+        from totp_utils import generate_backup_codes, verify_and_consume_backup_code
+        plain_codes, hashed_records = generate_backup_codes(count=8)
+
+        self.assertEqual(len(plain_codes), 8)
+        self.assertEqual(len(hashed_records), 8)
+
+        first_code = plain_codes[0]
+        # First verification should succeed
+        valid, updated_list = verify_and_consume_backup_code(hashed_records, first_code)
+        self.assertTrue(valid)
+        self.assertTrue(updated_list[0]["used"])
+
+        # Second verification with same code must fail (single-use)
+        valid_again, _ = verify_and_consume_backup_code(updated_list, first_code)
+        self.assertFalse(valid_again)
+
+    def test_unauthenticated_2fa_setup_redirects(self):
+        """Ensure unauthenticated access to /2fa/setup redirects to login."""
+        res = self.client.get("/2fa/setup")
+        self.assertIn(res.status_code, [302, 401])
+        self.assertIn("/login", res.headers.get("Location", ""))
+
+    def test_2fa_login_challenge_requires_pending_session(self):
+        """Ensure /2fa/challenge redirects to login if no pending session exists."""
+        res = self.client.get("/2fa/challenge")
+        self.assertEqual(res.status_code, 302)
+        self.assertIn("/login", res.headers.get("Location", ""))
+
 
 if __name__ == "__main__":
     unittest.main()
+
