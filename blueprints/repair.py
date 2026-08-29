@@ -162,10 +162,10 @@ def book_repair():
 def job_detail(job_id):
     """View repair job details. Technician info shown only if reveal_status = true."""
     user = session["user"]
+    from supabase_client import get_admin_client
+    sb = get_admin_client()
 
     try:
-        sb = get_supabase_client()
-
         job = sb.table("repair_jobs").select("*").eq("id", job_id).execute()
         if not job.data:
             flash("Repair job not found.", "error")
@@ -184,12 +184,18 @@ def job_detail(job_id):
             parts = sb.table("repair_parts").select("*").in_("id", job_data["part_ids"]).execute()
             parts_data = parts.data if parts.data else []
 
-        # Fetch technician (RLS will hide contact info if reveal_status = false)
+        # Fetch technician (mask details if reveal_status is false for customers)
         technician = None
         if job_data.get("technician_id"):
             tech = sb.table("technicians").select("*").eq("id", job_data["technician_id"]).execute()
             if tech.data:
-                technician = tech.data[0]
+                tech_record = tech.data[0]
+                if not tech_record.get("reveal_status") and user.get("role") != "admin":
+                    # Mask confidential details until admin approval
+                    tech_record["phone"] = None
+                    tech_record["email"] = None
+                    tech_record["photo_url"] = None
+                technician = tech_record
 
     except Exception:
         flash("Error loading repair job details.", "error")

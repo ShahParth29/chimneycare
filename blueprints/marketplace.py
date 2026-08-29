@@ -220,9 +220,10 @@ def validate_promo():
 def my_orders():
     """View customer's order history."""
     user = session["user"]
+    from supabase_client import get_admin_client
+    sb = get_admin_client()
 
     try:
-        sb = get_supabase_client()
         result = (
             sb.table("orders")
             .select("*, chimney_products(*)")

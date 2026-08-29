@@ -30,7 +30,8 @@ def landing():
 def dashboard():
     """Customer dashboard — overview of bookings, repair jobs, orders."""
     user = session["user"]
-    sb = get_supabase_client()
+    from supabase_client import get_admin_client
+    sb = get_admin_client()
 
     try:
         bookings = (
@@ -51,7 +52,7 @@ def dashboard():
         )
         orders = (
             sb.table("orders")
-            .select("*")
+            .select("*, chimney_products(brand, model)")
             .eq("customer_id", user["id"])
             .order("created_at", desc=True)
             .limit(5)
@@ -171,9 +172,10 @@ def book_service():
 def my_bookings():
     """View all customer bookings."""
     user = session["user"]
+    from supabase_client import get_admin_client
+    sb = get_admin_client()
 
     try:
-        sb = get_supabase_client()
         result = (
             sb.table("services")
             .select("*, amc_plans(*)")
