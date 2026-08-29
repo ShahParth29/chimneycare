@@ -1,9 +1,10 @@
 <nav class="nav" id="main-nav">
   <div class="nav__inner">
     <a href="{{ url_for('services.landing') }}" class="nav__logo" aria-label="ChimneyCare Home">
-      <div class="nav__logo-icon">🔥</div>
+      <img src="{{ url_for('static', filename='images/logo-icon.svg') }}" alt="ChimneyCare Logo" class="nav__logo-icon-img" style="width: 34px; height: 34px; border-radius: 8px; display: block;" />
       <span class="nav__logo-text">ChimneyCare</span>
     </a>
+
 
     <!-- Mobile Hamburger Toggle (3 lines morphing to X) -->
     <button class="nav__toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu">

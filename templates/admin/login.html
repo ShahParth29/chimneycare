@@ -6,7 +6,11 @@
 {% block content %}
 <div class="auth-page" style="background: var(--charcoal-900);">
   <div class="auth-card">
-    <div class="auth-card__logo">🔥 ChimneyCare</div>
+    <a href="{{ url_for('services.landing') }}" class="auth-card__logo" style="display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; margin-bottom: 8px;">
+      <img src="{{ url_for('static', filename='images/logo-icon.svg') }}" alt="ChimneyCare Logo" style="width: 40px; height: 40px; border-radius: 10px;" />
+      <span style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: white;">Chimney<span style="color: var(--orange-500);">Care</span></span>
+    </a>
+
     <p class="auth-card__subtitle">Admin Portal — authorized access only</p>
 
     <form method="post" action="{{ url_for('auth.admin_login') }}" data-validate>

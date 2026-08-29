@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=5.0">
   {% block extra_css %}{% endblock %}
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo-icon.svg') }}">
 </head>
 <body>
   {% block nav %}

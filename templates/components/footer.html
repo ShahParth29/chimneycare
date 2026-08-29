@@ -2,7 +2,11 @@
   <div class="container">
     <div class="footer__grid">
       <div>
-        <div class="footer__brand">🔥 ChimneyCare</div>
+        <a href="{{ url_for('services.landing') }}" class="footer__brand-link" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; margin-bottom: var(--space-md);">
+          <img src="{{ url_for('static', filename='images/logo-icon.svg') }}" alt="ChimneyCare Logo" style="width: 38px; height: 38px; border-radius: 8px; display: block;" />
+          <span style="font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; color: white;">Chimney<span style="color: var(--orange-500);">Care</span></span>
+        </a>
+
         <p class="footer__desc">
           A dedicated kitchen appliance service and installation division of 
           <strong>Sobhraj Enterprise Pvt Ltd</strong>. Trusted by thousands of homeowners 

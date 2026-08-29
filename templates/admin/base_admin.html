@@ -7,7 +7,7 @@
   <title>{% block admin_title %}Admin{% endblock %} — ChimneyCare Admin</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=5.0">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}?v=5.0">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo-icon.svg') }}">
   <!-- Supabase JS for Admin Realtime Alerts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -36,9 +36,13 @@
   <div class="admin-layout">
     <aside class="admin-sidebar" id="admin-sidebar">
       <div style="display:flex; justify-content:space-between; align-items:center; padding-right:var(--space-md);">
-        <a href="{{ url_for('admin.dashboard') }}" class="admin-sidebar__brand">🔥 ChimneyCare</a>
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-sidebar__brand" style="display:flex; align-items:center; gap:10px;">
+          <img src="{{ url_for('static', filename='images/logo-icon.svg') }}" alt="ChimneyCare Logo" style="width: 32px; height: 32px; border-radius: 8px;" />
+          <span>ChimneyCare</span>
+        </a>
         <button id="sidebar-close" style="display:none; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
       </div>
+
 
       <span class="admin-sidebar__label">Overview</span>
       <ul class="admin-sidebar__nav">
