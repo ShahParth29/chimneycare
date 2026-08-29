@@ -31,7 +31,7 @@
         </p>
         <div class="mt-xl" style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
           <a href="{{ url_for('services.services_index') }}" class="btn btn--primary">Explore Services</a>
-          <a href="https://wa.me/918734002200" target="_blank" class="btn btn--secondary">💬 Chat on WhatsApp</a>
+          <a href="https://wa.me/918734002200?text={{ ('Hello ChimneyCare, I would like to know more about your kitchen chimney AMC plans and services.') | urlencode }}" target="_blank" class="btn btn--whatsapp">💬 Chat on WhatsApp</a>
         </div>
       </div>
 
@@ -99,7 +99,7 @@
 
       <div style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
         <a href="{{ url_for('services.contact') }}" class="btn btn--primary">Contact Support</a>
-        <a href="https://wa.me/918734002200" target="_blank" class="btn btn--outline">WhatsApp Helpdesk</a>
+        <a href="https://wa.me/918734002200?text={{ ('Hello ChimneyCare Helpdesk, I need support regarding a service booking from Sobhraj Enterprise.') | urlencode }}" target="_blank" class="btn btn--whatsapp">💬 WhatsApp Helpdesk</a>
       </div>
     </div>
   </div>

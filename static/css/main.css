@@ -427,14 +427,32 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .btn--secondary {
-  background: transparent;
+  background: var(--charcoal-800);
   color: var(--cream-100);
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid var(--charcoal-700);
 }
 .btn--secondary:hover {
-  border-color: rgba(255,255,255,0.4);
+  background: var(--charcoal-700);
   color: white;
-  background: rgba(255,255,255,0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.btn--whatsapp {
+  background-color: #25D366 !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn--whatsapp:hover {
+  background-color: #20BA5A !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
 }
 
 .btn--outline {
