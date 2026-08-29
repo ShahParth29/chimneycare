@@ -2,27 +2,30 @@
 blueprints/marketplace.py — Chimney product marketplace routes.
 
 Handles product browsing with filters, promo code validation,
-exchange offers, and order placement (ends at "Order Placed").
+exchange offers, and order placement with strict schema checks.
 """
 
+import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from supabase_client import get_supabase_client
+from supabase_client import get_supabase_client, get_admin_client
 from utils import (
     login_required, generate_order_id, sanitize_string,
     validate_promo_code, handle_payment, send_whatsapp_message,
+    validate_float_range,
 )
 
+logger = logging.getLogger("chimneycare.marketplace")
 marketplace_bp = Blueprint("marketplace", __name__)
 
 
 @marketplace_bp.route("/marketplace")
 def marketplace_index():
     """Product catalogue with brand, price, type, size, suction capacity filters."""
-    brand = request.args.get("brand", "")
-    product_type = request.args.get("type", "")
-    size = request.args.get("size", "")
-    suction = request.args.get("suction", "")
-    sort_by = request.args.get("sort", "price_asc")
+    brand = sanitize_string(request.args.get("brand", ""), max_length=50)
+    product_type = sanitize_string(request.args.get("type", ""), max_length=50)
+    size = sanitize_string(request.args.get("size", ""), max_length=20)
+    suction = sanitize_string(request.args.get("suction", ""), max_length=30)
+    sort_by = sanitize_string(request.args.get("sort", "price_asc"), max_length=20)
     min_price = request.args.get("min_price", "")
     max_price = request.args.get("max_price", "")
 
@@ -71,7 +74,8 @@ def marketplace_index():
         sizes = sorted(set(p["size"] for p in all_data if p.get("size")))
         suctions = sorted(set(p["suction_capacity"] for p in all_data if p.get("suction_capacity")))
 
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error loading marketplace: {e}")
         products = []
         brands, types, sizes, suctions = [], [], [], []
 
@@ -97,6 +101,7 @@ def marketplace_index():
 @marketplace_bp.route("/marketplace/product/<product_id>")
 def product_detail(product_id):
     """Single product detail page."""
+    product_id = sanitize_string(product_id, max_length=50)
     try:
         sb = get_supabase_client()
         result = sb.table("chimney_products").select("*").eq("id", product_id).execute()
@@ -106,7 +111,8 @@ def product_detail(product_id):
             return redirect(url_for("marketplace.marketplace_index"))
 
         product = result.data[0]
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error loading product {product_id}: {e}")
         flash("Error loading product.", "error")
         return redirect(url_for("marketplace.marketplace_index"))
 
@@ -116,7 +122,8 @@ def product_detail(product_id):
 @marketplace_bp.route("/marketplace/checkout/<product_id>", methods=["GET", "POST"])
 @login_required
 def checkout(product_id):
-    """Checkout page with promo code and exchange offer."""
+    """Checkout page with promo code and exchange offer with strict checks."""
+    product_id = sanitize_string(product_id, max_length=50)
     try:
         sb = get_supabase_client()
         result = sb.table("chimney_products").select("*").eq("id", product_id).execute()
@@ -126,8 +133,9 @@ def checkout(product_id):
             return redirect(url_for("marketplace.marketplace_index"))
 
         product = result.data[0]
-    except Exception:
-        flash("Error loading product.", "error")
+    except Exception as e:
+        logger.error(f"Error loading checkout for product {product_id}: {e}")
+        flash("Error loading product checkout.", "error")
         return redirect(url_for("marketplace.marketplace_index"))
 
     if request.method == "GET":
@@ -135,11 +143,11 @@ def checkout(product_id):
 
     # ── POST: place order ──
     user = session["user"]
-    promo_code = sanitize_string(request.form.get("promo_code", ""))
+    promo_code = sanitize_string(request.form.get("promo_code", ""), max_length=20)
     has_exchange = request.form.get("has_exchange") == "on"
-    exchange_brand = sanitize_string(request.form.get("exchange_brand", ""))
-    exchange_model = sanitize_string(request.form.get("exchange_model", ""))
-    exchange_condition = sanitize_string(request.form.get("exchange_condition", ""))
+    exchange_brand = sanitize_string(request.form.get("exchange_brand", ""), max_length=50)
+    exchange_model = sanitize_string(request.form.get("exchange_model", ""), max_length=100)
+    exchange_condition = sanitize_string(request.form.get("exchange_condition", ""), max_length=50)
 
     total_price = float(product["price"])
 
@@ -165,7 +173,6 @@ def checkout(product_id):
     order_id = generate_order_id()
 
     try:
-        from supabase_client import get_admin_client
         admin_sb = get_admin_client()
         order_data = {
             "customer_id": user["id"],
@@ -187,8 +194,8 @@ def checkout(product_id):
                     if cur.data:
                         new_count = (cur.data[0].get("current_uses") or 0) + 1
                         admin_sb.table("promo_codes").update({"current_uses": new_count}).eq("id", promo_result["promo_id"]).execute()
-                except Exception:
-                    pass
+                except Exception as ex:
+                    logger.info(f"Promo usage counter update note: {ex}")
 
             # Stub payment
             handle_payment(order_id, total_price)
@@ -209,7 +216,8 @@ def checkout(product_id):
         return render_template("marketplace/checkout.html", product=product)
 
     except Exception as e:
-        flash(f"Error placing order: {str(e)}", "error")
+        logger.error(f"Error placing order for user {user.get('id')}: {e}")
+        flash("An unexpected error occurred while placing your order. Please try again.", "error")
         return render_template("marketplace/checkout.html", product=product)
 
 
@@ -217,14 +225,17 @@ def checkout(product_id):
 @login_required
 def validate_promo():
     """AJAX endpoint for promo code validation (rate limited in app.py)."""
-    promo_code = sanitize_string(request.json.get("code", "") if request.is_json else "")
-    subtotal = 0
+    if not request.is_json:
+        return jsonify({"valid": False, "error": "Invalid request format."}), 400
 
-    try:
-        subtotal = float(request.json.get("subtotal", 0) if request.is_json else 0)
-    except (ValueError, TypeError):
-        return jsonify({"valid": False, "error": "Invalid subtotal."}), 400
+    promo_code = sanitize_string(request.json.get("code", ""), max_length=20)
+    raw_subtotal = request.json.get("subtotal", 0)
 
+    is_valid_amount, amt_err = validate_float_range(raw_subtotal, min_val=0.0, max_val=1000000.0, field_name="Subtotal")
+    if not is_valid_amount:
+        return jsonify({"valid": False, "error": amt_err}), 400
+
+    subtotal = float(raw_subtotal)
     sb = get_supabase_client()
     result = validate_promo_code(sb, promo_code, subtotal)
     return jsonify(result)
@@ -235,7 +246,6 @@ def validate_promo():
 def my_orders():
     """View customer's order history."""
     user = session["user"]
-    from supabase_client import get_admin_client
     sb = get_admin_client()
 
     try:
@@ -247,7 +257,8 @@ def my_orders():
             .execute()
         )
         orders = result.data if result.data else []
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error fetching orders for user {user.get('id')}: {e}")
         orders = []
 
     return render_template("marketplace/my_orders.html", orders=orders)

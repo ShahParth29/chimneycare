@@ -2,16 +2,18 @@
 blueprints/repair.py — Repair service and parts catalogue routes.
 
 Handles parts browsing, repair job booking (with WhatsApp stub),
-and technician profile viewing (gated by reveal_status).
+and technician profile viewing (strictly gated by reveal_status).
 """
 
+import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from supabase_client import get_supabase_client
+from supabase_client import get_supabase_client, get_admin_client
 from utils import (
-    login_required, generate_order_id, generate_service_id,
-    sanitize_string, send_whatsapp_message,
+    login_required, generate_service_id, sanitize_string,
+    send_whatsapp_message, validate_text_field
 )
 
+logger = logging.getLogger("chimneycare.repair")
 repair_bp = Blueprint("repair", __name__)
 
 
@@ -22,7 +24,8 @@ def repair_index():
         sb = get_supabase_client()
         parts = sb.table("repair_parts").select("*").eq("in_stock", True).order("name").execute()
         parts_data = parts.data if parts.data else []
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error loading repair parts: {e}")
         parts_data = []
 
     # Group parts by category
@@ -39,8 +42,8 @@ def repair_index():
 @repair_bp.route("/repair/parts")
 def parts_catalogue():
     """Full parts catalogue with search and filter."""
-    search = request.args.get("search", "").strip()
-    category = request.args.get("category", "")
+    search = sanitize_string(request.args.get("search", ""), max_length=100)
+    category = sanitize_string(request.args.get("category", ""), max_length=50)
 
     try:
         sb = get_supabase_client()
@@ -52,7 +55,7 @@ def parts_catalogue():
         result = query.order("name").execute()
         parts = result.data if result.data else []
 
-        # Client-side search filter (Supabase free tier doesn't have full-text search)
+        # In-memory search filter
         if search:
             search_lower = search.lower()
             parts = [p for p in parts if search_lower in p.get("name", "").lower()
@@ -62,7 +65,8 @@ def parts_catalogue():
         all_parts = sb.table("repair_parts").select("category").eq("in_stock", True).execute()
         categories_list = sorted(set(p["category"] for p in (all_parts.data or []) if p.get("category")))
 
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error loading parts catalogue: {e}")
         parts = []
         categories_list = []
 
@@ -79,13 +83,14 @@ def parts_catalogue():
 @repair_bp.route("/repair/book", methods=["GET", "POST"])
 @login_required
 def book_repair():
-    """Book a repair job."""
+    """Book a repair job with strict description validation."""
     if request.method == "GET":
         try:
             sb = get_supabase_client()
             parts = sb.table("repair_parts").select("*").eq("in_stock", True).order("name").execute()
             parts_data = parts.data if parts.data else []
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error fetching parts for booking page: {e}")
             parts_data = []
 
         return render_template("repair/book.html", parts=parts_data)
@@ -95,24 +100,24 @@ def book_repair():
     selected_parts = request.form.getlist("parts")
     issue_description = sanitize_string(request.form.get("issue_description", ""), max_length=2000)
 
-    if not issue_description:
-        flash("Please describe the issue you're experiencing.", "error")
+    is_valid_desc, desc_err = validate_text_field(issue_description, min_len=5, max_len=2000, field_name="Issue Description")
+    if not is_valid_desc:
+        flash(desc_err, "error")
         return redirect(url_for("repair.book_repair"))
 
     service_id = generate_service_id()
 
     try:
-        from supabase_client import get_admin_client
         sb = get_admin_client()
 
-        # Calculate total parts cost
-        total_parts_cost = 0
+        # Calculate total parts cost server-side
+        total_parts_cost = 0.0
         if selected_parts:
             parts_result = sb.table("repair_parts").select("id, price").in_("id", selected_parts).execute()
             if parts_result.data:
                 total_parts_cost = sum(float(p["price"]) for p in parts_result.data)
 
-        # Fixed standard diagnostic & visit inspection fee (customizable only by admin)
+        # Fixed standard diagnostic & visit inspection fee
         labour_charge = 350.0
         total_cost = total_parts_cost + labour_charge
 
@@ -129,76 +134,87 @@ def book_repair():
         result = sb.table("repair_jobs").insert(repair_data).execute()
 
         if result.data:
-            # Send generic WhatsApp message (NEVER mention technician)
             whatsapp_number = user.get("phone", "")
-            send_whatsapp_message(
-                whatsapp_number,
-                "Thank you for your ChimneyCare repair request. "
-                "We will contact you within 24 hours for telephonic confirmation."
-            )
+            if whatsapp_number:
+                send_whatsapp_message(
+                    whatsapp_number,
+                    "Thank you for your ChimneyCare repair request. "
+                    "We will contact you within 24 hours for telephonic confirmation."
+                )
 
             flash(
                 f"Repair request submitted! Service ID: {service_id}. "
-                "We will contact you within 24 hours for telephonic confirmation.",
+                "Our team will contact you within 24 hours for telephonic confirmation.",
                 "success",
             )
-            return redirect(url_for("repair.job_detail", job_id=result.data[0]["id"]))
-
-        flash("Failed to submit repair request. Please try again.", "error")
-        return redirect(url_for("repair.book_repair"))
+            return redirect(url_for("services.dashboard"))
+        else:
+            flash("Repair request failed. Please try again.", "error")
+            return redirect(url_for("repair.book_repair"))
 
     except Exception as e:
-        flash(f"Error: {str(e)}", "error")
+        logger.error(f"Error submitting repair job: {e}")
+        flash("An unexpected error occurred while booking your repair. Please try again.", "error")
         return redirect(url_for("repair.book_repair"))
 
 
-@repair_bp.route("/repair/job/<job_id>")
+@repair_bp.route("/repair/technician/<tech_id>")
 @login_required
-def job_detail(job_id):
-    """View repair job details. Technician info shown only if reveal_status = true."""
+def technician_profile(tech_id):
+    """
+    View technician profile — STRICTLY gated by reveal_status.
+    Only accessible if the customer has a confirmed booking with this technician
+    AND the admin has revealed the technician's details.
+    """
     user = session["user"]
-    from supabase_client import get_admin_client
-    sb = get_admin_client()
+    tech_id = sanitize_string(tech_id, max_length=50)
 
     try:
-        job = sb.table("repair_jobs").select("*").eq("id", job_id).execute()
-        if not job.data:
-            flash("Repair job not found.", "error")
+        sb = get_admin_client()
+
+        # Check if customer has a confirmed service booking with this technician
+        service_check = (
+            sb.table("services")
+            .select("id, status")
+            .eq("customer_id", user["id"])
+            .eq("technician_id", tech_id)
+            .in_("status", ["confirmed", "in_progress", "completed"])
+            .execute()
+        )
+
+        # Check repair jobs
+        repair_check = (
+            sb.table("repair_jobs")
+            .select("id, confirmation_status")
+            .eq("customer_id", user["id"])
+            .eq("technician_id", tech_id)
+            .in_("confirmation_status", ["confirmed", "in_progress", "completed"])
+            .execute()
+        )
+
+        has_access = bool(service_check.data or repair_check.data)
+
+        if not has_access:
+            flash("Technician details are only available for confirmed bookings after telephonic verification.", "warning")
             return redirect(url_for("services.dashboard"))
 
-        job_data = job.data[0]
+        # Fetch technician record
+        tech_result = sb.table("technicians").select("*").eq("id", tech_id).execute()
 
-        # Security: ensure customer can only see their own jobs
-        if job_data["customer_id"] != user["id"] and user.get("role") != "admin":
-            flash("Access denied.", "error")
+        if not tech_result.data:
+            flash("Technician not found.", "error")
             return redirect(url_for("services.dashboard"))
 
-        # Fetch parts details
-        parts_data = []
-        if job_data.get("part_ids"):
-            parts = sb.table("repair_parts").select("*").in_("id", job_data["part_ids"]).execute()
-            parts_data = parts.data if parts.data else []
+        technician = tech_result.data[0]
 
-        # Fetch technician (mask details if reveal_status is false for customers)
-        technician = None
-        if job_data.get("technician_id"):
-            tech = sb.table("technicians").select("*").eq("id", job_data["technician_id"]).execute()
-            if tech.data:
-                tech_record = tech.data[0]
-                if not tech_record.get("reveal_status") and user.get("role") != "admin":
-                    # Mask confidential details until admin approval
-                    tech_record["phone"] = None
-                    tech_record["email"] = None
-                    tech_record["photo_url"] = None
-                technician = tech_record
+        # Double check reveal status
+        if not technician.get("reveal_status"):
+            flash("Technician details are pending confirmation by our operations desk.", "info")
+            return redirect(url_for("services.dashboard"))
 
-    except Exception:
-        flash("Error loading repair job details.", "error")
+        return render_template("repair/technician_profile.html", technician=technician)
+
+    except Exception as e:
+        logger.error(f"Error viewing technician profile {tech_id}: {e}")
+        flash("Unable to load technician profile.", "error")
         return redirect(url_for("services.dashboard"))
-
-    return render_template(
-        "repair/job_detail.html",
-        job=job_data,
-        parts=parts_data,
-        technician=technician,
-    )

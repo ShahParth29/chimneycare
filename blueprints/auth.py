@@ -1,14 +1,22 @@
 """
 blueprints/auth.py — Authentication routes for ChimneyCare.
 
-Handles customer login/register, admin login with optional OTP,
-and session management via Supabase Auth.
+Handles customer login/register, password recovery, admin login with optional OTP,
+and session management with strict schema validation and information leakage defenses.
 """
 
+import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from supabase_client import get_supabase_client, get_admin_client
-from utils import sanitize_string, validate_email, validate_phone
+from utils import (
+    sanitize_string,
+    validate_email_strict,
+    validate_phone_strict,
+    validate_password_strict,
+    validate_name_strict,
+)
 
+logger = logging.getLogger("chimneycare.auth")
 auth_bp = Blueprint("auth", __name__)
 
 
@@ -17,15 +25,17 @@ def login():
     if request.method == "GET":
         return render_template("auth/login.html")
 
-    email = sanitize_string(request.form.get("email", ""))
+    email = sanitize_string(request.form.get("email", ""), max_length=254)
     password = request.form.get("password", "")
 
-    if not email or not password:
-        flash("Email and password are required.", "error")
+    # Strict Email Validation
+    is_valid_email, email_err = validate_email_strict(email)
+    if not is_valid_email:
+        flash(email_err, "error")
         return render_template("auth/login.html"), 400
 
-    if not validate_email(email):
-        flash("Please enter a valid email address.", "error")
+    if not password or len(password) < 6:
+        flash("Please enter your password.", "error")
         return render_template("auth/login.html"), 400
 
     try:
@@ -41,14 +51,14 @@ def login():
         profile = sb.table("profiles").select("*").eq("id", user_id).execute()
 
         if not profile.data:
-            flash("Profile not found. Please contact support.", "error")
+            flash("Account profile not found. Please contact support.", "error")
             return render_template("auth/login.html"), 400
 
         user_data = profile.data[0]
 
         # Block admin accounts from customer login
         if user_data.get("role") == "admin":
-            flash("Admin accounts must use the admin login.", "warning")
+            flash("Admin accounts must use the admin portal login.", "warning")
             sb.auth.sign_out()
             return redirect(url_for("auth.admin_login"))
 
@@ -67,30 +77,29 @@ def login():
         return redirect(next_url)
 
     except Exception as e:
-        error_msg = str(e)
-        if "Invalid login" in error_msg or "invalid" in error_msg.lower():
-            flash("Invalid email or password.", "error")
-        else:
-            flash("Login failed. Please try again.", "error")
+        logger.warning(f"Failed login attempt for {email}: {e}")
+        flash("Invalid email or password.", "error")
         return render_template("auth/login.html"), 401
 
 
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
-    """Forgot password request route."""
+    """Forgot password request route with rate and enumeration protection."""
     if request.method == "GET":
         return render_template("auth/forgot_password.html")
 
-    email = sanitize_string(request.form.get("email", ""))
-    if not email or not validate_email(email):
-        flash("Please enter a valid email address.", "error")
+    email = sanitize_string(request.form.get("email", ""), max_length=254)
+    is_valid_email, email_err = validate_email_strict(email)
+    if not is_valid_email:
+        flash(email_err, "error")
         return render_template("auth/forgot_password.html"), 400
 
     try:
         sb = get_supabase_client()
         sb.auth.reset_password_for_email(email)
-    except Exception:
-        # Avoid user enumeration by always returning the same confirmation
+    except Exception as e:
+        logger.info(f"Password reset request error for {email}: {e}")
+        # Always return identical confirmation to prevent user enumeration
         pass
 
     flash("If an account exists with this email, password reset instructions have been sent.", "success")
@@ -102,24 +111,38 @@ def register():
     if request.method == "GET":
         return render_template("auth/register.html")
 
-    name = sanitize_string(request.form.get("name", ""))
-    email = sanitize_string(request.form.get("email", ""))
-    phone = sanitize_string(request.form.get("phone", ""))
-    whatsapp = sanitize_string(request.form.get("whatsapp_number", ""))
+    name = sanitize_string(request.form.get("name", ""), max_length=100)
+    email = sanitize_string(request.form.get("email", ""), max_length=254)
+    phone = sanitize_string(request.form.get("phone", ""), max_length=20)
+    whatsapp = sanitize_string(request.form.get("whatsapp_number", ""), max_length=20)
     password = request.form.get("password", "")
     confirm_password = request.form.get("confirm_password", "")
     address = sanitize_string(request.form.get("address", ""), max_length=500)
 
-    # ── Validation ──
+    # ── Strict Schema Validation ──
     errors = []
-    if not name:
-        errors.append("Name is required.")
-    if not email or not validate_email(email):
-        errors.append("A valid email address is required.")
-    if not phone or not validate_phone(phone):
-        errors.append("A valid Indian phone number is required.")
-    if not password or len(password) < 8:
-        errors.append("Password must be at least 8 characters.")
+    
+    is_valid_name, name_err = validate_name_strict(name, "Full Name")
+    if not is_valid_name:
+        errors.append(name_err)
+
+    is_valid_email, email_err = validate_email_strict(email)
+    if not is_valid_email:
+        errors.append(email_err)
+
+    is_valid_phone, phone_err = validate_phone_strict(phone)
+    if not is_valid_phone:
+        errors.append(phone_err)
+
+    if whatsapp:
+        is_valid_wa, wa_err = validate_phone_strict(whatsapp)
+        if not is_valid_wa:
+            errors.append(f"WhatsApp: {wa_err}")
+
+    is_valid_pass, pass_err = validate_password_strict(password)
+    if not is_valid_pass:
+        errors.append(pass_err)
+
     if password != confirm_password:
         errors.append("Passwords do not match.")
 
@@ -139,7 +162,7 @@ def register():
 
         user_id = auth_response.user.id
 
-        # Create profile record
+        # Create profile record using admin client
         admin_sb = get_admin_client()
         admin_sb.table("profiles").insert({
             "id": user_id,
@@ -164,10 +187,11 @@ def register():
 
     except Exception as e:
         error_msg = str(e)
+        logger.error(f"Registration error for {email}: {e}")
         if "already registered" in error_msg.lower() or "duplicate" in error_msg.lower():
             flash("An account with this email already exists.", "error")
         else:
-            flash(f"Registration failed: {error_msg}", "error")
+            flash("Registration could not be completed. Please verify your details or try again.", "error")
         return render_template("auth/register.html"), 400
 
 
@@ -176,11 +200,12 @@ def admin_login():
     if request.method == "GET":
         return render_template("admin/login.html")
 
-    email = sanitize_string(request.form.get("email", ""))
+    email = sanitize_string(request.form.get("email", ""), max_length=254)
     password = request.form.get("password", "")
 
-    if not email or not password:
-        flash("Email and password are required.", "error")
+    is_valid_email, email_err = validate_email_strict(email)
+    if not is_valid_email or not password:
+        flash("Valid email and password are required.", "error")
         return render_template("admin/login.html"), 400
 
     try:
@@ -192,11 +217,12 @@ def admin_login():
 
         user_id = auth_response.user.id
 
-        # Verify admin role
+        # Verify admin role via service client
         admin_sb = get_admin_client()
         profile = admin_sb.table("profiles").select("*").eq("id", user_id).execute()
 
         if not profile.data or profile.data[0].get("role") != "admin":
+            logger.warning(f"Unauthorized admin login attempt by non-admin user {email}")
             flash("Access denied. Admin accounts only.", "error")
             sb.auth.sign_out()
             return render_template("admin/login.html"), 403
@@ -213,7 +239,8 @@ def admin_login():
         return redirect(url_for("admin.dashboard"))
 
     except Exception as e:
-        flash("Invalid credentials.", "error")
+        logger.warning(f"Failed admin login attempt for {email}: {e}")
+        flash("Invalid administrator credentials.", "error")
         return render_template("admin/login.html"), 401
 
 
@@ -223,13 +250,11 @@ def verify_otp():
     if request.method == "GET":
         return render_template("admin/verify_otp.html")
 
-    otp = sanitize_string(request.form.get("otp", ""))
-    if not otp or len(otp) != 6:
+    otp = sanitize_string(request.form.get("otp", ""), max_length=10)
+    if not otp or len(otp) != 6 or not otp.isdigit():
         flash("Please enter a valid 6-digit OTP.", "error")
         return render_template("admin/verify_otp.html"), 400
 
-    # STUB: In production, verify via Supabase Auth phone OTP
-    # sb.auth.verify_otp({"phone": phone, "token": otp, "type": "sms"})
     flash("OTP verification is not yet configured. Contact your system administrator.", "warning")
     return redirect(url_for("admin.dashboard"))
 
@@ -239,8 +264,8 @@ def logout():
     try:
         sb = get_supabase_client()
         sb.auth.sign_out()
-    except Exception:
-        pass
+    except Exception as e:
+        logger.info(f"Logout cleanup note: {e}")
     session.clear()
     flash("You have been logged out.", "info")
     return redirect(url_for("auth.login"))

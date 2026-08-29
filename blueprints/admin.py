@@ -13,10 +13,16 @@ Full CRUD management of:
 """
 
 import os
+import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from supabase_client import get_admin_client, get_supabase_client
-from utils import admin_required, sanitize_string, send_whatsapp_message, generate_whatsapp_url
+from utils import (
+    admin_required, sanitize_string, send_whatsapp_message, generate_whatsapp_url,
+    validate_float_range, validate_integer_range, validate_phone_strict,
+    validate_name_strict, validate_and_save_upload,
+)
 
+logger = logging.getLogger("chimneycare.admin")
 admin_bp = Blueprint("admin", __name__)
 
 
@@ -433,22 +439,19 @@ def add_product():
         flash("Brand and model are required.", "error")
         return redirect(url_for("admin.products"))
 
+    is_valid_price, price_err = validate_float_range(price, 0.0, 1000000.0, "Price")
+    if not is_valid_price:
+        flash(price_err, "error")
+        return redirect(url_for("admin.products"))
+
     image_url = ""
-    if "image" in request.files:
+    if "image" in request.files and request.files["image"].filename:
         image = request.files["image"]
-        if image.filename:
-            try:
-                sb = get_admin_client()
-                file_ext = os.path.splitext(image.filename)[1]
-                file_path = f"products/{brand}_{model}{file_ext}".lower().replace(" ", "_")
-                sb.storage.from_("chimnecare-assets").upload(
-                    path=file_path,
-                    file=image.read(),
-                    file_options={"content-type": image.content_type or "image/jpeg"},
-                )
-                image_url = sb.storage.from_("chimnecare-assets").get_public_url(file_path)
-            except Exception:
-                pass
+        valid_upload, filename_or_err = validate_and_save_upload(image, target_folder="static/uploads/products", max_size_mb=5.0)
+        if valid_upload:
+            image_url = url_for("static", filename=f"uploads/products/{filename_or_err}")
+        else:
+            flash(f"Image upload warning: {filename_or_err}", "warning")
 
     try:
         sb = get_admin_client()
@@ -465,7 +468,8 @@ def add_product():
         }).execute()
         flash(f"Product '{brand} {model}' added to catalogue.", "success")
     except Exception as e:
-        flash(f"Error: {str(e)}", "error")
+        logger.error(f"Error adding product: {e}")
+        flash("Unable to add product. Please verify fields and try again.", "error")
 
     return redirect(url_for("admin.products"))
 
@@ -473,14 +477,19 @@ def add_product():
 @admin_bp.route("/admin/products/<product_id>/edit", methods=["POST"])
 @admin_required
 def edit_product(product_id):
-    brand = sanitize_string(request.form.get("brand", ""))
-    model = sanitize_string(request.form.get("model", ""))
+    brand = sanitize_string(request.form.get("brand", ""), max_length=100)
+    model = sanitize_string(request.form.get("model", ""), max_length=100)
     price = request.form.get("price", "0")
-    product_type = sanitize_string(request.form.get("type", ""))
-    size = sanitize_string(request.form.get("size", ""))
-    suction = sanitize_string(request.form.get("suction_capacity", ""))
+    product_type = sanitize_string(request.form.get("type", ""), max_length=50)
+    size = sanitize_string(request.form.get("size", ""), max_length=20)
+    suction = sanitize_string(request.form.get("suction_capacity", ""), max_length=30)
     description = sanitize_string(request.form.get("description", ""), max_length=1000)
     active = request.form.get("active") == "true"
+
+    is_valid_price, price_err = validate_float_range(price, 0.0, 1000000.0, "Price")
+    if not is_valid_price:
+        flash(price_err, "error")
+        return redirect(url_for("admin.products"))
 
     try:
         sb = get_admin_client()
@@ -497,19 +506,17 @@ def edit_product(product_id):
 
         if "image" in request.files and request.files["image"].filename:
             image = request.files["image"]
-            file_ext = os.path.splitext(image.filename)[1]
-            file_path = f"products/{brand}_{model}{file_ext}".lower().replace(" ", "_")
-            sb.storage.from_("chimnecare-assets").upload(
-                path=file_path,
-                file=image.read(),
-                file_options={"content-type": image.content_type or "image/jpeg", "upsert": "true"},
-            )
-            update_data["image_url"] = sb.storage.from_("chimnecare-assets").get_public_url(file_path)
+            valid_upload, filename_or_err = validate_and_save_upload(image, target_folder="static/uploads/products", max_size_mb=5.0)
+            if valid_upload:
+                update_data["image_url"] = url_for("static", filename=f"uploads/products/{filename_or_err}")
+            else:
+                flash(f"Image update note: {filename_or_err}", "warning")
 
         sb.table("chimney_products").update(update_data).eq("id", product_id).execute()
         flash(f"Product '{brand} {model}' updated.", "success")
     except Exception as e:
-        flash(f"Error: {str(e)}", "error")
+        logger.error(f"Error editing product {product_id}: {e}")
+        flash("Unable to update product details.", "error")
 
     return redirect(url_for("admin.products"))
 
