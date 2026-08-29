@@ -9,6 +9,7 @@ Provides two client factories:
 import os
 from flask import session
 from supabase import create_client, Client
+from supabase.client import ClientOptions
 from supabase_auth import SyncSupportedStorage
 from dotenv import load_dotenv
 
@@ -23,13 +24,22 @@ class FlaskSessionStorage(SyncSupportedStorage):
     """Persist Supabase auth tokens inside the Flask session cookie."""
 
     def get_item(self, key: str) -> str | None:
-        return session.get(key)
+        try:
+            return session.get(key)
+        except Exception:
+            return None
 
     def set_item(self, key: str, value: str) -> None:
-        session[key] = value
+        try:
+            session[key] = value
+        except Exception:
+            pass
 
     def remove_item(self, key: str) -> None:
-        session.pop(key, None)
+        try:
+            session.pop(key, None)
+        except Exception:
+            pass
 
 
 def get_supabase_client() -> Client:
@@ -37,10 +47,11 @@ def get_supabase_client() -> Client:
     Return a Supabase client that carries the logged-in user's JWT.
     All queries go through RLS — the database enforces row-level access.
     """
+    options = ClientOptions(storage=FlaskSessionStorage())
     return create_client(
         SUPABASE_URL,
         SUPABASE_ANON_KEY,
-        options={"storage": FlaskSessionStorage()},
+        options=options,
     )
 
 
