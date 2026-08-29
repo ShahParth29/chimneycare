@@ -75,6 +75,28 @@ def login():
         return render_template("auth/login.html"), 401
 
 
+@auth_bp.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    """Forgot password request route."""
+    if request.method == "GET":
+        return render_template("auth/forgot_password.html")
+
+    email = sanitize_string(request.form.get("email", ""))
+    if not email or not validate_email(email):
+        flash("Please enter a valid email address.", "error")
+        return render_template("auth/forgot_password.html"), 400
+
+    try:
+        sb = get_supabase_client()
+        sb.auth.reset_password_for_email(email)
+    except Exception:
+        # Avoid user enumeration by always returning the same confirmation
+        pass
+
+    flash("If an account exists with this email, password reset instructions have been sent.", "success")
+    return redirect(url_for("auth.login"))
+
+
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":

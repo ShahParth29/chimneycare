@@ -20,7 +20,12 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="password">Password</label>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xs);">
+          <label class="form-label" for="password" style="margin-bottom: 0;">Password</label>
+          <a href="{{ url_for('auth.forgot_password') }}" style="font-size: 0.8rem; color: var(--orange-500); text-decoration: none; font-weight: 600;">
+            Forgot Password?
+          </a>
+        </div>
         <div style="position:relative;">
           <input type="password" id="password" name="password" class="form-input" 
                  placeholder="Enter your password" required autocomplete="current-password">
