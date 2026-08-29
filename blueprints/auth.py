@@ -25,8 +25,9 @@ def login():
     if request.method == "GET":
         return render_template("auth/login.html")
 
-    email = sanitize_string(request.form.get("email", ""), max_length=254)
+    email = sanitize_string(request.form.get("email", ""), max_length=254).lower()
     password = request.form.get("password", "")
+
 
     # Strict Email Validation
     is_valid_email, email_err = validate_email_strict(email)
@@ -220,8 +221,9 @@ def admin_login():
     if request.method == "GET":
         return render_template("admin/login.html")
 
-    email = sanitize_string(request.form.get("email", ""), max_length=254)
+    email = sanitize_string(request.form.get("email", ""), max_length=254).lower()
     password = request.form.get("password", "")
+
 
     is_valid_email, email_err = validate_email_strict(email)
     if not is_valid_email or not password:
