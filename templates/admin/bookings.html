@@ -5,7 +5,7 @@
 <div class="admin-main__header">
   <div>
     <h1 class="admin-main__title">Customer Service Bookings</h1>
-    <p style="color: var(--steel-400); font-size: 0.85rem; margin: 4px 0 0;">Update service workflow, assign technicians, and adjust labour records.</p>
+    <p style="color: var(--steel-400); font-size: 0.85rem; margin: 4px 0 0;">Update service workflow, assign technicians, and dispatch WhatsApp confirmations with Service IDs.</p>
   </div>
   <div><input type="text" id="table-search" class="form-input" placeholder="Search bookings..." style="width:250px;"></div>
 </div>
@@ -21,7 +21,7 @@
         <th>Status</th>
         <th>Assigned Technician</th>
         <th>Labour (₹)</th>
-        <th>Date</th>
+        <th>WhatsApp Notify</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -67,7 +67,21 @@
           </form>
         </td>
         <td><strong>₹{{ "{:,.0f}".format(b.labour_charge or 0) }}</strong></td>
-        <td style="font-size:0.8rem; color:var(--steel-400);">{{ b.created_at[:10] if b.created_at else '—' }}</td>
+        <td>
+          {% if b.whatsapp_url %}
+          <div style="display:flex; gap:4px; align-items:center;">
+            <a href="{{ b.whatsapp_url }}" target="_blank" class="btn btn--sm" style="background:#25D366; color:white; font-size:0.75rem; padding:4px 8px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="Open WhatsApp Chat with prefilled Service ID & details">
+              💬 Chat
+            </a>
+            <form method="post" action="{{ url_for('admin.send_booking_confirmation', booking_id=b.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn--sm btn--outline" style="font-size:0.75rem; padding:4px 6px;" title="Dispatch Cloud API notification">📲 Push</button>
+            </form>
+          </div>
+          {% else %}
+          <span style="color:var(--steel-300); font-size:0.75rem;">No Phone</span>
+          {% endif %}
+        </td>
         <td>
           <button type="button" class="action-btn" title="Edit Full Booking Details" onclick="openModal('edit-booking-modal-{{ b.id }}')">✏️</button>
         </td>
@@ -111,6 +125,9 @@
             </div>
             <div class="mt-xl" style="display:flex; gap:var(--space-md);">
               <button type="submit" class="btn btn--primary">Update Booking</button>
+              {% if b.whatsapp_url %}
+              <a href="{{ b.whatsapp_url }}" target="_blank" class="btn" style="background:#25D366; color:white;">💬 Send WhatsApp to Customer</a>
+              {% endif %}
               <button type="button" class="btn btn--outline" onclick="closeModal('edit-booking-modal-{{ b.id }}')">Cancel</button>
             </div>
           </form>

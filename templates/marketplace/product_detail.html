@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ product.brand }} {{ product.model }}{% endblock %}
+{% block title %}{{ product.brand }} {{ product.model }} — ChimneyCare Marketplace{% endblock %}
+{% block meta_description %}Buy {{ product.brand }} {{ product.model }} with 5-year warranty, free installation, and old chimney exchange offers from Sobhraj Enterprise Pvt Ltd.{% endblock %}
 
 {% block content %}
 <section class="page-header">
@@ -19,15 +20,31 @@
       <div class="reveal">
         {% if product.image_url %}
         <img src="{{ product.image_url }}" alt="{{ product.brand }} {{ product.model }}" 
-             style="border-radius: var(--border-radius-xl); width: 100%; max-height: 500px; object-fit: cover;">
+             style="border-radius: var(--border-radius-xl); width: 100%; max-height: 520px; object-fit: cover; box-shadow: var(--shadow-lg); border: 1px solid var(--cream-300);">
         {% else %}
         <div style="width: 100%; height: 400px; background: linear-gradient(135deg, var(--cream-200), var(--cream-300)); border-radius: var(--border-radius-xl); display: flex; align-items: center; justify-content: center; font-size: 5rem;">🏠</div>
         {% endif %}
+
+        <!-- Guarantees Card -->
+        <div style="margin-top: var(--space-xl); background: var(--cream-100); border-radius: var(--border-radius-lg); padding: var(--space-xl); display: flex; flex-direction: column; gap: var(--space-md); border: 1px solid var(--cream-300);">
+          <div style="display: flex; gap: var(--space-sm); align-items: center;">
+            <span style="font-size: 1.3rem;">🛡️</span>
+            <span style="font-size: 0.9rem; color: var(--charcoal-700);"><strong>5-Year Motor Warranty</strong> &bull; Genuine OEM guarantee backed by Sobhraj Enterprise</span>
+          </div>
+          <div style="display: flex; gap: var(--space-sm); align-items: center;">
+            <span style="font-size: 1.3rem;">🚚</span>
+            <span style="font-size: 0.9rem; color: var(--charcoal-700);"><strong>Free Express Delivery &amp; Installation</strong> across Ahmedabad &amp; Gandhinagar</span>
+          </div>
+          <div style="display: flex; gap: var(--space-sm); align-items: center;">
+            <span style="font-size: 1.3rem;">🔄</span>
+            <span style="font-size: 0.9rem; color: var(--charcoal-700);"><strong>Exchange Discount Available</strong> &bull; Save ₹2,000 on trading in any old chimney</span>
+          </div>
+        </div>
       </div>
 
       <div class="reveal stagger-2">
         <span class="card__tag">{{ product.brand }}</span>
-        <h2 style="margin-bottom: var(--space-sm);">{{ product.model }}</h2>
+        <h2 style="margin-bottom: var(--space-sm); font-size: 2rem;">{{ product.model }}</h2>
 
         <div style="display: flex; gap: var(--space-lg); margin-bottom: var(--space-xl); flex-wrap: wrap;">
           {% if product.type %}
@@ -44,34 +61,35 @@
           {% endif %}
           {% if product.suction_capacity %}
           <div>
-            <span style="font-size: 0.75rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.06em; display: block;">Suction</span>
+            <span style="font-size: 0.75rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.06em; display: block;">Suction Power</span>
             <strong>{{ product.suction_capacity }}</strong>
           </div>
           {% endif %}
         </div>
 
         {% if product.description %}
-        <p style="color: var(--charcoal-600); margin-bottom: var(--space-xl);">{{ product.description }}</p>
+        <p style="color: var(--charcoal-600); margin-bottom: var(--space-xl); line-height: 1.7;">{{ product.description }}</p>
         {% endif %}
 
-        {% if product.specs %}
-        <h4 style="margin-bottom: var(--space-md);">Specifications</h4>
-        <div style="background: var(--cream-100); border-radius: var(--border-radius); padding: var(--space-lg); margin-bottom: var(--space-xl);">
-          {% for key, value in product.specs.items() %}
-          <div style="display: flex; justify-content: space-between; padding: var(--space-xs) 0; {% if not loop.last %}border-bottom: 1px solid var(--cream-300);{% endif %}">
-            <span style="color: var(--steel-400); text-transform: capitalize;">{{ key | replace('_', ' ') }}</span>
-            <strong>{{ value }}</strong>
+        <div style="background: white; border-radius: var(--border-radius-lg); border: 1px solid var(--cream-300); padding: var(--space-xl); margin-bottom: var(--space-xl);">
+          <div style="font-size: 0.8rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;">Special Pricing</div>
+          <div style="display: flex; align-items: baseline; gap: var(--space-sm); margin-top: 4px;">
+            <span style="font-family: var(--font-heading); font-size: 2.75rem; font-weight: 800; color: var(--charcoal-900);">
+              ₹{{ "{:,.0f}".format(product.price) }}
+            </span>
+            <span style="color: var(--success); font-weight: 600; font-size: 0.95rem;">All Taxes Included</span>
           </div>
-          {% endfor %}
+          <div style="font-size: 0.85rem; color: var(--steel-400); margin-top: 4px;">
+            + Free doorstep delivery, unboxing &amp; certified technician installation.
+          </div>
         </div>
-        {% endif %}
 
-        <div style="border-top: 2px solid var(--cream-300); padding-top: var(--space-xl); margin-top: var(--space-lg);">
-          <div style="font-family: var(--font-heading); font-size: 2.5rem; color: var(--charcoal-800); margin-bottom: var(--space-lg);">
-            ₹{{ "{:,.0f}".format(product.price) }}
-          </div>
-          <a href="{{ url_for('marketplace.checkout', product_id=product.id) }}" class="btn btn--primary btn--lg">Buy Now</a>
-          <a href="{{ url_for('marketplace.marketplace_index') }}" class="btn btn--outline btn--lg" style="margin-left: var(--space-md);">Back to Catalogue</a>
+        <div style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
+          <a href="{{ url_for('marketplace.checkout', product_id=product.id) }}" class="btn btn--primary btn--lg">Proceed to Checkout</a>
+          <a href="https://wa.me/918734002200?text={{ ('Hello ChimneyCare, I am interested in buying ' ~ product.brand ~ ' ' ~ product.model ~ ' priced at Rs.' ~ product.price ~ '. Please share offer details.') | urlencode }}" 
+             target="_blank" class="btn btn--secondary btn--lg" style="display: inline-flex; align-items: center; gap: 8px;">
+            💬 Enquire on WhatsApp
+          </a>
         </div>
       </div>
     </div>

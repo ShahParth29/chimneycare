@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Chimney Marketplace{% endblock %}
+{% block title %}Chimney Marketplace — Certified Kitchen Chimneys &amp; Exchange Offers{% endblock %}
+{% block meta_description %}Buy genuine kitchen chimneys from Faber, Elica, Hindware, and Glen with free installation and exchange discounts from Sobhraj Enterprise Pvt Ltd.{% endblock %}
 
 {% block extra_css %}
 <script src="{{ url_for('static', filename='js/marketplace.js') }}" defer></script>
@@ -12,6 +13,38 @@
       <a href="{{ url_for('services.landing') }}">Home</a> / <span>Marketplace</span>
     </div>
     <h1 class="page-header__title">Chimney Marketplace</h1>
+    <p style="color: var(--steel-300); font-size: 0.95rem; margin-top: 8px;">
+      Genuine OEM kitchen chimneys with official brand warranty &bull; Free standard installation across Ahmedabad &amp; Gandhinagar.
+    </p>
+  </div>
+</section>
+
+<!-- ═══ Business Model & Value Proposition Banner ═══ -->
+<section class="section section--cream" style="padding: var(--space-xl) 0; border-bottom: 1px solid var(--cream-300);">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-lg);" class="reveal">
+      <div style="background: white; padding: var(--space-lg); border-radius: var(--border-radius-lg); border: 1px solid var(--cream-300); display: flex; align-items: center; gap: var(--space-md);">
+        <div style="font-size: 2rem;">🔄</div>
+        <div>
+          <strong style="color: var(--charcoal-800); display: block;">Old Chimney Exchange</strong>
+          <span style="font-size: 0.85rem; color: var(--steel-400);">Instant flat ₹2,000 to ₹2,500 discount on trade-in.</span>
+        </div>
+      </div>
+      <div style="background: white; padding: var(--space-lg); border-radius: var(--border-radius-lg); border: 1px solid var(--cream-300); display: flex; align-items: center; gap: var(--space-md);">
+        <div style="font-size: 2rem;">🛠️</div>
+        <div>
+          <strong style="color: var(--charcoal-800); display: block;">Free Standard Installation</strong>
+          <span style="font-size: 0.85rem; color: var(--steel-400);">Carried out by Sobhraj Enterprise certified technicians.</span>
+        </div>
+      </div>
+      <div style="background: white; padding: var(--space-lg); border-radius: var(--border-radius-lg); border: 1px solid var(--cream-300); display: flex; align-items: center; gap: var(--space-md);">
+        <div style="font-size: 2rem;">🛡️</div>
+        <div>
+          <strong style="color: var(--charcoal-800); display: block;">5-Year Motor Warranty</strong>
+          <span style="font-size: 0.85rem; color: var(--steel-400);">Backed by OEM manufacturer guarantee &amp; AMC support.</span>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -71,7 +104,7 @@
     </div>
 
     <!-- Results count -->
-    <p class="text-muted mb-lg">{{ products | length }} product{{ 's' if products | length != 1 else '' }} found</p>
+    <p class="text-muted mb-lg">{{ products | length }} product{{ 's' if products | length != 1 else '' }} available in stock</p>
 
     <!-- Product Grid -->
     {% if products %}
@@ -79,9 +112,9 @@
       {% for product in products %}
       <div class="product-card reveal stagger-{{ (loop.index0 % 4) + 1 }}">
         {% if product.image_url %}
-        <img src="{{ product.image_url }}" alt="{{ product.brand }} {{ product.model }}" class="product-card__image">
+        <img src="{{ product.image_url }}" alt="{{ product.brand }} {{ product.model }}" class="product-card__image" style="height:240px; object-fit:cover; width:100%; border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;">
         {% else %}
-        <div class="product-card__image" style="display: flex; align-items: center; justify-content: center; font-size: 3rem; background: linear-gradient(135deg, var(--cream-200), var(--cream-300));">🏠</div>
+        <div class="product-card__image" style="display: flex; align-items: center; justify-content: center; font-size: 3rem; background: linear-gradient(135deg, var(--cream-200), var(--cream-300)); height:240px;">🏠</div>
         {% endif %}
         <div class="product-card__body">
           <span class="product-card__brand">{{ product.brand }}</span>
@@ -92,18 +125,22 @@
             {% if product.suction_capacity %} · {{ product.suction_capacity }}{% endif %}
           </div>
           <div class="product-card__footer">
-            <span class="product-card__price">₹{{ "{:,.0f}".format(product.price) }}</span>
-            <a href="{{ url_for('marketplace.product_detail', product_id=product.id) }}" class="btn btn--primary btn--sm">View</a>
+            <div>
+              <span class="product-card__price">₹{{ "{:,.0f}".format(product.price) }}</span>
+              <div style="font-size:0.75rem; color:var(--success); font-weight:600;">+ Free Installation</div>
+            </div>
+            <a href="{{ url_for('marketplace.product_detail', product_id=product.id) }}" class="btn btn--primary btn--sm">View Model</a>
           </div>
         </div>
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <div class="empty-state reveal">
-      <div class="empty-state__icon">🏪</div>
-      <div class="empty-state__title">No products found</div>
-      <p>Try adjusting your filters, or check back later as our catalogue grows.</p>
+    <div class="empty-state">
+      <div class="empty-state__icon">🔍</div>
+      <div class="empty-state__title">No chimneys match your filters</div>
+      <p class="empty-state__desc">Try clearing some filters or searching for another brand.</p>
+      <a href="{{ url_for('marketplace.marketplace_index') }}" class="btn btn--outline mt-md">Reset Filters</a>
     </div>
     {% endif %}
   </div>

@@ -15,7 +15,7 @@ Full CRUD management of:
 import os
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from supabase_client import get_admin_client, get_supabase_client
-from utils import admin_required, sanitize_string
+from utils import admin_required, sanitize_string, send_whatsapp_message, generate_whatsapp_url
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -637,17 +637,78 @@ def bookings():
     try:
         result = (
             sb.table("services")
-            .select("*, profiles(name, email, phone), technicians(id, name)")
+            .select("*, profiles(name, email, phone, whatsapp_number), technicians(id, name, phone, reveal_status)")
             .order("created_at", desc=True)
             .execute()
         )
         all_bookings = result.data or []
         techs_res = sb.table("technicians").select("id, name").execute()
         techs = techs_res.data or []
+
+        # Enrich each booking with direct WhatsApp message link
+        for b in all_bookings:
+            cust_phone = (b.get("profiles") or {}).get("whatsapp_number") or (b.get("profiles") or {}).get("phone") or ""
+            cust_name = (b.get("profiles") or {}).get("name") or "Customer"
+            tech_name = (b.get("technicians") or {}).get("name") or "Assigning soon"
+            
+            msg = (
+                f"🔥 *ChimneyCare Booking Confirmation*\n"
+                f"🏢 _Sobhraj Enterprise Pvt Ltd_\n\n"
+                f"Hello {cust_name},\n"
+                f"Your ChimneyCare booking has been confirmed!\n\n"
+                f"📋 *Order ID:* `{b.get('order_id')}`\n"
+                f"🆔 *Service ID:* `{b.get('service_id')}`\n"
+                f"🏷️ *Type:* {str(b.get('type', 'Service')).replace('_', ' ').title()}\n"
+                f"📅 *Status:* {str(b.get('status', 'Confirmed')).replace('_', ' ').title()}\n"
+                f"👷 *Assigned Technician:* {tech_name}\n"
+                f"💰 *Labour Charge:* ₹{int(b.get('labour_charge') or 0)}\n\n"
+                f"Track live: http://localhost:5000/dashboard\n"
+                f"Helpline: +91 87340 02200"
+            )
+            b["whatsapp_url"] = generate_whatsapp_url(cust_phone, msg) if cust_phone else ""
+            b["whatsapp_phone"] = cust_phone
+
     except Exception:
         all_bookings = []
         techs = []
     return render_template("admin/bookings.html", bookings=all_bookings, technicians=techs)
+
+
+@admin_bp.route("/admin/bookings/<booking_id>/send-confirmation", methods=["POST"])
+@admin_required
+def send_booking_confirmation(booking_id):
+    sb = get_admin_client()
+    try:
+        b_res = sb.table("services").select("*, profiles(name, phone, whatsapp_number), technicians(name)").eq("id", booking_id).execute()
+        if b_res.data:
+            b = b_res.data[0]
+            cust_phone = (b.get("profiles") or {}).get("whatsapp_number") or (b.get("profiles") or {}).get("phone")
+            cust_name = (b.get("profiles") or {}).get("name") or "Customer"
+            tech_name = (b.get("technicians") or {}).get("name") or "Operations Team"
+            
+            if cust_phone:
+                msg = (
+                    f"🔥 *ChimneyCare Booking Confirmation*\n"
+                    f"🏢 _Sobhraj Enterprise Pvt Ltd_\n\n"
+                    f"Hello {cust_name},\n"
+                    f"Your ChimneyCare booking has been confirmed!\n\n"
+                    f"📋 *Order ID:* `{b.get('order_id')}`\n"
+                    f"🆔 *Service ID:* `{b.get('service_id')}`\n"
+                    f"🏷️ *Type:* {str(b.get('type', 'Service')).replace('_', ' ').title()}\n"
+                    f"📅 *Status:* {str(b.get('status', 'Confirmed')).replace('_', ' ').title()}\n"
+                    f"👷 *Technician:* {tech_name}\n"
+                    f"💰 *Labour:* ₹{int(b.get('labour_charge') or 0)}\n\n"
+                    f"Track live: http://localhost:5000/dashboard\n"
+                    f"Helpline: +91 87340 02200"
+                )
+                send_whatsapp_message(cust_phone, msg)
+                flash(f"Confirmation WhatsApp dispatched to {cust_phone}.", "success")
+            else:
+                flash("Customer has no phone number on file.", "warning")
+    except Exception as e:
+        flash(f"Error sending WhatsApp: {str(e)}", "error")
+
+    return redirect(url_for("admin.bookings"))
 
 
 @admin_bp.route("/admin/bookings/<booking_id>/status", methods=["POST"])
@@ -686,17 +747,76 @@ def repairs():
     try:
         result = (
             sb.table("repair_jobs")
-            .select("*, profiles(name, email, phone), technicians(id, name)")
+            .select("*, profiles(name, email, phone, whatsapp_number), technicians(id, name, phone, reveal_status)")
             .order("created_at", desc=True)
             .execute()
         )
         all_repairs = result.data or []
         techs_res = sb.table("technicians").select("id, name").execute()
         techs = techs_res.data or []
+
+        # Enrich each repair with direct WhatsApp message link
+        for r in all_repairs:
+            cust_phone = (r.get("profiles") or {}).get("whatsapp_number") or (r.get("profiles") or {}).get("phone") or ""
+            cust_name = (r.get("profiles") or {}).get("name") or "Customer"
+            tech_name = (r.get("technicians") or {}).get("name") or "Assigning after confirmation"
+
+            msg = (
+                f"🔥 *ChimneyCare Repair Job Confirmation*\n"
+                f"🏢 _Sobhraj Enterprise Pvt Ltd_\n\n"
+                f"Hello {cust_name},\n"
+                f"Your chimney repair request has been processed!\n\n"
+                f"🆔 *Service ID:* `{r.get('service_id')}`\n"
+                f"📅 *Status:* {str(r.get('confirmation_status', 'Pending')).replace('_', ' ').title()}\n"
+                f"👷 *Technician:* {tech_name}\n"
+                f"💰 *Diagnostic Fee:* ₹{int(r.get('labour_charge') or 0)}\n"
+                f"💵 *Total Cost:* ₹{int(r.get('total_cost') or 0)}\n\n"
+                f"Track live: http://localhost:5000/dashboard\n"
+                f"Helpline: +91 87340 02200"
+            )
+            r["whatsapp_url"] = generate_whatsapp_url(cust_phone, msg) if cust_phone else ""
+            r["whatsapp_phone"] = cust_phone
+
     except Exception:
         all_repairs = []
         techs = []
     return render_template("admin/repairs.html", repairs=all_repairs, technicians=techs)
+
+
+@admin_bp.route("/admin/repairs/<repair_id>/send-confirmation", methods=["POST"])
+@admin_required
+def send_repair_confirmation(repair_id):
+    sb = get_admin_client()
+    try:
+        r_res = sb.table("repair_jobs").select("*, profiles(name, phone, whatsapp_number), technicians(name)").eq("id", repair_id).execute()
+        if r_res.data:
+            r = r_res.data[0]
+            cust_phone = (r.get("profiles") or {}).get("whatsapp_number") or (r.get("profiles") or {}).get("phone")
+            cust_name = (r.get("profiles") or {}).get("name") or "Customer"
+            tech_name = (r.get("technicians") or {}).get("name") or "Operations Specialist"
+
+            if cust_phone:
+                msg = (
+                    f"🔥 *ChimneyCare Repair Confirmation*\n"
+                    f"🏢 _Sobhraj Enterprise Pvt Ltd_\n\n"
+                    f"Hello {cust_name},\n"
+                    f"Your chimney repair request has been confirmed!\n\n"
+                    f"🆔 *Service ID:* `{r.get('service_id')}`\n"
+                    f"📅 *Status:* {str(r.get('confirmation_status', 'Confirmed')).replace('_', ' ').title()}\n"
+                    f"👷 *Technician:* {tech_name}\n"
+                    f"💰 *Diagnostic Labour:* ₹{int(r.get('labour_charge') or 0)}\n"
+                    f"💵 *Total Estimate:* ₹{int(r.get('total_cost') or 0)}\n\n"
+                    f"Track live: http://localhost:5000/dashboard\n"
+                    f"Helpline: +91 87340 02200"
+                )
+                send_whatsapp_message(cust_phone, msg)
+                flash(f"Confirmation WhatsApp dispatched to {cust_phone}.", "success")
+            else:
+                flash("Customer has no phone number on file.", "warning")
+    except Exception as e:
+        flash(f"Error sending WhatsApp: {str(e)}", "error")
+
+    return redirect(url_for("admin.repairs"))
 
 
 @admin_bp.route("/admin/repairs/<repair_id>/update", methods=["POST"])
