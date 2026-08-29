@@ -4,7 +4,7 @@ create_admin.py — Creates or configures the official admin user in Supabase.
 
 from supabase_client import get_admin_client
 
-def create_or_update_admin(email="admin.chimneycare@gmail.com", password="AdminPassword@2026", name="ChimneyCare Admin"):
+def create_or_update_admin(email="admin.chimneycare@gmail.com", password="Admin.ChimneyCare@291302", name="ChimneyCare Admin"):
     sb = get_admin_client()
     print(f"Setting up admin user: {email}...")
 
