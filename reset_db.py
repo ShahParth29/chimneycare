@@ -3,9 +3,13 @@ reset_db.py — Resets and cleans all database entries (bookings, repairs, order
 and seeds fresh initial catalog and admin data.
 """
 
+import os
+from dotenv import load_dotenv
 from supabase_client import get_admin_client
 from seed_data import seed
 from create_admin import create_or_update_admin
+
+load_dotenv()
 
 def reset_database():
     sb = get_admin_client()
@@ -34,7 +38,7 @@ def reset_database():
 
     # 4. Clear Non-Admin Profiles and Test Auth Users
     try:
-        admin_email = "admin.chimneycare@gmail.com"
+        admin_email = os.environ.get("ADMIN_EMAIL", "admin.chimneycare@gmail.com")
         users = sb.auth.admin.list_users()
         for u in users:
             if u.email != admin_email and getattr(u, 'email', None) != admin_email:
