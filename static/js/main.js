@@ -104,15 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Navbar Scroll Effect ─────────────────
   const nav = document.querySelector('.nav');
   if (nav) {
-    let lastScroll = 0;
     window.addEventListener('scroll', () => {
-      const currentScroll = window.pageYOffset;
-      if (currentScroll > 50) {
-        nav.style.background = 'rgba(15, 15, 15, 0.98)';
+      if (window.pageYOffset > 20) {
+        nav.classList.add('nav--scrolled');
       } else {
-        nav.style.background = 'rgba(15, 15, 15, 0.92)';
+        nav.classList.remove('nav--scrolled');
       }
-      lastScroll = currentScroll;
     });
   }
 

@@ -156,7 +156,12 @@ img { max-width: 100%; height: auto; display: block; }
   height: 70px;
   background: #0f0f0f;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  transition: background var(--transition-base), box-shadow var(--transition-base);
+  transition: box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.nav--scrolled {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  border-bottom-color: rgba(255, 255, 255, 0.14);
 }
 
 .nav__inner {
