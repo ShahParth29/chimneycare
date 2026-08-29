@@ -2191,14 +2191,9 @@ body.nav-open {
     align-items: flex-start;
   }
   
-  .nav__links {
-    padding: var(--space-xl) var(--space-md);
-    gap: var(--space-md);
-    overflow-y: auto;
-  }
-  
-  .nav__link {
-    font-size: 1rem;
+  .nav__links.open {
+    padding: var(--space-lg) var(--space-md);
+    gap: 0.3rem;
   }
 }
 
