@@ -7,6 +7,7 @@ security headers, error handling, and template context processors.
 
 import os
 import logging
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,7 +20,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("chimneycare.app")
 
-from flask import Flask, render_template, session, request
+from flask import Flask, render_template, session, request, jsonify
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -86,6 +87,18 @@ limiter.limit(RATELIMIT_AUTH, key_func=get_auth_rate_limit_key)(app.view_functio
 
 # API & Interactive Endpoint Limits
 limiter.limit(RATELIMIT_API)(app.view_functions["marketplace.validate_promo"])
+
+# ── Health Check Endpoint (UptimeRobot / Keep-Alive) ──
+
+@app.route("/health", methods=["GET", "HEAD"])
+@limiter.exempt
+def health_check():
+    """Lightweight health check endpoint for uptime monitoring."""
+    return jsonify({
+        "success": True,
+        "message": "Server is healthy",
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    }), 200
 
 # ── Template Context Processor ──────────────────
 

@@ -31,6 +31,17 @@ class ChimneyCareSecurityTests(unittest.TestCase):
         self.assertEqual(res.headers.get("X-XSS-Protection"), "1; mode=block")
         self.assertEqual(res.headers.get("Referrer-Policy"), "strict-origin-when-cross-origin")
 
+    def test_health_check_endpoint(self):
+        """Verify lightweight /health endpoint returns HTTP 200 with expected JSON payload."""
+        res = self.client.get("/health")
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertTrue(data.get("success"))
+        self.assertEqual(data.get("message"), "Server is healthy")
+        self.assertIn("timestamp", data)
+        res_head = self.client.head("/health")
+        self.assertEqual(res_head.status_code, 200)
+
     def test_unauthenticated_admin_access_blocked(self):
         """Ensure all protected admin endpoints deny unauthenticated access."""
         protected_routes = [
