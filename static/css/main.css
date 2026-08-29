@@ -250,7 +250,6 @@ img { max-width: 100%; height: auto; display: block; }
   box-shadow: 0 4px 15px rgba(212, 98, 43, 0.3);
 }
 
-/* Mobile nav toggle */
 .nav__toggle {
   display: none;
   background: none;
@@ -265,6 +264,15 @@ img { max-width: 100%; height: auto; display: block; }
   background: var(--cream-100);
   margin: 5px 0;
   transition: all var(--transition-fast);
+}
+.nav__toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+.nav__toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+.nav__toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
 }
 
 /* ── Hero Section ────────────────────────────── */

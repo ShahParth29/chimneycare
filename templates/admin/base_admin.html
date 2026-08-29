@@ -2,12 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>{% block admin_title %}Admin{% endblock %} — ChimneyCare Admin</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <!-- Supabase JS for Admin Realtime Alerts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    window.__SUPABASE_URL__ = "{{ config.get('SUPABASE_URL', '') }}";
+    window.__SUPABASE_ANON_KEY__ = "{{ config.get('SUPABASE_ANON_KEY', '') }}";
+    window.__IS_ADMIN__ = true;
+  </script>
 </head>
 <body>
   {% with messages = get_flashed_messages(with_categories=true) %}
@@ -20,9 +27,19 @@
     {% endif %}
   {% endwith %}
 
+  <!-- Toast Notification Container for Realtime Admin Alerts -->
+  <div class="admin-toast-container" id="admin-toast-container"></div>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
   <div class="admin-layout">
     <aside class="admin-sidebar" id="admin-sidebar">
-      <a href="{{ url_for('admin.dashboard') }}" class="admin-sidebar__brand">🔥 ChimneyCare</a>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-right:var(--space-md);">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-sidebar__brand">🔥 ChimneyCare</a>
+        <button id="sidebar-close" style="display:none; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+
       <span class="admin-sidebar__label">Overview</span>
       <ul class="admin-sidebar__nav">
         <li><a href="{{ url_for('admin.dashboard') }}" class="admin-sidebar__link"><span>📊</span> Dashboard</a></li>
@@ -57,13 +74,13 @@
 
     <main class="admin-main">
       <div class="admin-topbar">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <button id="sidebar-toggle" style="display:none; background:white; border:1px solid var(--cream-300); border-radius:4px; padding:6px 10px; cursor:pointer; font-size:1.1rem;">☰</button>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <button id="sidebar-toggle" style="display:none; background:white; border:1px solid var(--cream-300); border-radius:6px; padding:8px 12px; cursor:pointer; font-size:1.1rem;" aria-label="Toggle Sidebar">☰</button>
           <span style="font-size: 0.85rem; color: var(--steel-400);">ChimneyCare Operations &bull; Sobhraj Enterprise Pvt Ltd</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
           <span style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-800);">admin.chimneycare@gmail.com</span>
-          <span class="badge badge--confirmed">Administrator</span>
+          <span class="badge badge--confirmed">Admin</span>
         </div>
       </div>
       {% block admin_content %}{% endblock %}
