@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy — ChimneyCare (Sobharaj Enterprise Pvt Ltd){% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / <span>Privacy Policy</span>
+    </div>
+    <h1 class="page-header__title">Privacy Policy</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow">
+    <div style="background: white; border-radius: var(--border-radius-xl); border: 1px solid var(--cream-300); padding: var(--space-3xl); line-height: 1.8; color: var(--charcoal-700);">
+      <p style="font-size: 0.85rem; color: var(--steel-400); margin-bottom: var(--space-xl);">
+        Last Updated: August 2026 | <strong>Sobharaj Enterprise Pvt Ltd</strong>
+      </p>
+
+      <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-sm);">1. Information We Collect</h3>
+      <p>
+        To facilitate home service visits and order fulfillment, we collect your name, service address, email address, phone number, and WhatsApp number when you create an account or book an appointment on ChimneyCare.
+      </p>
+
+      <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-sm);">2. How We Use Your Data</h3>
+      <p>
+        Your data is used strictly for scheduling technician visits, service coordination, order delivery, sending status updates (including WhatsApp confirmation messages), and customer support. We do not sell or rent your personal information to third parties.
+      </p>
+
+      <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-sm);">3. Data Security</h3>
+      <p>
+        All user data is stored on encrypted databases protected by Row Level Security (RLS) policies. Access to customer records is restricted to authorized operations personnel.
+      </p>
+
+      <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-sm);">4. Communication &amp; Opt-Out</h3>
+      <p>
+        We send transactional alerts regarding your chimney bookings and orders. If you wish to modify your communication preferences, contact us at <a href="mailto:chimneycare.in@gmail.com">chimneycare.in@gmail.com</a>.
+      </p>
+
+      <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-sm);">5. Contact Privacy Officer</h3>
+      <p>
+        <strong>Sobharaj Enterprise Pvt Ltd</strong><br>
+        Email: <a href="mailto:chimneycare.in@gmail.com">chimneycare.in@gmail.com</a><br>
+        Phone: <a href="tel:+918734002200">+91 87340 02200</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -4,42 +4,53 @@
       <div>
         <div class="footer__brand">🔥 ChimneyCare</div>
         <p class="footer__desc">
-          Professional chimney cleaning, repair, and installation services. 
-          Trusted by homeowners since 2018. Licensed, insured, and committed 
-          to keeping your kitchen safe and efficient.
+          A dedicated kitchen appliance service and installation division of 
+          <strong>Sobharaj Enterprise Pvt Ltd</strong>. Trusted by thousands of homeowners 
+          for certified chimney cleaning, genuine repairs, and new chimney purchases.
         </p>
+        <div style="margin-top: var(--space-md); display: flex; flex-direction: column; gap: var(--space-xs); font-size: 0.85rem; color: var(--steel-200);">
+          <div>📞 <strong>Helpline / WhatsApp:</strong> <a href="https://wa.me/918734002200" target="_blank" style="color: var(--orange-300); text-decoration: none;">+91 87340 02200</a></div>
+          <div>✉️ <strong>Support:</strong> <a href="mailto:chimneycare.in@gmail.com" style="color: var(--steel-100); text-decoration: none;">chimneycare.in@gmail.com</a></div>
+          <div>🏢 <strong>Parent Company:</strong> Sobharaj Enterprise Pvt Ltd</div>
+        </div>
       </div>
+
       <div>
         <h4 class="footer__heading">Services</h4>
         <ul class="footer__links">
           <li><a href="{{ url_for('services.services_index') }}">Chimney Cleaning</a></li>
-          <li><a href="{{ url_for('services.amc_plans') }}">AMC Plans</a></li>
+          <li><a href="{{ url_for('services.amc_plans') }}">AMC Plans (3/6/12 Mo)</a></li>
           <li><a href="{{ url_for('repair.repair_index') }}">Repair &amp; Parts</a></li>
           <li><a href="{{ url_for('marketplace.marketplace_index') }}">Buy a Chimney</a></li>
+          <li><a href="{{ url_for('services.service_areas') }}">Service Areas</a></li>
         </ul>
       </div>
+
       <div>
         <h4 class="footer__heading">Company</h4>
         <ul class="footer__links">
-          <li><a href="#">About Us</a></li>
-          <li><a href="#">Our Technicians</a></li>
-          <li><a href="#">Service Areas</a></li>
-          <li><a href="#">Careers</a></li>
+          <li><a href="{{ url_for('services.about') }}">About ChimneyCare</a></li>
+          <li><a href="{{ url_for('services.about') }}#sobharaj">Sobharaj Enterprise Pvt Ltd</a></li>
+          <li><a href="{{ url_for('services.service_areas') }}">Coverage Cities</a></li>
+          <li><a href="{{ url_for('services.contact') }}">Contact Us</a></li>
+          <li><a href="{{ url_for('auth.admin_login') }}">Admin Portal</a></li>
         </ul>
       </div>
+
       <div>
-        <h4 class="footer__heading">Support</h4>
+        <h4 class="footer__heading">Support &amp; Legal</h4>
         <ul class="footer__links">
-          <li><a href="#">Contact Us</a></li>
-          <li><a href="#">FAQ</a></li>
-          <li><a href="#">Terms of Service</a></li>
-          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="{{ url_for('services.faq') }}">FAQ &amp; Knowledge Base</a></li>
+          <li><a href="{{ url_for('services.terms') }}">Terms of Service</a></li>
+          <li><a href="{{ url_for('services.privacy') }}">Privacy Policy</a></li>
+          <li><a href="https://wa.me/918734002200" target="_blank" style="color: #25D366; font-weight: 600;">💬 Direct WhatsApp Chat</a></li>
         </ul>
       </div>
     </div>
+
     <div class="footer__bottom">
-      <span>&copy; {{ "2026" }} ChimneyCare. All rights reserved.</span>
-      <span>Serving Mumbai, Delhi, Bangalore &amp; more</span>
+      <span>&copy; {{ "2026" }} ChimneyCare (A unit of Sobharaj Enterprise Pvt Ltd). All rights reserved.</span>
+      <span>Helpline: +91 87340 02200 | chimneycare.in@gmail.com</span>
     </div>
   </div>
 </footer>

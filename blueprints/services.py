@@ -200,3 +200,62 @@ def my_bookings():
         bookings = []
 
     return render_template("services/my_bookings.html", bookings=bookings)
+
+
+# ──────────────────────────────────────────────
+#  Supplementary Informational & Legal Routes
+# ──────────────────────────────────────────────
+
+@services_bp.route("/about")
+def about():
+    """About ChimneyCare & Parent Company Sobharaj Enterprise Pvt Ltd."""
+    return render_template("pages/about.html")
+
+
+@services_bp.route("/contact", methods=["GET", "POST"])
+def contact():
+    """Contact page with direct WhatsApp, email and inquiry form."""
+    if request.method == "POST":
+        name = sanitize_string(request.form.get("name", ""))
+        email = sanitize_string(request.form.get("email", ""))
+        phone = sanitize_string(request.form.get("phone", ""))
+        message = sanitize_string(request.form.get("message", ""), max_length=1000)
+
+        if not name or not email or not message:
+            flash("Please fill in all required fields.", "error")
+            return render_template("pages/contact.html"), 400
+
+        # Send WhatsApp alert to support
+        send_whatsapp_message(
+            "8734002200",
+            f"New Inquiry from {name} ({phone or email}): {message}"
+        )
+        flash("Thank you for reaching out! Our team will contact you shortly.", "success")
+        return redirect(url_for("services.contact"))
+
+    return render_template("pages/contact.html")
+
+
+@services_bp.route("/service-areas")
+def service_areas():
+    """List of coverage cities, pincodes and operational zones."""
+    return render_template("pages/service_areas.html")
+
+
+@services_bp.route("/faq")
+def faq():
+    """Frequently asked questions."""
+    return render_template("pages/faq.html")
+
+
+@services_bp.route("/terms")
+def terms():
+    """Terms of Service."""
+    return render_template("pages/terms.html")
+
+
+@services_bp.route("/privacy")
+def privacy():
+    """Privacy Policy."""
+    return render_template("pages/privacy.html")
+

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service — ChimneyCare (Sobharaj Enterprise Pvt Ltd){% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / <span>Terms of Service</span>
+    </div>
+    <h1 class="page-header__title">Terms of Service</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow">
+    <div style="background: white; border-radius: var(--border-radius-xl); border: 1px solid var(--cream-300); padding: var(--space-3xl); line-height: 1.8; color: var(--charcoal-700);">
+      <p style="font-size: 0.85rem; color: var(--steel-400); margin-bottom: var(--space-xl);">
+        Last Updated: August 2026 | Operated by <strong>Sobharaj Enterprise Pvt Ltd</strong>
+      </p>
+
+      <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-sm);">1. Introduction</h3>
+      <p>
+        These Terms of Service govern your use of the ChimneyCare platform, services, and product marketplace operated by <strong>Sobharaj Enterprise Pvt Ltd</strong> ("ChimneyCare", "Company", "we", "our"). By booking a service or purchasing a product, you agree to these terms.
+      </p>
+
+      <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-sm);">2. Services &amp; AMC Contracts</h3>
+      <p>
+        ChimneyCare offers one-time cleaning services, repair diagnostics, and Annual Maintenance Contracts (3, 6, and 12-month durations). All service visits must be booked through the platform. For AMC contracts, scheduled visits must be utilized within the contract term.
+      </p>
+
+      <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-sm);">3. Telephonic Confirmation &amp; Technician Access</h3>
+      <p>
+        For repair requests, our central operations desk conducts a telephonic confirmation within 24 hours. Technician contact details are disclosed to customers only following successful confirmation to guarantee safety and scheduling accuracy.
+      </p>
+
+      <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-sm);">4. Pricing, Labour &amp; Spare Parts</h3>
+      <p>
+        All prices shown on ChimneyCare represent transparent human-entered pricing. Labour charges and spare part prices are itemized separately. Any additional replacement part recommended by a technician during a visit will only be installed upon your verbal or written consent.
+      </p>
+
+      <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-sm);">5. Contact &amp; Grievances</h3>
+      <p>
+        For any grievance or support query, please contact:<br>
+        <strong>Sobharaj Enterprise Pvt Ltd</strong><br>
+        Email: <a href="mailto:chimneycare.in@gmail.com">chimneycare.in@gmail.com</a><br>
+        Helpline / WhatsApp: <a href="tel:+918734002200">+91 87340 02200</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

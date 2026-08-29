@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us — ChimneyCare &amp; Sobharaj Enterprise Pvt Ltd{% endblock %}
+{% block meta_description %}Get in touch with ChimneyCare. WhatsApp Helpline: +91 87340 02200, Email: chimneycare.in@gmail.com. We are here to help with your chimney servicing, AMC plans, and repair inquiries.{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / <span>Contact Us</span>
+    </div>
+    <h1 class="page-header__title">Contact Us</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="grid-editorial">
+      <!-- Contact Info -->
+      <div class="reveal">
+        <span class="section__label">Get In Touch</span>
+        <h2 class="section__title">We're always here to assist you.</h2>
+        <p class="section__desc">
+          Whether you need an urgent chimney repair, advice on an AMC contract, or help selecting a new chimney from our marketplace, our support team is ready.
+        </p>
+
+        <!-- Direct Contact Cards -->
+        <div style="display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-xl) 0;">
+          <div style="background: white; border: 1px solid var(--cream-300); border-radius: var(--border-radius-lg); padding: var(--space-lg); display: flex; gap: var(--space-md); align-items: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; flex-shrink: 0;">
+              💬
+            </div>
+            <div>
+              <span style="font-size: 0.75rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; display: block;">WhatsApp Support (Fastest)</span>
+              <a href="https://wa.me/918734002200?text=Hi%20ChimneyCare%20Support%2C%20I%20have%20an%20inquiry" target="_blank" style="font-size: 1.1rem; font-weight: 700; color: var(--charcoal-800); text-decoration: none;">
+                +91 87340 02200
+              </a>
+              <div style="font-size: 0.8rem; color: var(--steel-300);">Available Mon–Sat: 9:00 AM – 8:00 PM</div>
+            </div>
+          </div>
+
+          <div style="background: white; border: 1px solid var(--cream-300); border-radius: var(--border-radius-lg); padding: var(--space-lg); display: flex; gap: var(--space-md); align-items: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--orange-100); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--orange-600); flex-shrink: 0;">
+              ✉️
+            </div>
+            <div>
+              <span style="font-size: 0.75rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; display: block;">Email Inquiries</span>
+              <a href="mailto:chimneycare.in@gmail.com" style="font-size: 1.05rem; font-weight: 700; color: var(--charcoal-800); text-decoration: none;">
+                chimneycare.in@gmail.com
+              </a>
+              <div style="font-size: 0.8rem; color: var(--steel-300);">Response within 24 business hours</div>
+            </div>
+          </div>
+
+          <div style="background: white; border: 1px solid var(--cream-300); border-radius: var(--border-radius-lg); padding: var(--space-lg); display: flex; gap: var(--space-md); align-items: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--cream-200); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--charcoal-700); flex-shrink: 0;">
+              🏢
+            </div>
+            <div>
+              <span style="font-size: 0.75rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; display: block;">Parent Entity</span>
+              <strong style="color: var(--charcoal-800); font-size: 1rem;">Sobharaj Enterprise Pvt Ltd</strong>
+              <div style="font-size: 0.8rem; color: var(--steel-300);">Corporate &amp; Operational Headquarters</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inquiry Form -->
+      <div class="reveal stagger-2">
+        <div style="background: white; border-radius: var(--border-radius-xl); border: 1px solid var(--cream-300); padding: var(--space-3xl); box-shadow: var(--shadow-md);">
+          <h3 style="margin-bottom: var(--space-md);">Send an Online Message</h3>
+          <p style="color: var(--steel-300); font-size: 0.9rem; margin-bottom: var(--space-xl);">
+            Fill out the details below and a service coordinator will call you back.
+          </p>
+
+          <form method="post" action="{{ url_for('services.contact') }}" data-validate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+              <label class="form-label" for="name">Your Name *</label>
+              <input type="text" id="name" name="name" class="form-input" placeholder="e.g., Rajesh Kumar" required>
+              <span class="form-error"></span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+              <div class="form-group">
+                <label class="form-label" for="email">Email Address *</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required>
+                <span class="form-error"></span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="phone">Phone / WhatsApp</label>
+                <input type="tel" id="phone" name="phone" class="form-input" placeholder="+91 87340 02200" data-validate-phone>
+                <span class="form-error"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="message">Message / Inquiry Details *</label>
+              <textarea id="message" name="message" class="form-textarea" rows="4" placeholder="Tell us about your chimney model or service requirement..." required></textarea>
+              <span class="form-error"></span>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--full btn--lg">Submit Inquiry</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

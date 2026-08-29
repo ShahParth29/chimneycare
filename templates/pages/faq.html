@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Frequently Asked Questions — ChimneyCare{% endblock %}
+{% block meta_description %}Find answers to common questions about ChimneyCare services, AMC plans, chimney cleaning, repair costs, genuine spare parts, and orders.{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / <span>FAQ</span>
+    </div>
+    <h1 class="page-header__title">Frequently Asked Questions</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow">
+    <!-- FAQ Group 1: General & Services -->
+    <h3 style="margin-bottom: var(--space-lg);" class="reveal">General &amp; Cleaning Services</h3>
+
+    <div style="display: flex; flex-direction: column; gap: var(--space-md); margin-bottom: var(--space-3xl);">
+      <div class="admin-panel reveal">
+        <div class="admin-panel__header" style="cursor: pointer;">
+          <strong style="font-size: 1.05rem;">How often should I get my kitchen chimney deep cleaned?</strong>
+        </div>
+        <div class="admin-panel__body">
+          <p style="color: var(--charcoal-600); margin: 0; line-height: 1.6;">
+            For standard Indian cooking with daily frying and spices, we recommend deep cleaning every <strong>2 to 3 months</strong>. If you cook lightly, a service every 4–6 months is sufficient. Our AMC plans are tailored around these exact usage cycles.
+          </p>
+        </div>
+      </div>
+
+      <div class="admin-panel reveal">
+        <div class="admin-panel__header">
+          <strong style="font-size: 1.05rem;">What is included in a One-Time Deep Cleaning?</strong>
+        </div>
+        <div class="admin-panel__body">
+          <p style="color: var(--charcoal-600); margin: 0; line-height: 1.6;">
+            Our deep cleaning includes complete disassembly of baffle/mesh filters, chemical degreasing, motor and blower fan blade cleansing, oil collector tray drainage and degreasing, exterior stainless steel / glass polishing, and duct airflow inspection.
+          </p>
+        </div>
+      </div>
+
+      <div class="admin-panel reveal">
+        <div class="admin-panel__header">
+          <strong style="font-size: 1.05rem;">How does the AMC (Annual Maintenance Contract) work?</strong>
+        </div>
+        <div class="admin-panel__body">
+          <p style="color: var(--charcoal-600); margin: 0; line-height: 1.6;">
+            We offer 3-month (1 visit), 6-month (2 visits), and 12-month (4 visits) plans. All plans include 100% of labour charges, priority scheduling, and discounts on replacement spare parts. You will never pay unexpected labour fees during scheduled AMC visits.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ Group 2: Repairs & Spares -->
+    <h3 style="margin-bottom: var(--space-lg);" class="reveal">Repairs, Spares &amp; Technicians</h3>
+
+    <div style="display: flex; flex-direction: column; gap: var(--space-md); margin-bottom: var(--space-3xl);">
+      <div class="admin-panel reveal">
+        <div class="admin-panel__header">
+          <strong style="font-size: 1.05rem;">Why are technician contact details hidden until confirmation?</strong>
+        </div>
+        <div class="admin-panel__body">
+          <p style="color: var(--charcoal-600); margin: 0; line-height: 1.6;">
+            To ensure optimal service quality, technician safety, and correct parts allocation, our operations desk conducts a brief telephonic confirmation within 24 hours of your request. Once confirmed and assigned by our team, full technician credentials become visible on your tracking portal.
+          </p>
+        </div>
+      </div>
+
+      <div class="admin-panel reveal">
+        <div class="admin-panel__header">
+          <strong style="font-size: 1.05rem;">Are the replacement spare parts genuine?</strong>
+        </div>
+        <div class="admin-panel__body">
+          <p style="color: var(--charcoal-600); margin: 0; line-height: 1.6;">
+            Yes. All parts (baffle filters, motors, PCB boards, carbon filters, and exhaust ducts) are sourced directly from authorized OEM channels or heavy-gauge certified manufacturers and carry a service guarantee.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Still have questions? -->
+    <div style="background: var(--cream-200); border-radius: var(--border-radius-xl); padding: var(--space-2xl); text-align: center;" class="reveal">
+      <h4 style="margin-bottom: var(--space-xs);">Still have questions?</h4>
+      <p style="color: var(--steel-400); margin-bottom: var(--space-lg);">
+        Our helpline team is available on WhatsApp Mon–Sat, 9am–8pm.
+      </p>
+      <a href="https://wa.me/918734002200?text=Hi%20ChimneyCare%20Support%2C%20I%20have%20a%20question" target="_blank" class="btn btn--primary">
+        💬 Chat with Support (+91 87340 02200)
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

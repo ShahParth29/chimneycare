@@ -7,9 +7,11 @@
 
     <ul class="nav__links">
       <li><a href="{{ url_for('services.landing') }}" class="nav__link {% if request.path == '/' %}nav__link--active{% endif %}">Home</a></li>
-      <li><a href="{{ url_for('services.services_index') }}" class="nav__link {% if '/services' in request.path %}nav__link--active{% endif %}">Services</a></li>
+      <li><a href="{{ url_for('services.services_index') }}" class="nav__link {% if '/services' in request.path and '/my-bookings' not in request.path %}nav__link--active{% endif %}">Services</a></li>
       <li><a href="{{ url_for('repair.repair_index') }}" class="nav__link {% if '/repair' in request.path %}nav__link--active{% endif %}">Repair</a></li>
-      <li><a href="{{ url_for('marketplace.marketplace_index') }}" class="nav__link {% if '/marketplace' in request.path %}nav__link--active{% endif %}">Marketplace</a></li>
+      <li><a href="{{ url_for('marketplace.marketplace_index') }}" class="nav__link {% if '/marketplace' in request.path and '/my-orders' not in request.path %}nav__link--active{% endif %}">Marketplace</a></li>
+      <li><a href="{{ url_for('services.about') }}" class="nav__link {% if '/about' in request.path %}nav__link--active{% endif %}">About</a></li>
+      <li><a href="{{ url_for('services.contact') }}" class="nav__link {% if '/contact' in request.path %}nav__link--active{% endif %}">Contact</a></li>
       
       {% if current_user %}
         <li><a href="{{ url_for('services.dashboard') }}" class="nav__link {% if '/dashboard' in request.path %}nav__link--active{% endif %}">Dashboard</a></li>

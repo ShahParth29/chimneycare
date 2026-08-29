@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Service Areas &amp; Coverage — ChimneyCare{% endblock %}
+{% block meta_description %}Find ChimneyCare service areas across major Indian metro zones and cities. Same-day deep cleaning and 24-hour repair response by certified technicians.{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / <span>Service Areas</span>
+    </div>
+    <h1 class="page-header__title">Service Areas &amp; City Hubs</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__header text-center reveal">
+      <span class="section__label">Operational Coverage</span>
+      <h2 class="section__title" style="margin: 0 auto;">Serving key metros &amp; residential hubs</h2>
+      <p class="section__desc" style="margin: var(--space-md) auto 0;">
+        Our certified technicians are stationed at dedicated zonal service hubs to ensure prompt same-day visits and emergency response.
+      </p>
+    </div>
+
+    <div class="product-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+      <!-- Zone 1 -->
+      <div class="product-card reveal stagger-1">
+        <div class="product-card__body">
+          <span class="card__tag">Metro Hub 1</span>
+          <h3 class="product-card__name">Mumbai &amp; MMR</h3>
+          <p class="product-card__specs">
+            Coverage across South Mumbai, Western Suburbs (Andheri, Bandra, Borivali), Central Suburbs, Thane, and Navi Mumbai.
+          </p>
+          <ul style="list-style: none; font-size: 0.85rem; color: var(--steel-400); margin: var(--space-md) 0; display: flex; flex-direction: column; gap: 6px;">
+            <li>⚡ <strong>Response Time:</strong> Within 4–6 hours</li>
+            <li>🔧 <strong>Services:</strong> Deep Cleaning, AMC, Motor & PCB Repair</li>
+          </ul>
+          <a href="{{ url_for('services.book_service') }}" class="btn btn--primary btn--sm btn--full">Book in Mumbai</a>
+        </div>
+      </div>
+
+      <!-- Zone 2 -->
+      <div class="product-card reveal stagger-2">
+        <div class="product-card__body">
+          <span class="card__tag">Metro Hub 2</span>
+          <h3 class="product-card__name">Delhi NCR</h3>
+          <p class="product-card__specs">
+            Complete coverage in South Delhi, North/West Delhi, Noida, Greater Noida, and Gurugram.
+          </p>
+          <ul style="list-style: none; font-size: 0.85rem; color: var(--steel-400); margin: var(--space-md) 0; display: flex; flex-direction: column; gap: 6px;">
+            <li>⚡ <strong>Response Time:</strong> Within 4–8 hours</li>
+            <li>🔧 <strong>Services:</strong> Deep Cleaning, AMC, Duct Installation</li>
+          </ul>
+          <a href="{{ url_for('services.book_service') }}" class="btn btn--primary btn--sm btn--full">Book in Delhi NCR</a>
+        </div>
+      </div>
+
+      <!-- Zone 3 -->
+      <div class="product-card reveal stagger-3">
+        <div class="product-card__body">
+          <span class="card__tag">Metro Hub 3</span>
+          <h3 class="product-card__name">Bengaluru</h3>
+          <p class="product-card__specs">
+            Serving Whitefield, Koramangala, Indiranagar, HSR Layout, Electronic City, and North Bangalore.
+          </p>
+          <ul style="list-style: none; font-size: 0.85rem; color: var(--steel-400); margin: var(--space-md) 0; display: flex; flex-direction: column; gap: 6px;">
+            <li>⚡ <strong>Response Time:</strong> Within 6 hours</li>
+            <li>🔧 <strong>Services:</strong> All Brand AMC &amp; Genuine Spares</li>
+          </ul>
+          <a href="{{ url_for('services.book_service') }}" class="btn btn--primary btn--sm btn--full">Book in Bengaluru</a>
+        </div>
+      </div>
+
+      <!-- Zone 4 -->
+      <div class="product-card reveal stagger-4">
+        <div class="product-card__body">
+          <span class="card__tag">Metro Hub 4</span>
+          <h3 class="product-card__name">Ahmedabad &amp; Gujarat</h3>
+          <p class="product-card__specs">
+            Operational across Ahmedabad, Gandhinagar, Surat, and Vadodara hubs by Sobharaj Enterprise Pvt Ltd.
+          </p>
+          <ul style="list-style: none; font-size: 0.85rem; color: var(--steel-400); margin: var(--space-md) 0; display: flex; flex-direction: column; gap: 6px;">
+            <li>⚡ <strong>Response Time:</strong> Same-day dispatch</li>
+            <li>🔧 <strong>Services:</strong> Full Service, AMC, Chimney Marketplace</li>
+          </ul>
+          <a href="{{ url_for('services.book_service') }}" class="btn btn--primary btn--sm btn--full">Book in Gujarat</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Direct Helpline Banner -->
+    <div style="background: var(--charcoal-800); border-radius: var(--border-radius-xl); padding: var(--space-3xl); margin-top: var(--space-3xl); color: var(--cream-100); text-align: center;" class="reveal">
+      <h3 style="color: var(--cream-100); margin-bottom: var(--space-sm);">Don't see your city or pincode?</h3>
+      <p style="color: var(--steel-300); max-width: 550px; margin: 0 auto var(--space-xl);">
+        Contact our helpline team directly on WhatsApp with your pincode, and we will check technician availability in your neighborhood.
+      </p>
+      <a href="https://wa.me/918734002200?text=Hi%20ChimneyCare%2C%20is%20service%20available%20at%20my%20pincode%3F" target="_blank" class="btn btn--primary btn--lg">
+        💬 Check Pincode on WhatsApp (+91 87340 02200)
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

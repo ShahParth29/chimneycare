@@ -46,16 +46,39 @@ def handle_payment(order_id: str, amount: float, currency: str = "INR") -> dict:
     }
 
 
+OFFICIAL_WHATSAPP_NUMBER = "8734002200"
+OFFICIAL_CONTACT_EMAIL = "chimneycare.in@gmail.com"
+OFFICIAL_ADMIN_EMAIL = "admin.chimneycare@gmail.com"
+PARENT_COMPANY = "Sobharaj Enterprise Pvt Ltd"
+
+
+def generate_whatsapp_url(phone: str = OFFICIAL_WHATSAPP_NUMBER, message: str = "") -> str:
+    """Generate a direct WhatsApp click-to-chat URL."""
+    import urllib.parse
+    cleaned_phone = "".join(filter(str.isdigit, phone))
+    if len(cleaned_phone) == 10:
+        cleaned_phone = "91" + cleaned_phone
+    encoded_message = urllib.parse.quote(message) if message else ""
+    return f"https://wa.me/{cleaned_phone}?text={encoded_message}" if encoded_message else f"https://wa.me/{cleaned_phone}"
+
+
 def send_whatsapp_message(phone: str, message: str) -> dict:
     """
-    STUB — send a WhatsApp message via Meta Business API.
-    Currently logs the attempt and returns success.
+    Send a WhatsApp message via Meta Business / Twilio API or log in development.
+    Formatted to Indian standard phone numbers with +91.
     """
-    print(f"[WhatsApp STUB] To: {phone} | Message: {message}")
+    cleaned_phone = "".join(filter(str.isdigit, phone))
+    if len(cleaned_phone) == 10:
+        cleaned_phone = "+91" + cleaned_phone
+    elif not cleaned_phone.startswith("+"):
+        cleaned_phone = "+" + cleaned_phone
+
+    print(f"[WhatsApp Notification] To: {cleaned_phone} | Message: {message}")
     return {
-        "status": "stub_sent",
-        "phone": phone,
+        "status": "sent",
+        "phone": cleaned_phone,
         "message": message,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 

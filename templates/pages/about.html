@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}About Us — ChimneyCare &amp; Sobharaj Enterprise Pvt Ltd{% endblock %}
+{% block meta_description %}Learn about ChimneyCare, a dedicated kitchen safety and chimney service platform operated by Sobharaj Enterprise Pvt Ltd.{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <div class="page-header__breadcrumb">
+      <a href="{{ url_for('services.landing') }}">Home</a> / <span>About Us</span>
+    </div>
+    <h1 class="page-header__title">About ChimneyCare</h1>
+  </div>
+</section>
+
+<!-- ═══ Mission & Story ═══ -->
+<section class="section">
+  <div class="container">
+    <div class="grid-editorial">
+      <div class="reveal">
+        <span class="section__label">Our Story</span>
+        <h2 class="section__title">Dedicated to clean, safe, and smoke-free kitchens.</h2>
+        <p class="section__desc">
+          ChimneyCare was founded with a single mission: to bring professional reliability, 
+          transparent parts pricing, and certified workmanship to kitchen ventilation across India.
+        </p>
+        <p style="color: var(--charcoal-600); margin-top: var(--space-md); line-height: 1.7;">
+          Modern Indian cooking involves heavy spices and deep frying, requiring kitchen chimneys to operate at peak efficiency. 
+          Without regular maintenance, grease buildup causes motor failure, high noise, and fire hazards. We bridge this gap with 
+          scheduled Annual Maintenance Contracts (AMC), genuine OEM spare parts, and background-checked technicians.
+        </p>
+        <div class="mt-xl" style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
+          <a href="{{ url_for('services.services_index') }}" class="btn btn--primary">Explore Services</a>
+          <a href="https://wa.me/918734002200" target="_blank" class="btn btn--secondary">💬 Chat on WhatsApp</a>
+        </div>
+      </div>
+
+      <div class="reveal stagger-2">
+        <div style="background: var(--charcoal-800); border-radius: var(--border-radius-xl); padding: var(--space-3xl); color: var(--cream-100);">
+          <div style="font-size: 0.8rem; color: var(--orange-400); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: var(--space-sm);">Core Values</div>
+          <h3 style="color: var(--cream-100); margin-bottom: var(--space-xl);">Why homeowners trust us</h3>
+          
+          <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
+            <div style="display: flex; gap: var(--space-md);">
+              <div style="font-size: 1.5rem;">🛡️</div>
+              <div>
+                <strong style="color: var(--cream-100); display: block; margin-bottom: 4px;">Service Guarantee</strong>
+                <span style="color: var(--steel-300); font-size: 0.9rem;">All repair work and replacement parts carry our verified service warranty.</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: var(--space-md);">
+              <div style="font-size: 1.5rem;">💰</div>
+              <div>
+                <strong style="color: var(--cream-100); display: block; margin-bottom: 4px;">Transparent Line-Item Costs</strong>
+                <span style="color: var(--steel-300); font-size: 0.9rem;">Labour charges and spare parts costs are always separated so you know exactly what you pay for.</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: var(--space-md);">
+              <div style="font-size: 1.5rem;">👷</div>
+              <div>
+                <strong style="color: var(--cream-100); display: block; margin-bottom: 4px;">Certified Technicians</strong>
+                <span style="color: var(--steel-300); font-size: 0.9rem;">Trained specifically on all leading brands (Faber, Elica, Hindware, Glen, Kaff, Sunflame).</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Parent Company Spotlight ═══ -->
+<section class="section section--cream" id="sobharaj">
+  <div class="container">
+    <div style="background: white; border-radius: var(--border-radius-xl); border: 1px solid var(--cream-300); padding: var(--space-3xl); max-width: 900px; margin: 0 auto;" class="reveal">
+      <span class="section__label">Corporate Entity</span>
+      <h2 style="margin-bottom: var(--space-md);">Sobharaj Enterprise Pvt Ltd</h2>
+      <p style="color: var(--charcoal-600); line-height: 1.7; margin-bottom: var(--space-lg);">
+        ChimneyCare is proudly operated under the banner of <strong>Sobharaj Enterprise Pvt Ltd</strong>, 
+        a premier enterprise committed to quality home appliance servicing, consumer retail, and specialized maintenance infrastructure.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-lg); background: var(--cream-100); border-radius: var(--border-radius-lg); padding: var(--space-xl); margin-bottom: var(--space-xl);">
+        <div>
+          <span style="font-size: 0.75rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.08em; display: block; font-weight: 700;">Entity Type</span>
+          <strong>Private Limited Company</strong>
+        </div>
+        <div>
+          <span style="font-size: 0.75rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.08em; display: block; font-weight: 700;">Customer Care Line</span>
+          <strong><a href="tel:+918734002200" style="color: var(--orange-500); text-decoration: none;">+91 87340 02200</a></strong>
+        </div>
+        <div>
+          <span style="font-size: 0.75rem; color: var(--steel-300); text-transform: uppercase; letter-spacing: 0.08em; display: block; font-weight: 700;">Official Email</span>
+          <strong><a href="mailto:chimneycare.in@gmail.com" style="color: var(--charcoal-800); text-decoration: none;">chimneycare.in@gmail.com</a></strong>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
+        <a href="{{ url_for('services.contact') }}" class="btn btn--primary">Contact Support</a>
+        <a href="https://wa.me/918734002200" target="_blank" class="btn btn--outline">WhatsApp Helpdesk</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
