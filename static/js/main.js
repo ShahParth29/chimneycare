@@ -5,22 +5,64 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── Mobile Nav Toggle ────────────────────
+  // ── Mobile Nav Toggle & Overlay ──────────────
   const navToggle = document.querySelector('.nav__toggle');
   const navLinks = document.querySelector('.nav__links');
+  const navOverlay = document.querySelector('.nav__overlay');
+
+  function openMobileNav() {
+    if (!navLinks || !navToggle) return;
+    navLinks.classList.add('open');
+    navToggle.classList.add('active');
+    navToggle.setAttribute('aria-expanded', 'true');
+    if (navOverlay) navOverlay.classList.add('open');
+    document.body.classList.add('nav-open');
+  }
+
+  function closeMobileNav() {
+    if (!navLinks || !navToggle) return;
+    navLinks.classList.remove('open');
+    navToggle.classList.remove('active');
+    navToggle.setAttribute('aria-expanded', 'false');
+    if (navOverlay) navOverlay.classList.remove('open');
+    document.body.classList.remove('nav-open');
+  }
 
   if (navToggle && navLinks) {
-    navToggle.addEventListener('click', () => {
-      navLinks.classList.toggle('open');
-      navToggle.classList.toggle('active');
+    navToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = navLinks.classList.contains('open');
+      if (isOpen) {
+        closeMobileNav();
+      } else {
+        openMobileNav();
+      }
     });
 
-    // Close on link click
-    navLinks.querySelectorAll('.nav__link').forEach(link => {
+    // Close on link or button click inside mobile drawer
+    navLinks.querySelectorAll('a, button').forEach(link => {
       link.addEventListener('click', () => {
-        navLinks.classList.remove('open');
-        navToggle.classList.remove('active');
+        closeMobileNav();
       });
+    });
+
+    // Close on backdrop overlay click
+    if (navOverlay) {
+      navOverlay.addEventListener('click', closeMobileNav);
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && navLinks.classList.contains('open')) {
+        closeMobileNav();
+      }
+    });
+
+    // Reset mobile nav state on window resize (e.g. desktop view)
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        closeMobileNav();
+      }
     });
   }
 

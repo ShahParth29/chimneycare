@@ -2,35 +2,36 @@
   <div class="nav__inner">
     <a href="{{ url_for('services.landing') }}" class="nav__logo">
       <div class="nav__logo-icon">🔥</div>
-      ChimneyCare
+      <span class="nav__logo-text">ChimneyCare</span>
     </a>
 
-    <ul class="nav__links">
-      <li><a href="{{ url_for('services.landing') }}" class="nav__link {% if request.path == '/' %}nav__link--active{% endif %}">Home</a></li>
-      <li><a href="{{ url_for('services.services_index') }}" class="nav__link {% if '/services' in request.path and '/my-bookings' not in request.path %}nav__link--active{% endif %}">Services</a></li>
-      <li><a href="{{ url_for('repair.repair_index') }}" class="nav__link {% if '/repair' in request.path %}nav__link--active{% endif %}">Repair</a></li>
-      <li><a href="{{ url_for('marketplace.marketplace_index') }}" class="nav__link {% if '/marketplace' in request.path and '/my-orders' not in request.path %}nav__link--active{% endif %}">Marketplace</a></li>
-      <li><a href="{{ url_for('services.about') }}" class="nav__link {% if '/about' in request.path %}nav__link--active{% endif %}">About</a></li>
-      <li><a href="{{ url_for('services.contact') }}" class="nav__link {% if '/contact' in request.path %}nav__link--active{% endif %}">Contact</a></li>
-      
-      {% if current_user %}
-        <li><a href="{{ url_for('services.dashboard') }}" class="nav__link {% if '/dashboard' in request.path %}nav__link--active{% endif %}">Dashboard</a></li>
-        <li>
-          <form action="{{ url_for('auth.logout') }}" method="post" style="display:inline;">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="nav__link" style="background:none;border:none;cursor:pointer;font:inherit;">Logout</button>
-          </form>
-        </li>
-      {% else %}
-        <li><a href="{{ url_for('auth.login') }}" class="nav__link">Login</a></li>
-        <li><a href="{{ url_for('auth.register') }}" class="nav__cta">Get Started</a></li>
-      {% endif %}
-    </ul>
-
-    <button class="nav__toggle" aria-label="Toggle navigation">
+    <button class="nav__toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-menu">
       <span></span>
       <span></span>
       <span></span>
     </button>
+
+    <ul class="nav__links" id="nav-menu">
+      <li class="nav__item"><a href="{{ url_for('services.landing') }}" class="nav__link {% if request.path == '/' %}nav__link--active{% endif %}">Home</a></li>
+      <li class="nav__item"><a href="{{ url_for('services.services_index') }}" class="nav__link {% if '/services' in request.path and '/my-bookings' not in request.path %}nav__link--active{% endif %}">Services</a></li>
+      <li class="nav__item"><a href="{{ url_for('repair.repair_index') }}" class="nav__link {% if '/repair' in request.path %}nav__link--active{% endif %}">Repair</a></li>
+      <li class="nav__item"><a href="{{ url_for('marketplace.marketplace_index') }}" class="nav__link {% if '/marketplace' in request.path and '/my-orders' not in request.path %}nav__link--active{% endif %}">Marketplace</a></li>
+      <li class="nav__item"><a href="{{ url_for('services.about') }}" class="nav__link {% if '/about' in request.path %}nav__link--active{% endif %}">About</a></li>
+      <li class="nav__item"><a href="{{ url_for('services.contact') }}" class="nav__link {% if '/contact' in request.path %}nav__link--active{% endif %}">Contact</a></li>
+      
+      {% if current_user %}
+        <li class="nav__item"><a href="{{ url_for('services.dashboard') }}" class="nav__link {% if '/dashboard' in request.path %}nav__link--active{% endif %}">Dashboard</a></li>
+        <li class="nav__item nav__item--logout">
+          <form action="{{ url_for('auth.logout') }}" method="post" class="nav__logout-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="nav__logout-btn">Logout</button>
+          </form>
+        </li>
+      {% else %}
+        <li class="nav__item nav__item--login"><a href="{{ url_for('auth.login') }}" class="nav__link">Login</a></li>
+        <li class="nav__item nav__item--cta"><a href="{{ url_for('auth.register') }}" class="nav__cta">Get Started</a></li>
+      {% endif %}
+    </ul>
   </div>
+  <div class="nav__overlay" id="nav-overlay"></div>
 </nav>
