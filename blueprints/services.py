@@ -226,7 +226,7 @@ def contact():
         flash("Thank you for reaching out! Your message has been sent successfully. Our team will contact you shortly.", "success")
         return redirect(url_for("services.contact"))
 
-    web3forms_key = os.environ.get("WEB3FORMS_ACCESS_KEY", "")
+    web3forms_key = os.environ.get("WEB3FORMS_ACCESS_KEY") or "07fac542-1cfc-4794-bcd7-1a9a11ae9b2a"
     return render_template("pages/contact.html", web3forms_key=web3forms_key)
 
 
