@@ -70,14 +70,12 @@ from blueprints.services import services_bp
 from blueprints.repair import repair_bp
 from blueprints.marketplace import marketplace_bp
 from blueprints.admin import admin_bp
-from blueprints.two_factor import two_factor_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(services_bp)
 app.register_blueprint(repair_bp)
 app.register_blueprint(marketplace_bp)
 app.register_blueprint(admin_bp)
-app.register_blueprint(two_factor_bp)
 
 # ── Apply Configurable Rate Limits ──────────────
 
@@ -86,13 +84,9 @@ limiter.limit(RATELIMIT_AUTH, key_func=get_auth_rate_limit_key)(app.view_functio
 limiter.limit(RATELIMIT_AUTH, key_func=get_auth_rate_limit_key)(app.view_functions["auth.register"])
 limiter.limit(RATELIMIT_AUTH, key_func=get_auth_rate_limit_key)(app.view_functions["auth.forgot_password"])
 limiter.limit(RATELIMIT_AUTH, key_func=get_auth_rate_limit_key)(app.view_functions["auth.admin_login"])
-limiter.limit(RATELIMIT_AUTH, key_func=get_auth_rate_limit_key)(app.view_functions["two_factor.challenge"])
-limiter.limit(RATELIMIT_AUTH)(app.view_functions["two_factor.confirm"])
-limiter.limit(RATELIMIT_AUTH)(app.view_functions["two_factor.disable"])
 
 # API & Interactive Endpoint Limits
 limiter.limit(RATELIMIT_API)(app.view_functions["marketplace.validate_promo"])
-
 
 # ── Health Check Endpoint (UptimeRobot / Keep-Alive) ──
 

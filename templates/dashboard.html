@@ -149,58 +149,6 @@
         {% endif %}
       </div>
     </div>
-
-    <!-- Account Security (2FA) -->
-    <div style="background: white; border-radius: var(--border-radius-lg); border: 1px solid var(--cream-300); margin-top: var(--space-xl); overflow: hidden;">
-
-      <div style="padding: var(--space-lg) var(--space-xl); border-bottom: 1px solid var(--cream-200); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h3 style="font-size: 1.1rem; margin: 0;">🛡️ Account Security &amp; Two-Factor Authentication</h3>
-          <p style="font-size: 0.85rem; color: var(--steel-400); margin-top: 4px; margin-bottom: 0;">Protect your account with Time-based One-Time Passwords (TOTP) from Google Authenticator, Authy, or 1Password.</p>
-        </div>
-        <div>
-          {% if two_factor_enabled %}
-            <span class="badge badge--confirmed" style="font-size: 0.85rem; padding: 4px 10px;">🟢 2FA Active</span>
-          {% else %}
-            <span class="badge badge--pending" style="font-size: 0.85rem; padding: 4px 10px;">⚪ 2FA Disabled</span>
-          {% endif %}
-        </div>
-      </div>
-      <div style="padding: var(--space-lg) var(--space-xl); display: flex; justify-content: space-between; align-items: center; background: var(--cream-100);">
-        <div>
-          {% if two_factor_enabled %}
-            <p style="margin: 0; font-size: 0.9rem; color: var(--charcoal-900);">Your account requires a 6-digit TOTP code on every login.</p>
-          {% else %}
-            <p style="margin: 0; font-size: 0.9rem; color: var(--charcoal-900);">Add an extra layer of security so unauthorized users cannot access your bookings or orders.</p>
-          {% endif %}
-        </div>
-        <div>
-          {% if two_factor_enabled %}
-            <form method="post" action="{{ url_for('two_factor.disable') }}" style="display: inline-block;" onsubmit="return promptFor2FACode(this);">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="hidden" name="code" id="disable-2fa-code" value="">
-              <button type="submit" class="btn btn--sm btn--outline" style="color: #dc2626; border-color: #f87171;">
-                Disable 2FA
-              </button>
-            </form>
-          {% else %}
-            <a href="{{ url_for('two_factor.setup') }}" class="btn btn--sm btn--primary">
-              🔒 Enable 2FA
-            </a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
   </div>
 </section>
-
-<script>
-function promptFor2FACode(form) {
-  const code = prompt("Please enter your 6-digit Authenticator code or a backup code to disable 2FA:");
-  if (!code) return false;
-  document.getElementById('disable-2fa-code').value = code.trim();
-  return true;
-}
-</script>
-
 {% endblock %}

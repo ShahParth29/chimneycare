@@ -63,33 +63,6 @@ def login():
             sb.auth.sign_out()
             return redirect(url_for("auth.admin_login"))
 
-        # Check if 2FA is enabled for this account
-        import time
-        is_2fa_active = False
-        try:
-            admin_sb = get_admin_client()
-            tfa_check = admin_sb.table("user_two_factor").select("is_enabled").eq("user_id", user_id).execute()
-            is_2fa_active = bool(tfa_check.data and tfa_check.data[0].get("is_enabled"))
-        except Exception as tfa_err:
-            logger.info(f"2FA check bypassed for customer (table may not exist yet): {tfa_err}")
-
-        if is_2fa_active:
-            access_tok = auth_response.session.access_token if hasattr(auth_response, 'session') and auth_response.session else None
-            sb.auth.sign_out()
-            session["pending_2fa_login"] = {
-                "user_id": user_id,
-                "email": email,
-                "name": user_data.get("name", ""),
-                "role": user_data.get("role", "customer"),
-                "phone": user_data.get("phone", ""),
-                "access_token": access_tok,
-                "next_url": request.args.get("next", url_for("services.dashboard")),
-                "expires_at": time.time() + 300,
-                "attempts": 0,
-            }
-            return redirect(url_for("two_factor.challenge"))
-
-
         session["user"] = {
             "id": user_id,
             "email": email,
@@ -257,30 +230,6 @@ def admin_login():
             return render_template("admin/login.html"), 403
 
         user_data = profile.data[0]
-
-        # Check if Admin has 2FA enabled
-        import time
-        is_admin_2fa_active = False
-        try:
-            tfa_check = admin_sb.table("user_two_factor").select("is_enabled").eq("user_id", user_id).execute()
-            is_admin_2fa_active = bool(tfa_check.data and tfa_check.data[0].get("is_enabled"))
-        except Exception as tfa_err:
-            logger.info(f"2FA check bypassed for admin (table may not exist yet): {tfa_err}")
-
-        if is_admin_2fa_active:
-            sb.auth.sign_out()
-            session["pending_2fa_login"] = {
-                "user_id": user_id,
-                "email": email,
-                "name": user_data.get("name", "Admin"),
-                "role": "admin",
-                "next_url": url_for("admin.dashboard"),
-                "expires_at": time.time() + 300,
-                "attempts": 0,
-            }
-            return redirect(url_for("two_factor.challenge"))
-
-
         session["user"] = {
             "id": user_id,
             "email": email,
@@ -299,9 +248,17 @@ def admin_login():
 
 @auth_bp.route("/admin/verify-otp", methods=["GET", "POST"])
 def verify_otp():
-    """2FA OTP verification step for admin login (delegates to 2FA challenge)."""
-    return redirect(url_for("two_factor.challenge"))
+    """2FA OTP verification step for admin login."""
+    if request.method == "GET":
+        return render_template("admin/verify_otp.html")
 
+    otp = sanitize_string(request.form.get("otp", ""), max_length=10)
+    if not otp or len(otp) != 6 or not otp.isdigit():
+        flash("Please enter a valid 6-digit OTP.", "error")
+        return render_template("admin/verify_otp.html"), 400
+
+    flash("OTP verification is not yet configured. Contact your system administrator.", "warning")
+    return redirect(url_for("admin.dashboard"))
 
 
 @auth_bp.route("/logout", methods=["POST"])

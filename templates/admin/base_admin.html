@@ -58,9 +58,8 @@
         <li><a href="{{ url_for('admin.repairs') }}" class="admin-sidebar__link"><span>🔧</span> Repairs</a></li>
         <li><a href="{{ url_for('admin.orders') }}" class="admin-sidebar__link"><span>📦</span> Orders</a></li>
       </ul>
-      <span class="admin-sidebar__label">Account &amp; Security</span>
+      <span class="admin-sidebar__label">Account</span>
       <ul class="admin-sidebar__nav">
-        <li><a href="{{ url_for('two_factor.setup') }}" class="admin-sidebar__link"><span>🔒</span> 2FA Security</a></li>
         <li><a href="{{ url_for('services.landing') }}" target="_blank" class="admin-sidebar__link"><span>🌐</span> View Storefront</a></li>
         <li>
           <form action="{{ url_for('auth.logout') }}" method="post" style="margin:0;">
@@ -71,7 +70,6 @@
           </form>
         </li>
       </ul>
-
     </aside>
 
     <main class="admin-main">
