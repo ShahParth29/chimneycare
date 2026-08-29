@@ -7,7 +7,10 @@ confirmation), and customer booking history.
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from supabase_client import get_supabase_client
-from utils import login_required, generate_order_id, generate_service_id, sanitize_string
+from utils import (
+    login_required, generate_order_id, generate_service_id, sanitize_string,
+    send_whatsapp_message,
+)
 
 services_bp = Blueprint("services", __name__)
 

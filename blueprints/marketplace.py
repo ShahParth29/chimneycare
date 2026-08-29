@@ -9,7 +9,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from supabase_client import get_supabase_client
 from utils import (
     login_required, generate_order_id, sanitize_string,
-    validate_promo_code, handle_payment,
+    validate_promo_code, handle_payment, send_whatsapp_message,
 )
 
 marketplace_bp = Blueprint("marketplace", __name__)
@@ -181,8 +181,14 @@ def checkout(product_id):
 
         if result.data:
             # Increment promo code usage
-            if promo_result and promo_result.get("valid"):
-                sb.rpc("increment_promo_usage", {"promo_id": promo_result["promo_id"]}).execute()
+            if promo_result and promo_result.get("valid") and promo_result.get("promo_id"):
+                try:
+                    cur = admin_sb.table("promo_codes").select("current_uses").eq("id", promo_result["promo_id"]).execute()
+                    if cur.data:
+                        new_count = (cur.data[0].get("current_uses") or 0) + 1
+                        admin_sb.table("promo_codes").update({"current_uses": new_count}).eq("id", promo_result["promo_id"]).execute()
+                except Exception:
+                    pass
 
             # Stub payment
             handle_payment(order_id, total_price)
