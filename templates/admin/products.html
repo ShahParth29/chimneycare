@@ -3,60 +3,145 @@
 
 {% block admin_content %}
 <div class="admin-main__header">
-  <h1 class="admin-main__title">Chimney Products</h1>
-  <button class="btn btn--primary" onclick="openModal('add-product-modal')">+ Add Product</button>
+  <div>
+    <h1 class="admin-main__title">Chimney Marketplace Products</h1>
+    <p style="color: var(--steel-400); font-size: 0.85rem; margin: 4px 0 0;">Manage chimney models, sizes, suction ratings, and customer catalogue.</p>
+  </div>
+  <button class="btn btn--primary" onclick="openModal('add-product-modal')">+ Add New Product</button>
 </div>
 
 {% if products %}
 <div class="table-wrapper">
   <table class="data-table">
-    <thead><tr><th>Brand</th><th>Model</th><th>Type</th><th>Size</th><th>Suction</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Brand</th>
+        <th>Type / Size</th>
+        <th>Suction</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
     <tbody>
       {% for p in products %}
       <tr>
-        <td><strong>{{ p.brand }}</strong></td>
-        <td>{{ p.model }}</td>
-        <td>{{ p.type or '—' }}</td>
-        <td>{{ p.size or '—' }}</td>
+        <td>
+          <div style="display:flex; align-items:center; gap:var(--space-sm);">
+            {% if p.image_url %}
+            <img src="{{ p.image_url }}" style="width:40px; height:40px; border-radius:var(--border-radius); object-fit:cover; border:1px solid var(--cream-300);">
+            {% else %}
+            <div style="width:40px; height:40px; border-radius:var(--border-radius); background:var(--cream-200); display:flex; align-items:center; justify-content:center;">🏠</div>
+            {% endif %}
+            <strong>{{ p.model }}</strong>
+          </div>
+        </td>
+        <td><span class="badge badge--placed">{{ p.brand }}</span></td>
+        <td>{{ p.type or '—' }} &bull; {{ p.size or '—' }}</td>
         <td>{{ p.suction_capacity or '—' }}</td>
-        <td>₹{{ "{:,.0f}".format(p.price) }}</td>
+        <td><strong>₹{{ "{:,.0f}".format(p.price) }}</strong></td>
         <td><span class="badge {% if p.active %}badge--confirmed{% else %}badge--cancelled{% endif %}">{{ 'Active' if p.active else 'Inactive' }}</span></td>
         <td>
-          {% if p.active %}
-          <form method="post" action="{{ url_for('admin.delete_product', product_id=p.id) }}" style="display:inline;">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="action-btn action-btn--danger" data-confirm="Deactivate this product?">🗑</button>
-          </form>
-          {% endif %}
+          <div class="action-group">
+            <button type="button" class="action-btn" title="Edit Product" onclick="openModal('edit-product-modal-{{ p.id }}')">✏️</button>
+            <form method="post" action="{{ url_for('admin.delete_product', product_id=p.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="action-btn action-btn--danger" data-confirm="Delete product '{{ p.brand }} {{ p.model }}'?" title="Delete">🗑</button>
+            </form>
+          </div>
         </td>
       </tr>
+
+      <!-- Edit Product Modal -->
+      <div class="modal-overlay" id="edit-product-modal-{{ p.id }}">
+        <div class="modal">
+          <div class="modal__header">
+            <h3 class="modal__title">Edit Product: {{ p.brand }} {{ p.model }}</h3>
+            <button class="modal__close" onclick="closeModal('edit-product-modal-{{ p.id }}')">&times;</button>
+          </div>
+          <form method="post" action="{{ url_for('admin.edit_product', product_id=p.id) }}" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="admin-form">
+              <div class="form-group">
+                <label class="form-label">Brand *</label>
+                <input type="text" name="brand" class="form-input" value="{{ p.brand }}" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Model *</label>
+                <input type="text" name="model" class="form-input" value="{{ p.model }}" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Price (₹) *</label>
+                <input type="number" name="price" class="form-input" min="0" step="100" value="{{ p.price }}" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Type</label>
+                <input type="text" name="type" class="form-input" value="{{ p.type or '' }}" placeholder="e.g., Curved Glass, T-Shape">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Size</label>
+                <input type="text" name="size" class="form-input" value="{{ p.size or '' }}" placeholder="e.g., 60 cm, 90 cm">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Suction Capacity</label>
+                <input type="text" name="suction_capacity" class="form-input" value="{{ p.suction_capacity or '' }}" placeholder="e.g., 1200 m³/hr">
+              </div>
+              <div class="form-group form-group--full">
+                <label class="form-label">Listing Status</label>
+                <select name="active" class="form-select">
+                  <option value="true" {% if p.active %}selected{% endif %}>Active (Visible in Marketplace)</option>
+                  <option value="false" {% if not p.active %}selected{% endif %}>Inactive (Hidden)</option>
+                </select>
+              </div>
+              <div class="form-group form-group--full">
+                <label class="form-label">Update Product Image</label>
+                <input type="file" name="image" accept="image/*">
+              </div>
+              <div class="form-group form-group--full">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-textarea" rows="3">{{ p.description or '' }}</textarea>
+              </div>
+            </div>
+            <div class="mt-xl" style="display:flex; gap:var(--space-md);">
+              <button type="submit" class="btn btn--primary">Save Changes</button>
+              <button type="button" class="btn btn--outline" onclick="closeModal('edit-product-modal-{{ p.id }}')">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
       {% endfor %}
     </tbody>
   </table>
 </div>
 {% else %}
-<div class="empty-state"><div class="empty-state__icon">🏠</div><div class="empty-state__title">No products listed</div></div>
+<div class="empty-state">
+  <div class="empty-state__icon">🏠</div>
+  <div class="empty-state__title">No products listed</div>
+  <p>Add products to your marketplace catalogue.</p>
+</div>
 {% endif %}
 
+<!-- Add Product Modal -->
 <div class="modal-overlay" id="add-product-modal">
   <div class="modal">
     <div class="modal__header">
-      <h3 class="modal__title">Add Chimney Product</h3>
+      <h3 class="modal__title">Add New Chimney Model</h3>
       <button class="modal__close" onclick="closeModal('add-product-modal')">&times;</button>
     </div>
     <form method="post" action="{{ url_for('admin.add_product') }}" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="admin-form">
-        <div class="form-group"><label class="form-label">Brand *</label><input type="text" name="brand" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Model *</label><input type="text" name="model" class="form-input" required></div>
-        <div class="form-group"><label class="form-label">Price (₹) *</label><input type="number" name="price" class="form-input" min="0" step="100" required></div>
-        <div class="form-group"><label class="form-label">Type</label><input type="text" name="type" class="form-input" placeholder="e.g., Wall Mounted, Island"></div>
-        <div class="form-group"><label class="form-label">Size</label><input type="text" name="size" class="form-input" placeholder="e.g., 60cm, 90cm"></div>
+        <div class="form-group"><label class="form-label">Brand *</label><input type="text" name="brand" class="form-input" placeholder="e.g., Faber, Elica, Hindware" required></div>
+        <div class="form-group"><label class="form-label">Model *</label><input type="text" name="model" class="form-input" placeholder="e.g., Primus Plus 60" required></div>
+        <div class="form-group"><label class="form-label">Price (₹) *</label><input type="number" name="price" class="form-input" min="0" step="100" placeholder="12499" required></div>
+        <div class="form-group"><label class="form-label">Type</label><input type="text" name="type" class="form-input" placeholder="e.g., Curved Glass Wall Mounted"></div>
+        <div class="form-group"><label class="form-label">Size</label><input type="text" name="size" class="form-input" placeholder="e.g., 60 cm"></div>
         <div class="form-group"><label class="form-label">Suction Capacity</label><input type="text" name="suction_capacity" class="form-input" placeholder="e.g., 1200 m³/hr"></div>
-        <div class="form-group form-group--full"><label class="form-label">Description</label><textarea name="description" class="form-textarea" rows="2"></textarea></div>
-        <div class="form-group form-group--full"><label class="form-label">Product Image</label><input type="file" name="image" accept="image/*" data-preview="product-preview"><img id="product-preview" style="display:none;max-width:200px;margin-top:var(--space-sm);border-radius:var(--border-radius);"></div>
+        <div class="form-group form-group--full"><label class="form-label">Product Image</label><input type="file" name="image" accept="image/*"></div>
+        <div class="form-group form-group--full"><label class="form-label">Description</label><textarea name="description" class="form-textarea" rows="3" placeholder="Key features, filter type, warranty..."></textarea></div>
       </div>
-      <div class="mt-xl">
+      <div class="mt-xl" style="display:flex; gap:var(--space-md);">
         <button type="submit" class="btn btn--primary">Add Product</button>
         <button type="button" class="btn btn--outline" onclick="closeModal('add-product-modal')">Cancel</button>
       </div>

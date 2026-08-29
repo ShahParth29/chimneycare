@@ -1,8 +1,15 @@
 """
-blueprints/admin.py — Admin portal routes for ChimneyCare.
+blueprints/admin.py — Complete and fully editable Admin portal routes for ChimneyCare.
 
-Full management of technicians, AMC plans, repair parts,
-chimney products, promo codes, bookings, and orders.
+Full CRUD management of:
+- Technicians (Add, Edit, Reveal Toggle, Delete)
+- AMC Plans (Add, Edit, Toggle Active, Delete)
+- Repair Parts (Add, Edit, Stock Toggle, Delete)
+- Chimney Marketplace Products (Add, Edit, Toggle Active, Delete)
+- Promo Codes (Add, Edit, Toggle Active, Delete)
+- Bookings (Status update, Technician assignment, Labour adjustment)
+- Repair Jobs (Status update, Technician assignment, Labour & Parts adjustment)
+- Marketplace Orders (Status update: placed/processing/shipped/delivered/cancelled)
 """
 
 import os
@@ -20,14 +27,12 @@ def dashboard():
     sb = get_admin_client()
 
     try:
-        # Fetch counts for dashboard cards
         technicians = sb.table("technicians").select("id", count="exact").execute()
         services_data = sb.table("services").select("id", count="exact").execute()
         repair_data = sb.table("repair_jobs").select("id", count="exact").execute()
         orders_data = sb.table("orders").select("id", count="exact").execute()
         products_data = sb.table("chimney_products").select("id", count="exact").execute()
 
-        # Recent bookings
         recent_bookings = (
             sb.table("services")
             .select("*, profiles(name, email)")
@@ -35,7 +40,6 @@ def dashboard():
             .limit(10)
             .execute()
         )
-        # Recent repair jobs
         recent_repairs = (
             sb.table("repair_jobs")
             .select("*, profiles(name, email)")
@@ -43,7 +47,6 @@ def dashboard():
             .limit(10)
             .execute()
         )
-        # Recent orders
         recent_orders = (
             sb.table("orders")
             .select("*, profiles(name, email), chimney_products(brand, model)")
@@ -59,7 +62,7 @@ def dashboard():
             "orders": orders_data.count or 0,
             "products": products_data.count or 0,
         }
-    except Exception as e:
+    except Exception:
         stats = {"technicians": 0, "services": 0, "repairs": 0, "orders": 0, "products": 0}
         recent_bookings = type("obj", (object,), {"data": []})()
         recent_repairs = type("obj", (object,), {"data": []})()
@@ -74,7 +77,9 @@ def dashboard():
     )
 
 
-# ── Technician Management ──────────────────────
+# ═══════════════════════════════════════════════════
+#  Technician Management (Full CRUD)
+# ═══════════════════════════════════════════════════
 
 @admin_bp.route("/admin/technicians")
 @admin_required
@@ -115,7 +120,7 @@ def add_technician():
                 )
                 photo_url = sb.storage.from_("chimnecare-assets").get_public_url(file_path)
             except Exception:
-                flash("Photo upload failed, but technician was still added.", "warning")
+                pass
 
     try:
         sb = get_admin_client()
@@ -134,17 +139,58 @@ def add_technician():
     return redirect(url_for("admin.technicians"))
 
 
+@admin_bp.route("/admin/technicians/<tech_id>/edit", methods=["POST"])
+@admin_required
+def edit_technician(tech_id):
+    name = sanitize_string(request.form.get("name", ""))
+    phone = sanitize_string(request.form.get("phone", ""))
+    email = sanitize_string(request.form.get("email", ""))
+    specialization = sanitize_string(request.form.get("specialization", ""))
+    reveal_status = request.form.get("reveal_status") == "true"
+
+    if not name:
+        flash("Name cannot be empty.", "error")
+        return redirect(url_for("admin.technicians"))
+
+    try:
+        sb = get_admin_client()
+        update_data = {
+            "name": name,
+            "phone": phone,
+            "email": email,
+            "specialization": specialization,
+            "reveal_status": reveal_status,
+        }
+
+        if "photo" in request.files and request.files["photo"].filename:
+            photo = request.files["photo"]
+            file_ext = os.path.splitext(photo.filename)[1]
+            file_path = f"technicians/{name.lower().replace(' ', '_')}{file_ext}"
+            sb.storage.from_("chimnecare-assets").upload(
+                path=file_path,
+                file=photo.read(),
+                file_options={"content-type": photo.content_type or "image/jpeg", "upsert": "true"},
+            )
+            update_data["photo_url"] = sb.storage.from_("chimnecare-assets").get_public_url(file_path)
+
+        sb.table("technicians").update(update_data).eq("id", tech_id).execute()
+        flash(f"Technician '{name}' updated successfully.", "success")
+    except Exception as e:
+        flash(f"Error updating technician: {str(e)}", "error")
+
+    return redirect(url_for("admin.technicians"))
+
+
 @admin_bp.route("/admin/technicians/<tech_id>/reveal", methods=["POST"])
 @admin_required
 def toggle_reveal(tech_id):
-    """Toggle technician reveal_status (after telephonic confirmation)."""
     try:
         sb = get_admin_client()
         current = sb.table("technicians").select("reveal_status").eq("id", tech_id).execute()
         if current.data:
             new_status = not current.data[0]["reveal_status"]
             sb.table("technicians").update({"reveal_status": new_status}).eq("id", tech_id).execute()
-            status_text = "revealed" if new_status else "hidden"
+            status_text = "revealed (visible to customers)" if new_status else "hidden"
             flash(f"Technician contact info is now {status_text}.", "success")
     except Exception as e:
         flash(f"Error toggling reveal status: {str(e)}", "error")
@@ -164,7 +210,9 @@ def delete_technician(tech_id):
     return redirect(url_for("admin.technicians"))
 
 
-# ── AMC Plan Management ────────────────────────
+# ═══════════════════════════════════════════════════
+#  AMC Plan Management (Full CRUD)
+# ═══════════════════════════════════════════════════
 
 @admin_bp.route("/admin/amc-plans")
 @admin_required
@@ -197,10 +245,52 @@ def add_amc_plan():
             "description": description,
             "active": True,
         }).execute()
-        flash(f"AMC plan '{tier}' added.", "success")
+        flash(f"AMC plan '{tier}' created.", "success")
     except Exception as e:
         flash(f"Error: {str(e)}", "error")
 
+    return redirect(url_for("admin.amc_plans"))
+
+
+@admin_bp.route("/admin/amc-plans/<plan_id>/edit", methods=["POST"])
+@admin_required
+def edit_amc_plan(plan_id):
+    tier = sanitize_string(request.form.get("tier", ""))
+    duration = request.form.get("duration_months", "3")
+    visits = request.form.get("visits_included", "1")
+    price = request.form.get("price", "0")
+    description = sanitize_string(request.form.get("description", ""), max_length=1000)
+    active = request.form.get("active") == "true"
+
+    try:
+        sb = get_admin_client()
+        sb.table("amc_plans").update({
+            "tier": tier,
+            "duration_months": int(duration),
+            "visits_included": int(visits),
+            "price": float(price),
+            "description": description,
+            "active": active,
+        }).eq("id", plan_id).execute()
+        flash(f"AMC plan '{tier}' updated.", "success")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+
+    return redirect(url_for("admin.amc_plans"))
+
+
+@admin_bp.route("/admin/amc-plans/<plan_id>/toggle", methods=["POST"])
+@admin_required
+def toggle_amc_plan(plan_id):
+    try:
+        sb = get_admin_client()
+        current = sb.table("amc_plans").select("active").eq("id", plan_id).execute()
+        if current.data:
+            new_active = not current.data[0]["active"]
+            sb.table("amc_plans").update({"active": new_active}).eq("id", plan_id).execute()
+            flash(f"Plan status updated to {'Active' if new_active else 'Inactive'}.", "success")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
     return redirect(url_for("admin.amc_plans"))
 
 
@@ -209,14 +299,16 @@ def add_amc_plan():
 def delete_amc_plan(plan_id):
     try:
         sb = get_admin_client()
-        sb.table("amc_plans").update({"active": False}).eq("id", plan_id).execute()
-        flash("Plan deactivated.", "success")
-    except Exception:
-        flash("Error deactivating plan.", "error")
+        sb.table("amc_plans").delete().eq("id", plan_id).execute()
+        flash("AMC Plan deleted.", "success")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
     return redirect(url_for("admin.amc_plans"))
 
 
-# ── Repair Parts Management ────────────────────
+# ═══════════════════════════════════════════════════
+#  Repair Parts Management (Full CRUD)
+# ═══════════════════════════════════════════════════
 
 @admin_bp.route("/admin/parts")
 @admin_required
@@ -256,19 +348,63 @@ def add_part():
     return redirect(url_for("admin.parts"))
 
 
+@admin_bp.route("/admin/parts/<part_id>/edit", methods=["POST"])
+@admin_required
+def edit_part(part_id):
+    name = sanitize_string(request.form.get("name", ""))
+    price = request.form.get("price", "0")
+    source = sanitize_string(request.form.get("source", ""))
+    description = sanitize_string(request.form.get("description", ""), max_length=500)
+    category = sanitize_string(request.form.get("category", ""))
+    in_stock = request.form.get("in_stock") == "true"
+
+    try:
+        sb = get_admin_client()
+        sb.table("repair_parts").update({
+            "name": name,
+            "price": float(price),
+            "source": source,
+            "description": description,
+            "category": category,
+            "in_stock": in_stock,
+        }).eq("id", part_id).execute()
+        flash(f"Part '{name}' updated.", "success")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+
+    return redirect(url_for("admin.parts"))
+
+
+@admin_bp.route("/admin/parts/<part_id>/toggle-stock", methods=["POST"])
+@admin_required
+def toggle_part_stock(part_id):
+    try:
+        sb = get_admin_client()
+        current = sb.table("repair_parts").select("in_stock").eq("id", part_id).execute()
+        if current.data:
+            new_stock = not current.data[0]["in_stock"]
+            sb.table("repair_parts").update({"in_stock": new_stock}).eq("id", part_id).execute()
+            flash(f"Stock status updated to {'In Stock' if new_stock else 'Out of Stock'}.", "success")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+    return redirect(url_for("admin.parts"))
+
+
 @admin_bp.route("/admin/parts/<part_id>/delete", methods=["POST"])
 @admin_required
 def delete_part(part_id):
     try:
         sb = get_admin_client()
-        sb.table("repair_parts").update({"in_stock": False}).eq("id", part_id).execute()
-        flash("Part marked as out of stock.", "success")
-    except Exception:
-        flash("Error updating part.", "error")
+        sb.table("repair_parts").delete().eq("id", part_id).execute()
+        flash("Repair part removed from catalogue.", "success")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
     return redirect(url_for("admin.parts"))
 
 
-# ── Chimney Product Management ─────────────────
+# ═══════════════════════════════════════════════════
+#  Chimney Products Management (Full CRUD)
+# ═══════════════════════════════════════════════════
 
 @admin_bp.route("/admin/products")
 @admin_required
@@ -312,7 +448,7 @@ def add_product():
                 )
                 image_url = sb.storage.from_("chimnecare-assets").get_public_url(file_path)
             except Exception:
-                flash("Image upload failed.", "warning")
+                pass
 
     try:
         sb = get_admin_client()
@@ -327,7 +463,51 @@ def add_product():
             "image_url": image_url,
             "active": True,
         }).execute()
-        flash(f"Product '{brand} {model}' added.", "success")
+        flash(f"Product '{brand} {model}' added to catalogue.", "success")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+
+    return redirect(url_for("admin.products"))
+
+
+@admin_bp.route("/admin/products/<product_id>/edit", methods=["POST"])
+@admin_required
+def edit_product(product_id):
+    brand = sanitize_string(request.form.get("brand", ""))
+    model = sanitize_string(request.form.get("model", ""))
+    price = request.form.get("price", "0")
+    product_type = sanitize_string(request.form.get("type", ""))
+    size = sanitize_string(request.form.get("size", ""))
+    suction = sanitize_string(request.form.get("suction_capacity", ""))
+    description = sanitize_string(request.form.get("description", ""), max_length=1000)
+    active = request.form.get("active") == "true"
+
+    try:
+        sb = get_admin_client()
+        update_data = {
+            "brand": brand,
+            "model": model,
+            "price": float(price),
+            "type": product_type,
+            "size": size,
+            "suction_capacity": suction,
+            "description": description,
+            "active": active,
+        }
+
+        if "image" in request.files and request.files["image"].filename:
+            image = request.files["image"]
+            file_ext = os.path.splitext(image.filename)[1]
+            file_path = f"products/{brand}_{model}{file_ext}".lower().replace(" ", "_")
+            sb.storage.from_("chimnecare-assets").upload(
+                path=file_path,
+                file=image.read(),
+                file_options={"content-type": image.content_type or "image/jpeg", "upsert": "true"},
+            )
+            update_data["image_url"] = sb.storage.from_("chimnecare-assets").get_public_url(file_path)
+
+        sb.table("chimney_products").update(update_data).eq("id", product_id).execute()
+        flash(f"Product '{brand} {model}' updated.", "success")
     except Exception as e:
         flash(f"Error: {str(e)}", "error")
 
@@ -339,14 +519,16 @@ def add_product():
 def delete_product(product_id):
     try:
         sb = get_admin_client()
-        sb.table("chimney_products").update({"active": False}).eq("id", product_id).execute()
-        flash("Product deactivated.", "success")
-    except Exception:
-        flash("Error deactivating product.", "error")
+        sb.table("chimney_products").delete().eq("id", product_id).execute()
+        flash("Product removed.", "success")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
     return redirect(url_for("admin.products"))
 
 
-# ── Promo Code Management ──────────────────────
+# ═══════════════════════════════════════════════════
+#  Promo Codes Management (Full CRUD)
+# ═══════════════════════════════════════════════════
 
 @admin_bp.route("/admin/promo-codes")
 @admin_required
@@ -390,6 +572,33 @@ def add_promo_code():
     return redirect(url_for("admin.promo_codes"))
 
 
+@admin_bp.route("/admin/promo-codes/<promo_id>/edit", methods=["POST"])
+@admin_required
+def edit_promo_code(promo_id):
+    code = sanitize_string(request.form.get("code", "")).upper()
+    discount_type = sanitize_string(request.form.get("discount_type", "percentage"))
+    value = request.form.get("value", "0")
+    min_order = request.form.get("min_order_amount", "0")
+    max_uses = request.form.get("max_uses", "")
+    active = request.form.get("active") == "true"
+
+    try:
+        sb = get_admin_client()
+        sb.table("promo_codes").update({
+            "code": code,
+            "discount_type": discount_type,
+            "value": float(value),
+            "min_order_amount": float(min_order) if min_order else 0,
+            "max_uses": int(max_uses) if max_uses else None,
+            "active": active,
+        }).eq("id", promo_id).execute()
+        flash(f"Promo code '{code}' updated.", "success")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+
+    return redirect(url_for("admin.promo_codes"))
+
+
 @admin_bp.route("/admin/promo-codes/<promo_id>/toggle", methods=["POST"])
 @admin_required
 def toggle_promo(promo_id):
@@ -397,14 +606,29 @@ def toggle_promo(promo_id):
         sb = get_admin_client()
         current = sb.table("promo_codes").select("active").eq("id", promo_id).execute()
         if current.data:
-            sb.table("promo_codes").update({"active": not current.data[0]["active"]}).eq("id", promo_id).execute()
-            flash("Promo code status toggled.", "success")
-    except Exception:
-        flash("Error toggling promo code.", "error")
+            new_status = not current.data[0]["active"]
+            sb.table("promo_codes").update({"active": new_status}).eq("id", promo_id).execute()
+            flash(f"Promo code is now {'Active' if new_status else 'Inactive'}.", "success")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
     return redirect(url_for("admin.promo_codes"))
 
 
-# ── Bookings & Orders Views ───────────────────
+@admin_bp.route("/admin/promo-codes/<promo_id>/delete", methods=["POST"])
+@admin_required
+def delete_promo_code(promo_id):
+    try:
+        sb = get_admin_client()
+        sb.table("promo_codes").delete().eq("id", promo_id).execute()
+        flash("Promo code deleted.", "success")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "error")
+    return redirect(url_for("admin.promo_codes"))
+
+
+# ═══════════════════════════════════════════════════
+#  Bookings, Repairs & Orders Management (Full Edit)
+# ═══════════════════════════════════════════════════
 
 @admin_bp.route("/admin/bookings")
 @admin_required
@@ -413,7 +637,7 @@ def bookings():
     try:
         result = (
             sb.table("services")
-            .select("*, profiles(name, email, phone)")
+            .select("*, profiles(name, email, phone), technicians(id, name)")
             .order("created_at", desc=True)
             .execute()
         )
@@ -430,7 +654,9 @@ def bookings():
 @admin_required
 def update_booking_status(booking_id):
     new_status = sanitize_string(request.form.get("status", ""))
-    technician_id = request.form.get("technician_id") or None
+    technician_id = request.form.get("technician_id")
+    labour_charge = request.form.get("labour_charge")
+    notes = sanitize_string(request.form.get("notes", ""))
 
     try:
         sb = get_admin_client()
@@ -438,13 +664,17 @@ def update_booking_status(booking_id):
         if new_status in ("pending", "confirmed", "in_progress", "completed", "cancelled"):
             update_data["status"] = new_status
         if "technician_id" in request.form:
-            update_data["technician_id"] = technician_id
+            update_data["technician_id"] = technician_id if technician_id else None
+        if labour_charge:
+            update_data["labour_charge"] = float(labour_charge)
+        if notes:
+            update_data["notes"] = notes
 
         if update_data:
             sb.table("services").update(update_data).eq("id", booking_id).execute()
-            flash("Booking updated.", "success")
+            flash("Booking updated successfully.", "success")
     except Exception as e:
-        flash(f"Error: {str(e)}", "error")
+        flash(f"Error updating booking: {str(e)}", "error")
 
     return redirect(url_for("admin.bookings"))
 
@@ -456,13 +686,13 @@ def repairs():
     try:
         result = (
             sb.table("repair_jobs")
-            .select("*, profiles(name, email, phone)")
+            .select("*, profiles(name, email, phone), technicians(id, name)")
             .order("created_at", desc=True)
             .execute()
         )
         all_repairs = result.data or []
-        technicians_result = sb.table("technicians").select("id, name").execute()
-        techs = technicians_result.data or []
+        techs_res = sb.table("technicians").select("id, name").execute()
+        techs = techs_res.data or []
     except Exception:
         all_repairs = []
         techs = []
@@ -473,8 +703,9 @@ def repairs():
 @admin_required
 def update_repair(repair_id):
     status = sanitize_string(request.form.get("status", ""))
-    technician_id = request.form.get("technician_id") or None
-    labour_charge = request.form.get("labour_charge", "")
+    technician_id = request.form.get("technician_id")
+    labour_charge = request.form.get("labour_charge")
+    total_cost = request.form.get("total_cost")
 
     try:
         sb = get_admin_client()
@@ -482,14 +713,17 @@ def update_repair(repair_id):
         if status in ("pending", "confirmed", "in_progress", "completed", "cancelled"):
             update_data["confirmation_status"] = status
         if "technician_id" in request.form:
-            update_data["technician_id"] = technician_id
+            update_data["technician_id"] = technician_id if technician_id else None
         if labour_charge:
             update_data["labour_charge"] = float(labour_charge)
+        if total_cost:
+            update_data["total_cost"] = float(total_cost)
+
         if update_data:
             sb.table("repair_jobs").update(update_data).eq("id", repair_id).execute()
-            flash("Repair job updated.", "success")
+            flash("Repair job updated successfully.", "success")
     except Exception as e:
-        flash(f"Error: {str(e)}", "error")
+        flash(f"Error updating repair job: {str(e)}", "error")
 
     return redirect(url_for("admin.repairs"))
 
@@ -515,15 +749,13 @@ def orders():
 @admin_required
 def update_order_status(order_id):
     new_status = sanitize_string(request.form.get("status", ""))
-    if new_status not in ("placed", "processing", "shipped", "delivered", "cancelled"):
-        flash("Invalid status.", "error")
-        return redirect(url_for("admin.orders"))
 
     try:
         sb = get_admin_client()
-        sb.table("orders").update({"status": new_status}).eq("id", order_id).execute()
-        flash("Order status updated.", "success")
+        if new_status in ("placed", "processing", "shipped", "delivered", "cancelled"):
+            sb.table("orders").update({"status": new_status}).eq("id", order_id).execute()
+            flash(f"Order status updated to '{new_status.title()}'.", "success")
     except Exception as e:
-        flash(f"Error: {str(e)}", "error")
+        flash(f"Error updating order: {str(e)}", "error")
 
     return redirect(url_for("admin.orders"))

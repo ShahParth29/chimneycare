@@ -3,7 +3,10 @@
 
 {% block admin_content %}
 <div class="admin-main__header">
-  <h1 class="admin-main__title">Technicians</h1>
+  <div>
+    <h1 class="admin-main__title">Certified Technicians</h1>
+    <p style="color: var(--steel-400); font-size: 0.85rem; margin: 4px 0 0;">Manage service technicians, specializations, and customer reveal permissions.</p>
+  </div>
   <button class="btn btn--primary" onclick="openModal('add-tech-modal')">+ Add Technician</button>
 </div>
 
@@ -11,7 +14,14 @@
 <div class="table-wrapper">
   <table class="data-table">
     <thead>
-      <tr><th>Name</th><th>Phone</th><th>Email</th><th>Specialization</th><th>Reveal Status</th><th>Actions</th></tr>
+      <tr>
+        <th>Technician</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Specialization</th>
+        <th>Reveal Status</th>
+        <th>Actions</th>
+      </tr>
     </thead>
     <tbody>
       {% for tech in technicians %}
@@ -19,32 +29,84 @@
         <td>
           <div style="display:flex; align-items:center; gap:var(--space-sm);">
             {% if tech.photo_url %}
-            <img src="{{ tech.photo_url }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+            <img src="{{ tech.photo_url }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid var(--cream-300);">
             {% else %}
-            <div style="width:36px;height:36px;border-radius:50%;background:var(--cream-200);display:flex;align-items:center;justify-content:center;">👷</div>
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--cream-200);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">👷</div>
             {% endif %}
-            <strong>{{ tech.name }}</strong>
+            <div>
+              <strong>{{ tech.name }}</strong>
+            </div>
           </div>
         </td>
         <td>{{ tech.phone or '—' }}</td>
         <td>{{ tech.email or '—' }}</td>
-        <td>{{ tech.specialization or '—' }}</td>
+        <td><span class="badge badge--placed">{{ tech.specialization or 'General Service' }}</span></td>
         <td>
           <form method="post" action="{{ url_for('admin.toggle_reveal', tech_id=tech.id) }}" style="display:inline;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="badge {% if tech.reveal_status %}badge--confirmed{% else %}badge--pending{% endif %}" 
-                    style="cursor:pointer;border:none;">
-              {{ 'Revealed' if tech.reveal_status else 'Hidden' }}
+                    style="cursor:pointer; border:none; padding:6px 12px;"
+                    title="Click to toggle customer visibility">
+              {{ '✓ Revealed' if tech.reveal_status else '🔒 Hidden' }}
             </button>
           </form>
         </td>
         <td>
-          <form method="post" action="{{ url_for('admin.delete_technician', tech_id=tech.id) }}" style="display:inline;">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="action-btn action-btn--danger" data-confirm="Delete this technician?">🗑</button>
-          </form>
+          <div class="action-group">
+            <button type="button" class="action-btn" title="Edit Technician" onclick="openModal('edit-tech-modal-{{ tech.id }}')">✏️</button>
+            <form method="post" action="{{ url_for('admin.delete_technician', tech_id=tech.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="action-btn action-btn--danger" data-confirm="Delete technician '{{ tech.name }}'?" title="Delete">🗑</button>
+            </form>
+          </div>
         </td>
       </tr>
+
+      <!-- Edit Technician Modal -->
+      <div class="modal-overlay" id="edit-tech-modal-{{ tech.id }}">
+        <div class="modal">
+          <div class="modal__header">
+            <h3 class="modal__title">Edit Technician: {{ tech.name }}</h3>
+            <button class="modal__close" onclick="closeModal('edit-tech-modal-{{ tech.id }}')">&times;</button>
+          </div>
+          <form method="post" action="{{ url_for('admin.edit_technician', tech_id=tech.id) }}" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="admin-form">
+              <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" name="name" class="form-input" value="{{ tech.name }}" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Specialization</label>
+                <input type="text" name="specialization" class="form-input" value="{{ tech.specialization or '' }}" placeholder="e.g., Faber & Elica Expert">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" name="phone" class="form-input" value="{{ tech.phone or '' }}" placeholder="+91 87340 02200">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-input" value="{{ tech.email or '' }}">
+              </div>
+              <div class="form-group form-group--full">
+                <label class="form-label">Reveal to Verified Customers</label>
+                <select name="reveal_status" class="form-select">
+                  <option value="false" {% if not tech.reveal_status %}selected{% endif %}>🔒 Hidden (Show only after telephonic confirmation)</option>
+                  <option value="true" {% if tech.reveal_status %}selected{% endif %}>✓ Revealed (Phone & details visible to customer)</option>
+                </select>
+              </div>
+              <div class="form-group form-group--full">
+                <label class="form-label">Update Profile Photo</label>
+                <input type="file" name="photo" accept="image/*">
+              </div>
+            </div>
+            <div class="mt-xl" style="display:flex; gap:var(--space-md);">
+              <button type="submit" class="btn btn--primary">Save Changes</button>
+              <button type="button" class="btn btn--outline" onclick="closeModal('edit-tech-modal-{{ tech.id }}')">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
       {% endfor %}
     </tbody>
   </table>
@@ -52,8 +114,8 @@
 {% else %}
 <div class="empty-state">
   <div class="empty-state__icon">👷</div>
-  <div class="empty-state__title">No technicians added</div>
-  <p>Add your first technician to start assigning service jobs.</p>
+  <div class="empty-state__title">No technicians added yet</div>
+  <p>Add your certified technicians to assign service and repair bookings.</p>
 </div>
 {% endif %}
 
@@ -61,35 +123,34 @@
 <div class="modal-overlay" id="add-tech-modal">
   <div class="modal">
     <div class="modal__header">
-      <h3 class="modal__title">Add Technician</h3>
+      <h3 class="modal__title">Add New Certified Technician</h3>
       <button class="modal__close" onclick="closeModal('add-tech-modal')">&times;</button>
     </div>
     <form method="post" action="{{ url_for('admin.add_technician') }}" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="admin-form">
         <div class="form-group">
-          <label class="form-label">Name *</label>
-          <input type="text" name="name" class="form-input" required>
+          <label class="form-label">Full Name *</label>
+          <input type="text" name="name" class="form-input" placeholder="e.g., Rajesh Sharma" required>
         </div>
         <div class="form-group">
           <label class="form-label">Specialization</label>
-          <input type="text" name="specialization" class="form-input" placeholder="e.g., Motor Repair">
+          <input type="text" name="specialization" class="form-input" placeholder="e.g., Motor Repair & Deep Cleaning">
         </div>
         <div class="form-group">
-          <label class="form-label">Phone</label>
-          <input type="tel" name="phone" class="form-input">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" name="phone" class="form-input" placeholder="+91 98765 43210">
         </div>
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input type="email" name="email" class="form-input">
+          <input type="email" name="email" class="form-input" placeholder="technician@chimneycare.in">
         </div>
         <div class="form-group form-group--full">
           <label class="form-label">Photo</label>
-          <input type="file" name="photo" accept="image/*" data-preview="photo-preview">
-          <img id="photo-preview" style="display:none;max-width:120px;margin-top:var(--space-sm);border-radius:var(--border-radius);">
+          <input type="file" name="photo" accept="image/*">
         </div>
       </div>
-      <div class="mt-xl">
+      <div class="mt-xl" style="display:flex; gap:var(--space-md);">
         <button type="submit" class="btn btn--primary">Add Technician</button>
         <button type="button" class="btn btn--outline" onclick="closeModal('add-tech-modal')">Cancel</button>
       </div>

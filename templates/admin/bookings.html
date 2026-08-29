@@ -1,51 +1,130 @@
 {% extends "admin/base_admin.html" %}
-{% block admin_title %}Bookings{% endblock %}
+{% block admin_title %}Bookings Management{% endblock %}
 
 {% block admin_content %}
 <div class="admin-main__header">
-  <h1 class="admin-main__title">All Bookings</h1>
+  <div>
+    <h1 class="admin-main__title">Customer Service Bookings</h1>
+    <p style="color: var(--steel-400); font-size: 0.85rem; margin: 4px 0 0;">Update service workflow, assign technicians, and adjust labour records.</p>
+  </div>
   <div><input type="text" id="table-search" class="form-input" placeholder="Search bookings..." style="width:250px;"></div>
 </div>
 
 {% if bookings %}
 <div class="table-wrapper">
   <table class="data-table">
-    <thead><tr><th>Order ID</th><th>Customer</th><th>Type</th><th>Labour</th><th>Status</th><th>Technician</th><th>Date</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Booking Details</th>
+        <th>Customer</th>
+        <th>Service Type</th>
+        <th>Status</th>
+        <th>Assigned Technician</th>
+        <th>Labour (₹)</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
     <tbody>
       {% for b in bookings %}
       <tr>
-        <td><strong>{{ b.order_id }}</strong><br><code style="font-size:0.7rem;color:var(--steel-400);">{{ b.service_id }}</code></td>
-        <td>{{ b.profiles.name if b.profiles else '—' }}<br><small style="color:var(--steel-300);">{{ b.profiles.email if b.profiles else '' }}</small></td>
-        <td>{{ b.type | replace('_', ' ') | title }}</td>
-        <td>₹{{ "{:,.0f}".format(b.labour_charge or 0) }}</td>
         <td>
-          <form method="post" action="{{ url_for('admin.update_booking_status', booking_id=b.id) }}" style="display:inline;">
+          <strong style="color:var(--charcoal-900); font-size:0.95rem;">{{ b.order_id }}</strong><br>
+          <code style="font-size:0.75rem; color:var(--steel-400);">{{ b.service_id }}</code>
+        </td>
+        <td>
+          <strong>{{ b.profiles.name if b.profiles else '—' }}</strong><br>
+          <small style="color:var(--steel-300);">{{ b.profiles.phone or b.profiles.email if b.profiles else '' }}</small>
+        </td>
+        <td>
+          {% if b.type == 'amc' %}
+            <span class="badge badge--placed">AMC Contract</span>
+          {% else %}
+            <span class="badge badge--processing">One-Time Deep Clean</span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="post" action="{{ url_for('admin.update_booking_status', booking_id=b.id) }}" style="display:flex; align-items:center; gap:6px;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <select name="status" class="status-select" style="font-size:0.8rem;padding:4px 8px;border-radius:4px;border:1px solid var(--cream-300);">
+            <select name="status" class="form-select" style="font-size:0.8rem; padding:4px 8px; width:130px;">
               {% for s in ['pending','confirmed','in_progress','completed','cancelled'] %}
               <option value="{{ s }}" {% if b.status == s %}selected{% endif %}>{{ s | replace('_', ' ') | title }}</option>
               {% endfor %}
             </select>
+            <button type="submit" class="btn btn--sm btn--primary" style="padding:4px 10px; font-size:0.75rem;" title="Save Status">Save</button>
           </form>
         </td>
         <td>
-          <form method="post" action="{{ url_for('admin.update_booking_status', booking_id=b.id) }}" style="display:inline;">
+          <form method="post" action="{{ url_for('admin.update_booking_status', booking_id=b.id) }}" style="display:flex; align-items:center; gap:6px;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <select name="technician_id" class="status-select" style="font-size:0.8rem;padding:4px 8px;border-radius:4px;border:1px solid var(--cream-300);">
-              <option value="">Unassigned</option>
+            <select name="technician_id" class="form-select" style="font-size:0.8rem; padding:4px 8px; width:140px;">
+              <option value="">-- Unassigned --</option>
               {% for tech in technicians %}
               <option value="{{ tech.id }}" {% if b.technician_id == tech.id %}selected{% endif %}>{{ tech.name }}</option>
               {% endfor %}
             </select>
+            <button type="submit" class="btn btn--sm btn--secondary" style="padding:4px 10px; font-size:0.75rem;" title="Assign Technician">Assign</button>
           </form>
         </td>
-        <td style="font-size:0.8rem;color:var(--steel-400);">{{ b.created_at[:10] if b.created_at else '—' }}</td>
+        <td><strong>₹{{ "{:,.0f}".format(b.labour_charge or 0) }}</strong></td>
+        <td style="font-size:0.8rem; color:var(--steel-400);">{{ b.created_at[:10] if b.created_at else '—' }}</td>
+        <td>
+          <button type="button" class="action-btn" title="Edit Full Booking Details" onclick="openModal('edit-booking-modal-{{ b.id }}')">✏️</button>
+        </td>
       </tr>
+
+      <!-- Edit Booking Modal -->
+      <div class="modal-overlay" id="edit-booking-modal-{{ b.id }}">
+        <div class="modal">
+          <div class="modal__header">
+            <h3 class="modal__title">Edit Booking: {{ b.order_id }}</h3>
+            <button class="modal__close" onclick="closeModal('edit-booking-modal-{{ b.id }}')">&times;</button>
+          </div>
+          <form method="post" action="{{ url_for('admin.update_booking_status', booking_id=b.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="admin-form">
+              <div class="form-group">
+                <label class="form-label">Service Status</label>
+                <select name="status" class="form-select">
+                  {% for s in ['pending','confirmed','in_progress','completed','cancelled'] %}
+                  <option value="{{ s }}" {% if b.status == s %}selected{% endif %}>{{ s | replace('_', ' ') | title }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Assign Technician</label>
+                <select name="technician_id" class="form-select">
+                  <option value="">-- Unassigned --</option>
+                  {% for tech in technicians %}
+                  <option value="{{ tech.id }}" {% if b.technician_id == tech.id %}selected{% endif %}>{{ tech.name }} ({{ tech.specialization or 'General' }})</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Labour Charge (₹)</label>
+                <input type="number" name="labour_charge" class="form-input" value="{{ b.labour_charge or 0 }}" min="0" step="10">
+              </div>
+              <div class="form-group form-group--full">
+                <label class="form-label">Service Notes / Remarks</label>
+                <textarea name="notes" class="form-textarea" rows="3">{{ b.notes or '' }}</textarea>
+              </div>
+            </div>
+            <div class="mt-xl" style="display:flex; gap:var(--space-md);">
+              <button type="submit" class="btn btn--primary">Update Booking</button>
+              <button type="button" class="btn btn--outline" onclick="closeModal('edit-booking-modal-{{ b.id }}')">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
       {% endfor %}
     </tbody>
   </table>
 </div>
 {% else %}
-<div class="empty-state"><div class="empty-state__icon">📅</div><div class="empty-state__title">No bookings yet</div></div>
+<div class="empty-state">
+  <div class="empty-state__icon">📅</div>
+  <div class="empty-state__title">No bookings found</div>
+  <p>Customer bookings will appear here in real-time.</p>
+</div>
 {% endif %}
 {% endblock %}
