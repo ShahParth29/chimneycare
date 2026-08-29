@@ -64,25 +64,64 @@ def generate_whatsapp_url(phone: str = OFFICIAL_WHATSAPP_NUMBER, message: str = 
 
 def send_whatsapp_message(phone: str, message: str) -> dict:
     """
-    Send a WhatsApp message via Meta Business / Twilio API or log in development.
-    Formatted to Indian standard phone numbers with +91.
-    Safely handles Windows charmap console encoding.
+    Send a WhatsApp message via Meta Cloud API or Twilio API if keys exist,
+    otherwise log in development and prepare click-to-chat payload.
     """
     cleaned_phone = "".join(filter(str.isdigit, str(phone)))
     if len(cleaned_phone) == 10:
-        cleaned_phone = "+91" + cleaned_phone
-    elif not cleaned_phone.startswith("+"):
-        cleaned_phone = "+" + cleaned_phone
+        cleaned_phone = "91" + cleaned_phone
 
-    try:
-        safe_msg = message.encode("ascii", errors="replace").decode("ascii")
-        print(f"[WhatsApp Notification] To: {cleaned_phone} | Status: Dispatched")
-    except Exception:
-        pass
+    meta_token = os.environ.get("WHATSAPP_API_KEY")
+    meta_phone_id = os.environ.get("WHATSAPP_PHONE_NUMBER_ID")
 
+    twilio_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+    twilio_token = os.environ.get("TWILIO_AUTH_TOKEN")
+    twilio_from = os.environ.get("TWILIO_WHATSAPP_NUMBER", "+14155238886")
+
+    # 1. Meta WhatsApp Cloud API
+    if meta_token and meta_phone_id and meta_token not in ("placeholder", "placeholder-not-active"):
+        try:
+            import json, urllib.request
+            url = f"https://graph.facebook.com/v18.0/{meta_phone_id}/messages"
+            payload = json.dumps({
+                "messaging_product": "whatsapp",
+                "to": cleaned_phone,
+                "type": "text",
+                "text": {"body": message}
+            }).encode("utf-8")
+            req = urllib.request.Request(url, data=payload, headers={
+                "Authorization": f"Bearer {meta_token}",
+                "Content-Type": "application/json"
+            })
+            with urllib.request.urlopen(req) as resp:
+                return {"status": "sent", "provider": "meta"}
+        except Exception as e:
+            print(f"[Meta Cloud API Error] {e}")
+
+    # 2. Twilio WhatsApp API
+    if twilio_sid and twilio_token and twilio_sid not in ("placeholder", "placeholder-not-active"):
+        try:
+            import urllib.request, urllib.parse, base64
+            url = f"https://api.twilio.com/2010-04-01/Accounts/{twilio_sid}/Messages.json"
+            data = urllib.parse.urlencode({
+                "From": f"whatsapp:{twilio_from}",
+                "To": f"whatsapp:+{cleaned_phone}",
+                "Body": message
+            }).encode("utf-8")
+            auth_header = base64.b64encode(f"{twilio_sid}:{twilio_token}".encode("utf-8")).decode("ascii")
+            req = urllib.request.Request(url, data=data, headers={
+                "Authorization": f"Basic {auth_header}",
+                "Content-Type": "application/x-www-form-urlencoded"
+            })
+            with urllib.request.urlopen(req) as resp:
+                return {"status": "sent", "provider": "twilio"}
+        except Exception as e:
+            print(f"[Twilio API Error] {e}")
+
+    # 3. Development / Local Environment
     return {
-        "status": "sent",
-        "phone": cleaned_phone,
+        "status": "sent_direct",
+        "phone": f"+{cleaned_phone}",
         "message": message,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }

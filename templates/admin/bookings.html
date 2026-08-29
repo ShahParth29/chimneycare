@@ -5,7 +5,7 @@
 <div class="admin-main__header">
   <div>
     <h1 class="admin-main__title">Customer Service Bookings</h1>
-    <p style="color: var(--steel-400); font-size: 0.85rem; margin: 4px 0 0;">Update service workflow, assign technicians, and dispatch WhatsApp confirmations with Service IDs.</p>
+    <p style="color: var(--steel-400); font-size: 0.85rem; margin: 4px 0 0;">Update service workflow, assign technicians, and send WhatsApp confirmations directly to customers.</p>
   </div>
   <div><input type="text" id="table-search" class="form-input" placeholder="Search bookings..." style="width:250px;"></div>
 </div>
@@ -21,7 +21,7 @@
         <th>Status</th>
         <th>Assigned Technician</th>
         <th>Labour (₹)</th>
-        <th>WhatsApp Notify</th>
+        <th>Send WhatsApp</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -69,17 +69,11 @@
         <td><strong>₹{{ "{:,.0f}".format(b.labour_charge or 0) }}</strong></td>
         <td>
           {% if b.whatsapp_url %}
-          <div style="display:flex; gap:4px; align-items:center;">
-            <a href="{{ b.whatsapp_url }}" target="_blank" class="btn btn--sm" style="background:#25D366; color:white; font-size:0.75rem; padding:4px 8px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="Open WhatsApp Chat with prefilled Service ID & details">
-              💬 Chat
-            </a>
-            <form method="post" action="{{ url_for('admin.send_booking_confirmation', booking_id=b.id) }}" style="display:inline;">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button type="submit" class="btn btn--sm btn--outline" style="font-size:0.75rem; padding:4px 6px;" title="Dispatch Cloud API notification">📲 Push</button>
-            </form>
-          </div>
+          <a href="{{ b.whatsapp_url }}" target="_blank" class="btn btn--sm" style="background:#25D366; color:white; font-size:0.8rem; font-weight:600; padding:6px 12px; border-radius:6px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(37,211,102,0.25);" title="Open WhatsApp Chat with Service ID & confirmation details">
+            💬 Send to Customer
+          </a>
           {% else %}
-          <span style="color:var(--steel-300); font-size:0.75rem;">No Phone</span>
+          <span style="color:var(--steel-300); font-size:0.75rem;">No Phone Provided</span>
           {% endif %}
         </td>
         <td>
@@ -123,10 +117,10 @@
                 <textarea name="notes" class="form-textarea" rows="3">{{ b.notes or '' }}</textarea>
               </div>
             </div>
-            <div class="mt-xl" style="display:flex; gap:var(--space-md);">
+            <div class="mt-xl" style="display:flex; gap:var(--space-md); flex-wrap:wrap;">
               <button type="submit" class="btn btn--primary">Update Booking</button>
               {% if b.whatsapp_url %}
-              <a href="{{ b.whatsapp_url }}" target="_blank" class="btn" style="background:#25D366; color:white;">💬 Send WhatsApp to Customer</a>
+              <a href="{{ b.whatsapp_url }}" target="_blank" class="btn" style="background:#25D366; color:white;">💬 Open WhatsApp Confirmation</a>
               {% endif %}
               <button type="button" class="btn btn--outline" onclick="closeModal('edit-booking-modal-{{ b.id }}')">Cancel</button>
             </div>

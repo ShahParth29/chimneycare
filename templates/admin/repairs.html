@@ -21,7 +21,7 @@
         <th>Status</th>
         <th>Assigned Technician</th>
         <th>Labour / Total</th>
-        <th>WhatsApp Notify</th>
+        <th>Send WhatsApp</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -67,17 +67,11 @@
         </td>
         <td>
           {% if r.whatsapp_url %}
-          <div style="display:flex; gap:4px; align-items:center;">
-            <a href="{{ r.whatsapp_url }}" target="_blank" class="btn btn--sm" style="background:#25D366; color:white; font-size:0.75rem; padding:4px 8px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" title="Open WhatsApp Chat with Service ID & confirmation">
-              💬 Chat
-            </a>
-            <form method="post" action="{{ url_for('admin.send_repair_confirmation', repair_id=r.id) }}" style="display:inline;">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button type="submit" class="btn btn--sm btn--outline" style="font-size:0.75rem; padding:4px 6px;" title="Dispatch Cloud API notification">📲 Push</button>
-            </form>
-          </div>
+          <a href="{{ r.whatsapp_url }}" target="_blank" class="btn btn--sm" style="background:#25D366; color:white; font-size:0.8rem; font-weight:600; padding:6px 12px; border-radius:6px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(37,211,102,0.25);" title="Open WhatsApp Chat with Service ID & confirmation">
+            💬 Send to Customer
+          </a>
           {% else %}
-          <span style="color:var(--steel-300); font-size:0.75rem;">No Phone</span>
+          <span style="color:var(--steel-300); font-size:0.75rem;">No Phone Provided</span>
           {% endif %}
         </td>
         <td>
@@ -127,10 +121,10 @@
                 </div>
               </div>
             </div>
-            <div class="mt-xl" style="display:flex; gap:var(--space-md);">
+            <div class="mt-xl" style="display:flex; gap:var(--space-md); flex-wrap:wrap;">
               <button type="submit" class="btn btn--primary">Save Repair Updates</button>
               {% if r.whatsapp_url %}
-              <a href="{{ r.whatsapp_url }}" target="_blank" class="btn" style="background:#25D366; color:white;">💬 Send WhatsApp to Customer</a>
+              <a href="{{ r.whatsapp_url }}" target="_blank" class="btn" style="background:#25D366; color:white;">💬 Open WhatsApp Confirmation</a>
               {% endif %}
               <button type="button" class="btn btn--outline" onclick="closeModal('edit-repair-modal-{{ r.id }}')">Cancel</button>
             </div>
