@@ -123,14 +123,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      // Phone validation
+      // Phone validation (accepts 7-15 digits with optional + and formatting)
       form.querySelectorAll('input[data-validate-phone]').forEach(field => {
-        const phoneRegex = /^(\+91)?[6-9]\d{9}$/;
+        const errorEl = field.parentElement.querySelector('.form-error');
         const cleaned = field.value.replace(/[\s\-\(\)]/g, '');
+        const phoneRegex = /^\+?[0-9]{7,15}$/;
         if (cleaned && !phoneRegex.test(cleaned)) {
           valid = false;
           field.style.borderColor = 'var(--error)';
+          if (errorEl) errorEl.textContent = 'Please enter a valid phone number (at least 7-10 digits).';
+        } else if (cleaned) {
+          field.style.borderColor = '';
+          if (errorEl) errorEl.textContent = '';
         }
+      });
+
+      // Reset border and error on input
+      form.querySelectorAll('input, select, textarea').forEach(input => {
+        input.addEventListener('input', () => {
+          input.style.borderColor = '';
+          const err = input.parentElement.querySelector('.form-error');
+          if (err) err.textContent = '';
+        });
       });
 
       // Password match

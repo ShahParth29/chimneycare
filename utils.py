@@ -166,7 +166,8 @@ def validate_email(email: str) -> bool:
 
 
 def validate_phone(phone: str) -> bool:
-    """Basic phone number format check (Indian numbers)."""
+    """Phone number format check (supports standard international and national numbers 7-15 digits)."""
     import re
     cleaned = re.sub(r"[\s\-\(\)]", "", phone)
-    return bool(re.match(r"^(\+91)?[6-9]\d{9}$", cleaned))
+    return bool(re.match(r"^\+?[0-9]{7,15}$", cleaned))
+
