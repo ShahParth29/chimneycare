@@ -103,46 +103,50 @@
       </form>
     </div>
 
-    <!-- Results count -->
-    <p class="text-muted mb-lg">{{ products | length }} product{{ 's' if products | length != 1 else '' }} available in stock</p>
+    <!-- Dynamic Results Container for AJAX Filter Updates -->
+    <div id="marketplace-results" style="transition: opacity 0.2s ease;">
+      <!-- Results count -->
+      <p class="text-muted mb-lg" id="results-count">{{ products | length }} product{{ 's' if products | length != 1 else '' }} available in stock</p>
 
-    <!-- Product Grid -->
-    {% if products %}
-    <div class="product-grid">
-      {% for product in products %}
-      <div class="product-card reveal stagger-{{ (loop.index0 % 4) + 1 }}">
-        {% if product.image_url %}
-        <img src="{{ product.image_url }}" alt="{{ product.brand }} {{ product.model }}" class="product-card__image" style="height:240px; object-fit:cover; width:100%; border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;">
-        {% else %}
-        <div class="product-card__image" style="display: flex; align-items: center; justify-content: center; font-size: 3rem; background: linear-gradient(135deg, var(--cream-200), var(--cream-300)); height:240px;">🏠</div>
-        {% endif %}
-        <div class="product-card__body">
-          <span class="product-card__brand">{{ product.brand }}</span>
-          <h4 class="product-card__name">{{ product.model }}</h4>
-          <div class="product-card__specs">
-            {% if product.type %}{{ product.type }}{% endif %}
-            {% if product.size %} · {{ product.size }}{% endif %}
-            {% if product.suction_capacity %} · {{ product.suction_capacity }}{% endif %}
-          </div>
-          <div class="product-card__footer">
-            <div>
-              <span class="product-card__price">₹{{ "{:,.0f}".format(product.price) }}</span>
-              <div style="font-size:0.75rem; color:var(--success); font-weight:600;">+ Free Installation</div>
+      <!-- Product Grid -->
+      {% if products %}
+      <div class="product-grid">
+        {% for product in products %}
+        <div class="product-card">
+          {% if product.image_url %}
+          <img src="{{ product.image_url }}" alt="{{ product.brand }} {{ product.model }}" class="product-card__image" style="height:240px; object-fit:cover; width:100%; border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;">
+          {% else %}
+          <div class="product-card__image" style="display: flex; align-items: center; justify-content: center; font-size: 3rem; background: linear-gradient(135deg, var(--cream-200), var(--cream-300)); height:240px;">🏠</div>
+          {% endif %}
+          <div class="product-card__body">
+            <span class="product-card__brand">{{ product.brand }}</span>
+            <h4 class="product-card__name">{{ product.model }}</h4>
+            <div class="product-card__specs">
+              {% if product.type %}{{ product.type }}{% endif %}
+              {% if product.size %} · {{ product.size }}{% endif %}
+              {% if product.suction_capacity %} · {{ product.suction_capacity }}{% endif %}
             </div>
-            <a href="{{ url_for('marketplace.product_detail', product_id=product.id) }}" class="btn btn--primary btn--sm">View Model</a>
+            <div class="product-card__footer">
+              <div>
+                <span class="product-card__price">₹{{ "{:,.0f}".format(product.price) }}</span>
+                <div style="font-size:0.75rem; color:var(--success); font-weight:600;">+ Free Installation</div>
+              </div>
+              <a href="{{ url_for('marketplace.product_detail', product_id=product.id) }}" class="btn btn--primary btn--sm">View Model</a>
+            </div>
           </div>
         </div>
+        {% endfor %}
       </div>
-      {% endfor %}
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state__icon">🔍</div>
+        <div class="empty-state__title">No chimneys match your filters</div>
+        <p class="empty-state__desc">Try clearing some filters or searching for another brand.</p>
+        <button type="button" id="reset-filters-btn" class="btn btn--outline mt-md">Reset Filters</button>
+      </div>
+      {% endif %}
     </div>
-    {% else %}
-    <div class="empty-state">
-      <div class="empty-state__icon">🔍</div>
-      <div class="empty-state__title">No chimneys match your filters</div>
-      <p class="empty-state__desc">Try clearing some filters or searching for another brand.</p>
-      <a href="{{ url_for('marketplace.marketplace_index') }}" class="btn btn--outline mt-md">Reset Filters</a>
-    </div>
-    {% endif %}
   </div>
 </section>
+
 {% endblock %}

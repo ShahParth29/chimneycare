@@ -5,15 +5,91 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── Filter Form Auto-Submit ──────────────
+  // ── Seamless AJAX Product Filtering (No Page Reload) ──────────────
   const filterForm = document.getElementById('filter-form');
+  const resultsContainer = document.getElementById('marketplace-results');
+
+  async function applyFilters(pushHistory = true) {
+    if (!filterForm || !resultsContainer) return;
+
+    const formData = new FormData(filterForm);
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+      if (value) params.append(key, value);
+    }
+
+    const targetUrl = `${filterForm.action || window.location.pathname}?${params.toString()}`;
+
+    // Visual loading state
+    resultsContainer.style.opacity = '0.4';
+    resultsContainer.style.pointerEvents = 'none';
+
+    try {
+      const response = await fetch(targetUrl, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (response.ok) {
+        const htmlText = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+        const newResults = doc.getElementById('marketplace-results');
+
+        if (newResults) {
+          resultsContainer.innerHTML = newResults.innerHTML;
+        }
+
+        if (pushHistory) {
+          window.history.pushState({ path: targetUrl }, '', targetUrl);
+        }
+      } else {
+        window.location.href = targetUrl;
+      }
+    } catch (err) {
+      console.error('Filter fetch error:', err);
+      filterForm.submit(); // Graceful fallback
+    } finally {
+      resultsContainer.style.opacity = '1';
+      resultsContainer.style.pointerEvents = 'auto';
+    }
+  }
+
   if (filterForm) {
     filterForm.querySelectorAll('select').forEach(select => {
       select.addEventListener('change', () => {
-        filterForm.submit();
+        applyFilters(true);
       });
     });
+
+    filterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      applyFilters(true);
+    });
   }
+
+  // Handle browser Back/Forward navigation smoothly
+  window.addEventListener('popstate', () => {
+    // Sync select dropdowns with URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    if (filterForm) {
+      filterForm.querySelectorAll('select').forEach(select => {
+        select.value = urlParams.get(select.name) || '';
+      });
+      applyFilters(false);
+    }
+  });
+
+  // Dynamic delegate for "Reset Filters" button
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'reset-filters-btn') {
+      e.preventDefault();
+      if (filterForm) {
+        filterForm.querySelectorAll('select').forEach(select => {
+          select.value = '';
+        });
+        applyFilters(true);
+      }
+    }
+  });
 
   // ── Price Range Inputs ───────────────────
   const priceInputs = document.querySelectorAll('.filter-bar input[type="number"]');
@@ -22,10 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('input', () => {
       clearTimeout(priceTimeout);
       priceTimeout = setTimeout(() => {
-        if (filterForm) filterForm.submit();
-      }, 800);
+        applyFilters(true);
+      }, 500);
     });
   });
+
 
   // ── Promo Code Validation (AJAX) ─────────
   const promoInput = document.getElementById('promo-code');
