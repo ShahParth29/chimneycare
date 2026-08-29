@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Service Areas &amp; Coverage — ChimneyCare{% endblock %}
-{% block meta_description %}Find ChimneyCare service areas across major Indian metro zones and cities. Same-day deep cleaning and 24-hour repair response by certified technicians.{% endblock %}
+{% block title %}Service Areas — Ahmedabad, Gandhinagar &amp; 100km Radius | ChimneyCare{% endblock %}
+{% block meta_description %}ChimneyCare provides certified chimney cleaning, AMC, and repair services across Ahmedabad, Gandhinagar, and up to a 100 km radius. Pan-India expansion coming soon.{% endblock %}
 
 {% block content %}
 <section class="page-header">
@@ -9,95 +9,83 @@
     <div class="page-header__breadcrumb">
       <a href="{{ url_for('services.landing') }}">Home</a> / <span>Service Areas</span>
     </div>
-    <h1 class="page-header__title">Service Areas &amp; City Hubs</h1>
+    <h1 class="page-header__title">Our Service Areas</h1>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
     <div class="section__header text-center reveal">
-      <span class="section__label">Operational Coverage</span>
-      <h2 class="section__title" style="margin: 0 auto;">Serving key metros &amp; residential hubs</h2>
+      <span class="section__label">Active Service Zone</span>
+      <h2 class="section__title" style="margin: 0 auto;">Ahmedabad, Gandhinagar &amp; 100 km Regional Hubs</h2>
       <p class="section__desc" style="margin: var(--space-md) auto 0;">
-        Our certified technicians are stationed at dedicated zonal service hubs to ensure prompt same-day visits and emergency response.
+        Operated by <strong>Sobharaj Enterprise Pvt Ltd</strong>, our technician fleet provides same-day dispatch and emergency kitchen chimney maintenance across Gujarat's capital region.
       </p>
     </div>
 
-    <div class="product-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-      <!-- Zone 1 -->
+    <div class="product-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+      <!-- Zone 1: Ahmedabad Core -->
       <div class="product-card reveal stagger-1">
         <div class="product-card__body">
-          <span class="card__tag">Metro Hub 1</span>
-          <h3 class="product-card__name">Mumbai &amp; MMR</h3>
+          <span class="card__tag" style="background: var(--success-bg); color: var(--success);">Active Daily</span>
+          <h3 class="product-card__name">Ahmedabad Metro</h3>
           <p class="product-card__specs">
-            Coverage across South Mumbai, Western Suburbs (Andheri, Bandra, Borivali), Central Suburbs, Thane, and Navi Mumbai.
+            Complete doorstep coverage across East &amp; West Ahmedabad including Bopal, South Bopal, Satellite, SG Highway, Vastrapur, Prahlad Nagar, Chandkheda, Gota, Motera, Maninagar, and Naroda.
           </p>
           <ul style="list-style: none; font-size: 0.85rem; color: var(--steel-400); margin: var(--space-md) 0; display: flex; flex-direction: column; gap: 6px;">
-            <li>⚡ <strong>Response Time:</strong> Within 4–6 hours</li>
-            <li>🔧 <strong>Services:</strong> Deep Cleaning, AMC, Motor & PCB Repair</li>
+            <li>⚡ <strong>Response Time:</strong> Same-day (within 2–4 hours)</li>
+            <li>🔧 <strong>Services:</strong> Deep Cleaning, AMC Plans, Motor/PCB Repair, Chimney Installation</li>
           </ul>
-          <a href="{{ url_for('services.book_service') }}" class="btn btn--primary btn--sm btn--full">Book in Mumbai</a>
+          <a href="{{ url_for('services.book_service') }}" class="btn btn--primary btn--sm btn--full">Book in Ahmedabad</a>
         </div>
       </div>
 
-      <!-- Zone 2 -->
+      <!-- Zone 2: Gandhinagar & GIFT City -->
       <div class="product-card reveal stagger-2">
         <div class="product-card__body">
-          <span class="card__tag">Metro Hub 2</span>
-          <h3 class="product-card__name">Delhi NCR</h3>
+          <span class="card__tag" style="background: var(--success-bg); color: var(--success);">Active Daily</span>
+          <h3 class="product-card__name">Gandhinagar &amp; GIFT City</h3>
           <p class="product-card__specs">
-            Complete coverage in South Delhi, North/West Delhi, Noida, Greater Noida, and Gurugram.
+            Full coverage across all residential Sectors (Sector 1 to 30), Kudasan, Raysan, PDPU Road, Infocity, Sargasan, Vavol, and GIFT City residential towers.
           </p>
           <ul style="list-style: none; font-size: 0.85rem; color: var(--steel-400); margin: var(--space-md) 0; display: flex; flex-direction: column; gap: 6px;">
-            <li>⚡ <strong>Response Time:</strong> Within 4–8 hours</li>
-            <li>🔧 <strong>Services:</strong> Deep Cleaning, AMC, Duct Installation</li>
+            <li>⚡ <strong>Response Time:</strong> Same-day (within 3–5 hours)</li>
+            <li>🔧 <strong>Services:</strong> Deep Cleaning, AMC Plans, Spare Parts, Exchange Offers</li>
           </ul>
-          <a href="{{ url_for('services.book_service') }}" class="btn btn--primary btn--sm btn--full">Book in Delhi NCR</a>
+          <a href="{{ url_for('services.book_service') }}" class="btn btn--primary btn--sm btn--full">Book in Gandhinagar</a>
         </div>
       </div>
 
-      <!-- Zone 3 -->
+      <!-- Zone 3: 100 km Radius -->
       <div class="product-card reveal stagger-3">
         <div class="product-card__body">
-          <span class="card__tag">Metro Hub 3</span>
-          <h3 class="product-card__name">Bengaluru</h3>
+          <span class="card__tag" style="background: var(--orange-100); color: var(--orange-600);">Extended 100 km Radius</span>
+          <h3 class="product-card__name">Regional Hubs (&lt; 100 km)</h3>
           <p class="product-card__specs">
-            Serving Whitefield, Koramangala, Indiranagar, HSR Layout, Electronic City, and North Bangalore.
+            Serving extended surrounding industrial and residential townships including <strong>Sanand, Kalol, Kadi, Mehsana, Nadiad, Anand, Viramgam, and Dholka</strong>.
           </p>
           <ul style="list-style: none; font-size: 0.85rem; color: var(--steel-400); margin: var(--space-md) 0; display: flex; flex-direction: column; gap: 6px;">
-            <li>⚡ <strong>Response Time:</strong> Within 6 hours</li>
-            <li>🔧 <strong>Services:</strong> All Brand AMC &amp; Genuine Spares</li>
+            <li>⚡ <strong>Response Time:</strong> Scheduled within 24 hours</li>
+            <li>🔧 <strong>Services:</strong> Residential &amp; Commercial Chimney Maintenance, AMC</li>
           </ul>
-          <a href="{{ url_for('services.book_service') }}" class="btn btn--primary btn--sm btn--full">Book in Bengaluru</a>
-        </div>
-      </div>
-
-      <!-- Zone 4 -->
-      <div class="product-card reveal stagger-4">
-        <div class="product-card__body">
-          <span class="card__tag">Metro Hub 4</span>
-          <h3 class="product-card__name">Ahmedabad &amp; Gujarat</h3>
-          <p class="product-card__specs">
-            Operational across Ahmedabad, Gandhinagar, Surat, and Vadodara hubs by Sobharaj Enterprise Pvt Ltd.
-          </p>
-          <ul style="list-style: none; font-size: 0.85rem; color: var(--steel-400); margin: var(--space-md) 0; display: flex; flex-direction: column; gap: 6px;">
-            <li>⚡ <strong>Response Time:</strong> Same-day dispatch</li>
-            <li>🔧 <strong>Services:</strong> Full Service, AMC, Chimney Marketplace</li>
-          </ul>
-          <a href="{{ url_for('services.book_service') }}" class="btn btn--primary btn--sm btn--full">Book in Gujarat</a>
+          <a href="https://wa.me/918734002200?text=Hi%20ChimneyCare%2C%20I%20need%20service%20in%20my%20area%20near%20Ahmedabad." target="_blank" class="btn btn--secondary btn--sm btn--full">Inquire for 100km Radius</a>
         </div>
       </div>
     </div>
 
-    <!-- Direct Helpline Banner -->
-    <div style="background: var(--charcoal-800); border-radius: var(--border-radius-xl); padding: var(--space-3xl); margin-top: var(--space-3xl); color: var(--cream-100); text-align: center;" class="reveal">
-      <h3 style="color: var(--cream-100); margin-bottom: var(--space-sm);">Don't see your city or pincode?</h3>
-      <p style="color: var(--steel-300); max-width: 550px; margin: 0 auto var(--space-xl);">
-        Contact our helpline team directly on WhatsApp with your pincode, and we will check technician availability in your neighborhood.
+    <!-- Pan India Launching Soon Banner -->
+    <div style="background: linear-gradient(135deg, var(--charcoal-900), var(--charcoal-800)); border: 1px solid var(--charcoal-700); border-radius: var(--border-radius-xl); padding: var(--space-3xl); margin-top: var(--space-3xl); color: var(--cream-100); text-align: center;" class="reveal">
+      <span class="badge" style="background: var(--orange-500); color: white; margin-bottom: var(--space-sm); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;">Expansion Roadmap</span>
+      <h3 style="color: var(--cream-100); margin: var(--space-sm) 0 var(--space-md);">🇮🇳 Pan-India Services Coming Soon!</h3>
+      <p style="color: var(--steel-300); max-width: 650px; margin: 0 auto var(--space-xl); line-height: 1.7;">
+        We are actively expanding our certified technician network and service hubs across major Indian metros (Mumbai, Delhi NCR, Bengaluru, Pune, Hyderabad, and more). Stay tuned as we launch nationwide soon!
       </p>
-      <a href="https://wa.me/918734002200?text=Hi%20ChimneyCare%2C%20is%20service%20available%20at%20my%20pincode%3F" target="_blank" class="btn btn--primary btn--lg">
-        💬 Check Pincode on WhatsApp (+91 87340 02200)
-      </a>
+      <div style="display: flex; justify-content: center; gap: var(--space-md); flex-wrap: wrap;">
+        <a href="https://wa.me/918734002200?text=Hi%20ChimneyCare%2C%20I%20would%20like%20to%20know%20when%20you%20launch%20in%20my%20city." target="_blank" class="btn btn--primary btn--lg">
+          💬 Inquire on WhatsApp (+91 87340 02200)
+        </a>
+        <a href="{{ url_for('services.contact') }}" class="btn btn--secondary btn--lg">Contact Operations Desk</a>
+      </div>
     </div>
   </div>
 </section>
