@@ -167,18 +167,22 @@ def send_whatsapp_message(phone: str, message: str) -> dict:
 # ──────────────────────────────────────────────
 
 def login_required(f):
-    """Redirect to login if no valid session exists."""
+    """Enforce customer session only. Admins are redirected to the Admin Portal."""
     @functools.wraps(f)
     def decorated(*args, **kwargs):
-        if not session.get("user"):
+        user = session.get("user")
+        if not user:
             flash("Please log in to continue.", "warning")
             return redirect(url_for("auth.login", next=request.url))
+        if user.get("role") == "admin":
+            flash("Administrator accounts cannot access the Customer Portal. Redirected to Admin Portal.", "info")
+            return redirect(url_for("admin.dashboard"))
         return f(*args, **kwargs)
     return decorated
 
 
 def admin_required(f):
-    """Restrict access to users with role == 'admin'."""
+    """Restrict access strictly to users with role == 'admin'."""
     @functools.wraps(f)
     def decorated(*args, **kwargs):
         user = session.get("user")
@@ -189,6 +193,7 @@ def admin_required(f):
             abort(403)
         return f(*args, **kwargs)
     return decorated
+
 
 
 # ──────────────────────────────────────────────

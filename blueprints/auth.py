@@ -26,11 +26,16 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
+        user = session.get("user")
+        if user:
+            if user.get("role") == "admin":
+                flash("You are already signed in as Administrator.", "info")
+                return redirect(url_for("admin.dashboard"))
+            return redirect(url_for("services.dashboard"))
         return render_template("auth/login.html")
 
     email = sanitize_string(request.form.get("email", ""), max_length=254).lower()
     password = request.form.get("password", "")
-
 
     # Strict Email Validation
     is_valid_email, email_err = validate_email_strict(email)
@@ -60,11 +65,12 @@ def login():
 
         user_data = profile.data[0]
 
-        # Block admin accounts from customer login
+        # Strictly block admin accounts from logging in to Customer Portal
         if user_data.get("role") == "admin":
-            flash("Admin accounts must use the admin portal login.", "warning")
             sb.auth.sign_out()
-            return redirect(url_for("auth.admin_login"))
+            session.clear()
+            flash("Administrator accounts cannot log into the Customer Portal. Please use the Admin Portal.", "error")
+            return render_template("auth/login.html"), 403
 
         session["user"] = {
             "id": user_id,
@@ -73,6 +79,7 @@ def login():
             "role": user_data.get("role", "customer"),
             "phone": user_data.get("phone", ""),
         }
+
         if hasattr(auth_response, 'session') and auth_response.session:
             session["access_token"] = auth_response.session.access_token
 
@@ -113,7 +120,14 @@ def forgot_password():
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
+        user = session.get("user")
+        if user:
+            if user.get("role") == "admin":
+                flash("You are already signed in as Administrator.", "info")
+                return redirect(url_for("admin.dashboard"))
+            return redirect(url_for("services.dashboard"))
         return render_template("auth/register.html")
+
 
     name = sanitize_string(request.form.get("name", ""), max_length=100)
     email = sanitize_string(request.form.get("email", ""), max_length=254)
@@ -202,7 +216,11 @@ def register():
 @auth_bp.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "GET":
+        user = session.get("user")
+        if user and user.get("role") == "admin":
+            return redirect(url_for("admin.dashboard"))
         return render_template("admin/login.html")
+
 
     email = sanitize_string(request.form.get("email", ""), max_length=254).lower()
     password = request.form.get("password", "")

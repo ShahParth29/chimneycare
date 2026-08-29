@@ -23,7 +23,11 @@
       <li class="nav__item"><a href="{{ url_for('services.contact') }}" class="nav__link {% if '/contact' in request.path %}nav__link--active{% endif %}">Contact</a></li>
       
       {% if current_user %}
-        <li class="nav__item"><a href="{{ url_for('services.dashboard') }}" class="nav__link {% if '/dashboard' in request.path %}nav__link--active{% endif %}">Dashboard</a></li>
+        {% if current_user.role == 'admin' %}
+          <li class="nav__item"><a href="{{ url_for('admin.dashboard') }}" class="nav__link nav__link--admin" style="color: var(--orange-400); font-weight: 700;">🔒 Admin Portal</a></li>
+        {% else %}
+          <li class="nav__item"><a href="{{ url_for('services.dashboard') }}" class="nav__link {% if '/dashboard' in request.path %}nav__link--active{% endif %}">Dashboard</a></li>
+        {% endif %}
         <li class="nav__item nav__item--logout">
           <form action="{{ url_for('auth.logout') }}" method="post" class="nav__logout-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -34,6 +38,7 @@
         <li class="nav__item nav__item--login"><a href="{{ url_for('auth.login') }}" class="nav__link">Login</a></li>
         <li class="nav__item nav__item--cta"><a href="{{ url_for('auth.register') }}" class="nav__cta">Get Started</a></li>
       {% endif %}
+
     </ul>
   </div>
 
@@ -115,9 +120,15 @@
       <!-- User Account & Action Buttons -->
       <div class="mobile-drawer__actions">
         {% if current_user %}
-          <a href="{{ url_for('services.dashboard') }}" class="btn btn--primary btn--full" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-            <span>📊</span> Customer Dashboard
-          </a>
+          {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn--primary btn--full" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--charcoal-900);border:1px solid var(--orange-500);">
+              <span>🔒</span> Admin Dashboard
+            </a>
+          {% else %}
+            <a href="{{ url_for('services.dashboard') }}" class="btn btn--primary btn--full" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+              <span>📊</span> Customer Dashboard
+            </a>
+          {% endif %}
           <form action="{{ url_for('auth.logout') }}" method="post" style="width: 100%; margin-top: 8px;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="mobile-drawer__logout-btn">
@@ -125,6 +136,7 @@
             </button>
           </form>
         {% else %}
+
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <a href="{{ url_for('auth.login') }}" class="btn btn--secondary btn--full" style="padding: 0.85rem 0.5rem; text-align: center; font-size: 0.95rem;">
               Log In
