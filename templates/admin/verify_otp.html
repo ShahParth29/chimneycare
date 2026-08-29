@@ -11,22 +11,23 @@
       <span style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: white;">Chimney<span style="color: var(--orange-500);">Care</span></span>
     </a>
 
-    <p class="auth-card__subtitle">Two-Factor Authentication (OTP)</p>
+    <p class="auth-card__subtitle">Two-Factor Authentication (TOTP)</p>
 
-    <div style="background: var(--info-bg); border: 1px solid var(--info); border-radius: var(--border-radius); padding: var(--space-md); margin-bottom: var(--space-xl); font-size: 0.85rem; color: var(--info);">
-      Please enter the 6-digit one-time passcode sent to your registered admin phone number.
+    <div style="background: rgba(255, 107, 0, 0.1); border: 1px solid var(--orange-500); border-radius: var(--border-radius); padding: var(--space-md); margin-bottom: var(--space-xl); font-size: 0.85rem; color: var(--steel-200); line-height: 1.4;">
+      Enter the <strong>6-digit security code</strong> from your Authenticator app (Google Authenticator, Authy, Microsoft Authenticator) or an <strong>emergency backup code</strong>.
     </div>
 
     <form method="post" action="{{ url_for('auth.verify_otp') }}" data-validate>
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       <div class="form-group">
-        <label class="form-label" for="otp">Enter 6-Digit OTP</label>
+        <label class="form-label" for="otp">Security Code / Backup Code</label>
         <input type="text" id="otp" name="otp" class="form-input" 
-               placeholder="123456" maxlength="6" pattern="[0-9]{6}" required 
-               style="letter-spacing: 0.3em; font-size: 1.25rem; text-align: center;">
+               placeholder="123456 or CHMN-9281" maxlength="12" required autofocus autocomplete="one-time-code"
+               style="letter-spacing: 0.25em; font-size: 1.25rem; text-align: center; font-weight: bold; background: #1e293b; color: white; border-color: #334155;">
         <span class="form-error"></span>
       </div>
+
 
       <button type="submit" class="btn btn--primary btn--full btn--lg">Verify &amp; Proceed</button>
     </form>

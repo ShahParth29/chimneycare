@@ -882,3 +882,43 @@ def update_order_status(order_id):
         flash(f"Error updating order: {str(e)}", "error")
 
     return redirect(url_for("admin.orders"))
+
+
+@admin_bp.route("/admin/2fa-setup")
+@admin_required
+def setup_2fa():
+    """Admin 2FA QR code & Secret key viewer."""
+    import io
+    import base64
+    import pyotp
+    import qrcode
+
+    admin_email = os.environ.get("ADMIN_EMAIL", "admin.chimneycare@gmail.com")
+    admin_secret = os.environ.get("ADMIN_2FA_SECRET", "PKNZR4SQICIEAKDHYVINE2ASHJXOZFQE")
+    backup_codes = [b.strip() for b in os.environ.get("ADMIN_BACKUP_CODES", "CHMN-9281,CARE-4710,SAFE-8392,FIRE-1934").split(",") if b.strip()]
+
+    totp = pyotp.TOTP(admin_secret)
+    provisioning_uri = totp.provisioning_uri(name=admin_email, issuer_name="ChimneyCare Admin")
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=6,
+        border=2,
+    )
+    qr.add_data(provisioning_uri)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="#0f172a", back_color="#ffffff")
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    b64_img = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    qr_data_url = f"data:image/png;base64,{b64_img}"
+
+    return render_template(
+        "admin/setup_2fa.html",
+        qr_data_url=qr_data_url,
+        secret_manual=admin_secret,
+        backup_codes=backup_codes,
+    )
+

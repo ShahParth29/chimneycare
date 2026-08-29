@@ -5,8 +5,11 @@ Handles customer login/register, password recovery, admin login with optional OT
 and session management with strict schema validation and information leakage defenses.
 """
 
+import os
+import time
 import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+
 from supabase_client import get_supabase_client, get_admin_client
 from utils import (
     sanitize_string,
@@ -230,6 +233,22 @@ def admin_login():
             return render_template("admin/login.html"), 403
 
         user_data = profile.data[0]
+
+        # ── Admin 2FA TOTP Verification ──
+        admin_2fa_enabled = os.environ.get("ADMIN_2FA_ENABLED", "true").lower() in ("true", "1", "yes")
+        if admin_2fa_enabled:
+            import time
+            sb.auth.sign_out()
+            session["pending_admin_2fa"] = {
+                "user_id": user_id,
+                "email": email,
+                "name": user_data.get("name", "Admin"),
+                "role": "admin",
+                "expires_at": time.time() + 300,
+                "attempts": 0,
+            }
+            return redirect(url_for("auth.verify_otp"))
+
         session["user"] = {
             "id": user_id,
             "email": email,
@@ -249,16 +268,65 @@ def admin_login():
 @auth_bp.route("/admin/verify-otp", methods=["GET", "POST"])
 def verify_otp():
     """2FA OTP verification step for admin login."""
+    import time
+    import pyotp
+
+    pending = session.get("pending_admin_2fa")
+    if not pending or time.time() > pending.get("expires_at", 0):
+        session.pop("pending_admin_2fa", None)
+        flash("2FA session expired. Please sign in again.", "warning")
+        return redirect(url_for("auth.admin_login"))
+
     if request.method == "GET":
         return render_template("admin/verify_otp.html")
 
-    otp = sanitize_string(request.form.get("otp", ""), max_length=10)
-    if not otp or len(otp) != 6 or not otp.isdigit():
-        flash("Please enter a valid 6-digit OTP.", "error")
+    code = sanitize_string(request.form.get("otp", ""), max_length=12).strip().upper()
+    if not code:
+        flash("Please enter your 6-digit Authenticator code or a backup code.", "error")
         return render_template("admin/verify_otp.html"), 400
 
-    flash("OTP verification is not yet configured. Contact your system administrator.", "warning")
+    # Track attempts
+    attempts = pending.get("attempts", 0) + 1
+    pending["attempts"] = attempts
+    session["pending_admin_2fa"] = pending
+
+    if attempts > 5:
+        session.pop("pending_admin_2fa", None)
+        flash("Too many failed verification attempts. Please log in again.", "error")
+        return redirect(url_for("auth.admin_login"))
+
+    # Verify TOTP code against ADMIN_2FA_SECRET
+    admin_secret = os.environ.get("ADMIN_2FA_SECRET", "PKNZR4SQICIEAKDHYVINE2ASHJXOZFQE")
+    totp = pyotp.TOTP(admin_secret)
+    is_valid = False
+
+    if len(code) == 6 and code.isdigit():
+        is_valid = totp.verify(code, valid_window=1)
+
+    # Check emergency backup codes (e.g. CHMN-9281)
+    if not is_valid:
+        backup_codes_str = os.environ.get("ADMIN_BACKUP_CODES", "CHMN-9281,CARE-4710,SAFE-8392,FIRE-1934")
+        allowed_backups = [b.strip().upper() for b in backup_codes_str.split(",") if b.strip()]
+        if code in allowed_backups:
+            is_valid = True
+
+    if not is_valid:
+        remaining = 5 - attempts
+        flash(f"Invalid verification code. {remaining} attempt(s) remaining.", "error")
+        return render_template("admin/verify_otp.html"), 401
+
+    # Verification successful: promote to full session
+    session.pop("pending_admin_2fa", None)
+    session["user"] = {
+        "id": pending["user_id"],
+        "email": pending["email"],
+        "name": pending["name"],
+        "role": "admin",
+    }
+
+    flash("2FA Verification Successful. Welcome to the Admin Portal.", "success")
     return redirect(url_for("admin.dashboard"))
+
 
 
 @auth_bp.route("/logout", methods=["POST"])
