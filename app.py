@@ -110,6 +110,16 @@ def server_error(e):
         error_message="Something went wrong on our end. Please try again later.",
     ), 500
 
+# ── Security Headers Middleware ─────────────────
+
+@app.after_request
+def add_security_headers(response):
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
 # ── Run ──────────────────────────────────────────
 
 if __name__ == "__main__":
