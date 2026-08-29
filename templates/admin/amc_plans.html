@@ -50,60 +50,63 @@
           </div>
         </td>
       </tr>
-
-      <!-- Edit Plan Modal -->
-      <div class="modal-overlay" id="edit-plan-modal-{{ plan.id }}">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">Edit AMC Plan: {{ plan.tier }}</h3>
-            <button class="modal__close" onclick="closeModal('edit-plan-modal-{{ plan.id }}')">&times;</button>
-          </div>
-          <form method="post" action="{{ url_for('admin.edit_amc_plan', plan_id=plan.id) }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="admin-form">
-              <div class="form-group">
-                <label class="form-label">Tier Name *</label>
-                <input type="text" name="tier" class="form-input" value="{{ plan.tier }}" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Duration (Months) *</label>
-                <select name="duration_months" class="form-select" required>
-                  <option value="3" {% if plan.duration_months == 3 %}selected{% endif %}>3 Months</option>
-                  <option value="6" {% if plan.duration_months == 6 %}selected{% endif %}>6 Months</option>
-                  <option value="12" {% if plan.duration_months == 12 %}selected{% endif %}>12 Months</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Visits Included *</label>
-                <input type="number" name="visits_included" class="form-input" min="1" value="{{ plan.visits_included }}" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Price (₹) *</label>
-                <input type="number" name="price" class="form-input" min="0" step="50" value="{{ plan.price }}" required>
-              </div>
-              <div class="form-group form-group--full">
-                <label class="form-label">Status</label>
-                <select name="active" class="form-select">
-                  <option value="true" {% if plan.active %}selected{% endif %}>Active</option>
-                  <option value="false" {% if not plan.active %}selected{% endif %}>Inactive</option>
-                </select>
-              </div>
-              <div class="form-group form-group--full">
-                <label class="form-label">Description</label>
-                <textarea name="description" class="form-textarea" rows="3">{{ plan.description or '' }}</textarea>
-              </div>
-            </div>
-            <div class="mt-xl" style="display:flex; gap:var(--space-md);">
-              <button type="submit" class="btn btn--primary">Save Changes</button>
-              <button type="button" class="btn btn--outline" onclick="closeModal('edit-plan-modal-{{ plan.id }}')">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
       {% endfor %}
     </tbody>
   </table>
 </div>
+
+<!-- Edit Plan Modals (Rendered cleanly outside table) -->
+{% for plan in plans %}
+<div class="modal-overlay" id="edit-plan-modal-{{ plan.id }}">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title">Edit AMC Plan: {{ plan.tier }}</h3>
+      <button class="modal__close" onclick="closeModal('edit-plan-modal-{{ plan.id }}')">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('admin.edit_amc_plan', plan_id=plan.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-form">
+        <div class="form-group">
+          <label class="form-label">Tier Name *</label>
+          <input type="text" name="tier" class="form-input" value="{{ plan.tier }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duration (Months) *</label>
+          <select name="duration_months" class="form-select" required>
+            <option value="3" {% if plan.duration_months == 3 %}selected{% endif %}>3 Months</option>
+            <option value="6" {% if plan.duration_months == 6 %}selected{% endif %}>6 Months</option>
+            <option value="12" {% if plan.duration_months == 12 %}selected{% endif %}>12 Months</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Visits Included *</label>
+          <input type="number" name="visits_included" class="form-input" min="1" value="{{ plan.visits_included }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price (₹) *</label>
+          <input type="number" name="price" class="form-input" min="0" step="50" value="{{ plan.price }}" required>
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Status</label>
+          <select name="active" class="form-select">
+            <option value="true" {% if plan.active %}selected{% endif %}>Active</option>
+            <option value="false" {% if not plan.active %}selected{% endif %}>Inactive</option>
+          </select>
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-textarea" rows="3">{{ plan.description or '' }}</textarea>
+        </div>
+      </div>
+      <div class="mt-xl" style="display:flex; gap:var(--space-md);">
+        <button type="submit" class="btn btn--primary">Save Changes</button>
+        <button type="button" class="btn btn--outline" onclick="closeModal('edit-plan-modal-{{ plan.id }}')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
+
 {% else %}
 <div class="empty-state">
   <div class="empty-state__icon">📋</div>

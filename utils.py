@@ -16,20 +16,50 @@ logger = logging.getLogger("chimneycare.utils")
 
 
 # ──────────────────────────────────────────────
-#  ID Generators
+#  ID Generators (Sequential 6-digit starting from 000001)
 # ──────────────────────────────────────────────
 
-def generate_order_id() -> str:
-    """Generate a human-readable Order ID like CC-ORD-20260829-A3F7."""
-    date_part = datetime.now(timezone.utc).strftime("%Y%m%d")
-    unique_part = uuid.uuid4().hex[:4].upper()
-    return f"CC-ORD-{date_part}-{unique_part}"
+def generate_order_id(prefix: str = "CC-ORD") -> str:
+    """Generate a sequential 6-digit Order ID starting from 000001 (e.g. CC-ORD-000001)."""
+    try:
+        from supabase_client import get_admin_client
+        sb = get_admin_client()
+        res = sb.table("orders").select("id", count="exact").execute()
+        count = res.count if res and res.count is not None else 0
+        return f"{prefix}-{(count + 1):06d}"
+    except Exception as e:
+        logger.warning(f"Error querying order count: {e}")
+        return f"{prefix}-000001"
 
 
-def generate_service_id() -> str:
-    """Generate a human-readable Service ID like CC-SVC-B2E9."""
-    unique_part = uuid.uuid4().hex[:6].upper()
-    return f"CC-SVC-{unique_part}"
+def generate_booking_id(prefix: str = "CC-BK") -> str:
+    """Generate a sequential 6-digit Booking ID starting from 000001 (e.g. CC-BK-000001)."""
+    try:
+        from supabase_client import get_admin_client
+        sb = get_admin_client()
+        res = sb.table("services").select("id", count="exact").execute()
+        count = res.count if res and res.count is not None else 0
+        return f"{prefix}-{(count + 1):06d}"
+    except Exception as e:
+        logger.warning(f"Error querying booking count: {e}")
+        return f"{prefix}-000001"
+
+
+def generate_service_id(prefix: str = "CC-SVC") -> str:
+    """Generate a sequential 6-digit Service ID starting from 000001 (e.g. CC-SVC-000001)."""
+    try:
+        from supabase_client import get_admin_client
+        sb = get_admin_client()
+        svc_res = sb.table("services").select("id", count="exact").execute()
+        rep_res = sb.table("repair_jobs").select("id", count="exact").execute()
+        svc_cnt = svc_res.count if svc_res and svc_res.count is not None else 0
+        rep_cnt = rep_res.count if rep_res and rep_res.count is not None else 0
+        total_cnt = svc_cnt + rep_cnt
+        return f"{prefix}-{(total_cnt + 1):06d}"
+    except Exception as e:
+        logger.warning(f"Error querying service count: {e}")
+        return f"{prefix}-000001"
+
 
 
 # ──────────────────────────────────────────────

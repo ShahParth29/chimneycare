@@ -52,68 +52,70 @@
           </div>
         </td>
       </tr>
-
-      <!-- Edit Product Modal -->
-      <div class="modal-overlay" id="edit-product-modal-{{ p.id }}">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">Edit Product: {{ p.brand }} {{ p.model }}</h3>
-            <button class="modal__close" onclick="closeModal('edit-product-modal-{{ p.id }}')">&times;</button>
-          </div>
-          <form method="post" action="{{ url_for('admin.edit_product', product_id=p.id) }}" enctype="multipart/form-data">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="admin-form">
-              <div class="form-group">
-                <label class="form-label">Brand *</label>
-                <input type="text" name="brand" class="form-input" value="{{ p.brand }}" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Model *</label>
-                <input type="text" name="model" class="form-input" value="{{ p.model }}" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Price (₹) *</label>
-                <input type="number" name="price" class="form-input" min="0" step="100" value="{{ p.price }}" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Type</label>
-                <input type="text" name="type" class="form-input" value="{{ p.type or '' }}" placeholder="e.g., Curved Glass, T-Shape">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Size</label>
-                <input type="text" name="size" class="form-input" value="{{ p.size or '' }}" placeholder="e.g., 60 cm, 90 cm">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Suction Capacity</label>
-                <input type="text" name="suction_capacity" class="form-input" value="{{ p.suction_capacity or '' }}" placeholder="e.g., 1200 m³/hr">
-              </div>
-              <div class="form-group form-group--full">
-                <label class="form-label">Listing Status</label>
-                <select name="active" class="form-select">
-                  <option value="true" {% if p.active %}selected{% endif %}>Active (Visible in Marketplace)</option>
-                  <option value="false" {% if not p.active %}selected{% endif %}>Inactive (Hidden)</option>
-                </select>
-              </div>
-              <div class="form-group form-group--full">
-                <label class="form-label">Update Product Image</label>
-                <input type="file" name="image" accept="image/*">
-              </div>
-              <div class="form-group form-group--full">
-                <label class="form-label">Description</label>
-                <textarea name="description" class="form-textarea" rows="3">{{ p.description or '' }}</textarea>
-              </div>
-            </div>
-            <div class="mt-xl" style="display:flex; gap:var(--space-md);">
-              <button type="submit" class="btn btn--primary">Save Changes</button>
-              <button type="button" class="btn btn--outline" onclick="closeModal('edit-product-modal-{{ p.id }}')">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
       {% endfor %}
     </tbody>
   </table>
 </div>
+
+<!-- Edit Product Modals (Rendered cleanly outside table) -->
+{% for p in products %}
+<div class="modal-overlay" id="edit-product-modal-{{ p.id }}">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title">Edit Product: {{ p.brand }} {{ p.model }}</h3>
+      <button class="modal__close" onclick="closeModal('edit-product-modal-{{ p.id }}')">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('admin.edit_product', product_id=p.id) }}" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-form">
+        <div class="form-group">
+          <label class="form-label">Brand *</label>
+          <input type="text" name="brand" class="form-input" value="{{ p.brand }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Model *</label>
+          <input type="text" name="model" class="form-input" value="{{ p.model }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price (₹) *</label>
+          <input type="number" name="price" class="form-input" min="0" step="100" value="{{ p.price }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <input type="text" name="type" class="form-input" value="{{ p.type or '' }}" placeholder="e.g., Curved Glass, T-Shape">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Size</label>
+          <input type="text" name="size" class="form-input" value="{{ p.size or '' }}" placeholder="e.g., 60 cm, 90 cm">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Suction Capacity</label>
+          <input type="text" name="suction_capacity" class="form-input" value="{{ p.suction_capacity or '' }}" placeholder="e.g., 1200 m³/hr">
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Listing Status</label>
+          <select name="active" class="form-select">
+            <option value="true" {% if p.active %}selected{% endif %}>Active (Visible in Marketplace)</option>
+            <option value="false" {% if not p.active %}selected{% endif %}>Inactive (Hidden)</option>
+          </select>
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Update Product Image</label>
+          <input type="file" name="image" accept="image/*">
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-textarea" rows="3">{{ p.description or '' }}</textarea>
+        </div>
+      </div>
+      <div class="mt-xl" style="display:flex; gap:var(--space-md);">
+        <button type="submit" class="btn btn--primary">Save Changes</button>
+        <button type="button" class="btn btn--outline" onclick="closeModal('edit-product-modal-{{ p.id }}')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
 {% else %}
 <div class="empty-state">
   <div class="empty-state__icon">🏠</div>

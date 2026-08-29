@@ -48,56 +48,58 @@
           </div>
         </td>
       </tr>
-
-      <!-- Edit Part Modal -->
-      <div class="modal-overlay" id="edit-part-modal-{{ part.id }}">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">Edit Part: {{ part.name }}</h3>
-            <button class="modal__close" onclick="closeModal('edit-part-modal-{{ part.id }}')">&times;</button>
-          </div>
-          <form method="post" action="{{ url_for('admin.edit_part', part_id=part.id) }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="admin-form">
-              <div class="form-group">
-                <label class="form-label">Part Name *</label>
-                <input type="text" name="name" class="form-input" value="{{ part.name }}" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Category</label>
-                <input type="text" name="category" class="form-input" value="{{ part.category or '' }}" placeholder="e.g., Filters, Motors, PCB">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Price (₹) *</label>
-                <input type="number" name="price" class="form-input" min="0" step="10" value="{{ part.price }}" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Source / Brand</label>
-                <input type="text" name="source" class="form-input" value="{{ part.source or '' }}" placeholder="e.g., OEM Direct, Certified">
-              </div>
-              <div class="form-group form-group--full">
-                <label class="form-label">Availability</label>
-                <select name="in_stock" class="form-select">
-                  <option value="true" {% if part.in_stock %}selected{% endif %}>In Stock</option>
-                  <option value="false" {% if not part.in_stock %}selected{% endif %}>Out of Stock</option>
-                </select>
-              </div>
-              <div class="form-group form-group--full">
-                <label class="form-label">Description</label>
-                <textarea name="description" class="form-textarea" rows="2">{{ part.description or '' }}</textarea>
-              </div>
-            </div>
-            <div class="mt-xl" style="display:flex; gap:var(--space-md);">
-              <button type="submit" class="btn btn--primary">Save Changes</button>
-              <button type="button" class="btn btn--outline" onclick="closeModal('edit-part-modal-{{ part.id }}')">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
       {% endfor %}
     </tbody>
   </table>
 </div>
+
+<!-- Edit Part Modals (Rendered cleanly outside table) -->
+{% for part in parts %}
+<div class="modal-overlay" id="edit-part-modal-{{ part.id }}">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title">Edit Part: {{ part.name }}</h3>
+      <button class="modal__close" onclick="closeModal('edit-part-modal-{{ part.id }}')">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('admin.edit_part', part_id=part.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-form">
+        <div class="form-group">
+          <label class="form-label">Part Name *</label>
+          <input type="text" name="name" class="form-input" value="{{ part.name }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <input type="text" name="category" class="form-input" value="{{ part.category or '' }}" placeholder="e.g., Filters, Motors, PCB">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price (₹) *</label>
+          <input type="number" name="price" class="form-input" min="0" step="10" value="{{ part.price }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Source / Brand</label>
+          <input type="text" name="source" class="form-input" value="{{ part.source or '' }}" placeholder="e.g., OEM Direct, Certified">
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Availability</label>
+          <select name="in_stock" class="form-select">
+            <option value="true" {% if part.in_stock %}selected{% endif %}>In Stock</option>
+            <option value="false" {% if not part.in_stock %}selected{% endif %}>Out of Stock</option>
+          </select>
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-textarea" rows="2">{{ part.description or '' }}</textarea>
+        </div>
+      </div>
+      <div class="mt-xl" style="display:flex; gap:var(--space-md);">
+        <button type="submit" class="btn btn--primary">Save Changes</button>
+        <button type="button" class="btn btn--outline" onclick="closeModal('edit-part-modal-{{ part.id }}')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
 {% else %}
 <div class="empty-state">
   <div class="empty-state__icon">🔩</div>

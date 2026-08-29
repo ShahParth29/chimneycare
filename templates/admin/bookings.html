@@ -80,57 +80,59 @@
           <button type="button" class="action-btn" title="Edit Full Booking Details" onclick="openModal('edit-booking-modal-{{ b.id }}')">✏️</button>
         </td>
       </tr>
-
-      <!-- Edit Booking Modal -->
-      <div class="modal-overlay" id="edit-booking-modal-{{ b.id }}">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">Edit Booking: {{ b.order_id }}</h3>
-            <button class="modal__close" onclick="closeModal('edit-booking-modal-{{ b.id }}')">&times;</button>
-          </div>
-          <form method="post" action="{{ url_for('admin.update_booking_status', booking_id=b.id) }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="admin-form">
-              <div class="form-group">
-                <label class="form-label">Service Status</label>
-                <select name="status" class="form-select">
-                  {% for s in ['pending','confirmed','in_progress','completed','cancelled'] %}
-                  <option value="{{ s }}" {% if b.status == s %}selected{% endif %}>{{ s | replace('_', ' ') | title }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Assign Technician</label>
-                <select name="technician_id" class="form-select">
-                  <option value="">-- Unassigned --</option>
-                  {% for tech in technicians %}
-                  <option value="{{ tech.id }}" {% if b.technician_id == tech.id %}selected{% endif %}>{{ tech.name }} ({{ tech.specialization or 'General' }})</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Labour Charge (₹)</label>
-                <input type="number" name="labour_charge" class="form-input" value="{{ b.labour_charge or 0 }}" min="0" step="10">
-              </div>
-              <div class="form-group form-group--full">
-                <label class="form-label">Service Notes / Remarks</label>
-                <textarea name="notes" class="form-textarea" rows="3">{{ b.notes or '' }}</textarea>
-              </div>
-            </div>
-            <div class="mt-xl" style="display:flex; gap:var(--space-md); flex-wrap:wrap;">
-              <button type="submit" class="btn btn--primary">Update Booking</button>
-              {% if b.whatsapp_url %}
-              <a href="{{ b.whatsapp_url }}" target="_blank" class="btn" style="background:#25D366; color:white;">💬 Open WhatsApp Confirmation</a>
-              {% endif %}
-              <button type="button" class="btn btn--outline" onclick="closeModal('edit-booking-modal-{{ b.id }}')">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
       {% endfor %}
     </tbody>
   </table>
 </div>
+
+<!-- Edit Booking Modals (Rendered cleanly outside table) -->
+{% for b in bookings %}
+<div class="modal-overlay" id="edit-booking-modal-{{ b.id }}">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title">Edit Booking: {{ b.order_id }}</h3>
+      <button class="modal__close" onclick="closeModal('edit-booking-modal-{{ b.id }}')">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('admin.update_booking_status', booking_id=b.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-form">
+        <div class="form-group">
+          <label class="form-label">Service Status</label>
+          <select name="status" class="form-select">
+            {% for s in ['pending','confirmed','in_progress','completed','cancelled'] %}
+            <option value="{{ s }}" {% if b.status == s %}selected{% endif %}>{{ s | replace('_', ' ') | title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign Technician</label>
+          <select name="technician_id" class="form-select">
+            <option value="">-- Unassigned --</option>
+            {% for tech in technicians %}
+            <option value="{{ tech.id }}" {% if b.technician_id == tech.id %}selected{% endif %}>{{ tech.name }} ({{ tech.specialization or 'General' }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Labour Charge (₹)</label>
+          <input type="number" name="labour_charge" class="form-input" value="{{ b.labour_charge or 0 }}" min="0" step="10">
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Service Notes / Remarks</label>
+          <textarea name="notes" class="form-textarea" rows="3">{{ b.notes or '' }}</textarea>
+        </div>
+      </div>
+      <div class="mt-xl" style="display:flex; gap:var(--space-md); flex-wrap:wrap;">
+        <button type="submit" class="btn btn--primary">Update Booking</button>
+        {% if b.whatsapp_url %}
+        <a href="{{ b.whatsapp_url }}" target="_blank" class="btn" style="background:#25D366; color:white;">💬 Open WhatsApp Confirmation</a>
+        {% endif %}
+        <button type="button" class="btn btn--outline" onclick="closeModal('edit-booking-modal-{{ b.id }}')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
 {% else %}
 <div class="empty-state">
   <div class="empty-state__icon">📅</div>

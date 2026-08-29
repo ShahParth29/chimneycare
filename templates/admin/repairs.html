@@ -78,63 +78,65 @@
           <button type="button" class="action-btn" title="Edit Repair Details" onclick="openModal('edit-repair-modal-{{ r.id }}')">✏️</button>
         </td>
       </tr>
-
-      <!-- Edit Repair Job Modal -->
-      <div class="modal-overlay" id="edit-repair-modal-{{ r.id }}">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">Edit Repair Job: {{ r.service_id }}</h3>
-            <button class="modal__close" onclick="closeModal('edit-repair-modal-{{ r.id }}')">&times;</button>
-          </div>
-          <form method="post" action="{{ url_for('admin.update_repair', repair_id=r.id) }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="admin-form">
-              <div class="form-group">
-                <label class="form-label">Confirmation &amp; Progress Status</label>
-                <select name="status" class="form-select">
-                  {% for s in ['pending','confirmed','in_progress','completed','cancelled'] %}
-                  <option value="{{ s }}" {% if r.confirmation_status == s %}selected{% endif %}>{{ s | replace('_', ' ') | title }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Assign Technician</label>
-                <select name="technician_id" class="form-select">
-                  <option value="">-- Unassigned --</option>
-                  {% for tech in technicians %}
-                  <option value="{{ tech.id }}" {% if r.technician_id == tech.id %}selected{% endif %}>{{ tech.name }} ({{ tech.specialization or 'General' }})</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Diagnostic Labour Fee (₹)</label>
-                <input type="number" name="labour_charge" class="form-input" value="{{ r.labour_charge or 0 }}" min="0" step="10">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Total Final Cost (₹)</label>
-                <input type="number" name="total_cost" class="form-input" value="{{ r.total_cost or 0 }}" min="0" step="10">
-              </div>
-              <div class="form-group form-group--full">
-                <label class="form-label">Customer Reported Issue</label>
-                <div style="background:var(--cream-100); padding:var(--space-md); border-radius:var(--border-radius); font-size:0.9rem; color:var(--charcoal-700);">
-                  {{ r.issue_description or 'No specific description provided.' }}
-                </div>
-              </div>
-            </div>
-            <div class="mt-xl" style="display:flex; gap:var(--space-md); flex-wrap:wrap;">
-              <button type="submit" class="btn btn--primary">Save Repair Updates</button>
-              {% if r.whatsapp_url %}
-              <a href="{{ r.whatsapp_url }}" target="_blank" class="btn" style="background:#25D366; color:white;">💬 Open WhatsApp Confirmation</a>
-              {% endif %}
-              <button type="button" class="btn btn--outline" onclick="closeModal('edit-repair-modal-{{ r.id }}')">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
       {% endfor %}
     </tbody>
   </table>
 </div>
+
+<!-- Edit Repair Job Modals (Rendered cleanly outside table) -->
+{% for r in repairs %}
+<div class="modal-overlay" id="edit-repair-modal-{{ r.id }}">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title">Edit Repair Job: {{ r.service_id }}</h3>
+      <button class="modal__close" onclick="closeModal('edit-repair-modal-{{ r.id }}')">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('admin.update_repair', repair_id=r.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-form">
+        <div class="form-group">
+          <label class="form-label">Confirmation &amp; Progress Status</label>
+          <select name="status" class="form-select">
+            {% for s in ['pending','confirmed','in_progress','completed','cancelled'] %}
+            <option value="{{ s }}" {% if r.confirmation_status == s %}selected{% endif %}>{{ s | replace('_', ' ') | title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign Technician</label>
+          <select name="technician_id" class="form-select">
+            <option value="">-- Unassigned --</option>
+            {% for tech in technicians %}
+            <option value="{{ tech.id }}" {% if r.technician_id == tech.id %}selected{% endif %}>{{ tech.name }} ({{ tech.specialization or 'General' }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Diagnostic Labour Fee (₹)</label>
+          <input type="number" name="labour_charge" class="form-input" value="{{ r.labour_charge or 0 }}" min="0" step="10">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Final Cost (₹)</label>
+          <input type="number" name="total_cost" class="form-input" value="{{ r.total_cost or 0 }}" min="0" step="10">
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Customer Reported Issue</label>
+          <div style="background:var(--cream-100); padding:var(--space-md); border-radius:var(--border-radius); font-size:0.9rem; color:var(--charcoal-700);">
+            {{ r.issue_description or 'No specific description provided.' }}
+          </div>
+        </div>
+      </div>
+      <div class="mt-xl" style="display:flex; gap:var(--space-md); flex-wrap:wrap;">
+        <button type="submit" class="btn btn--primary">Save Repair Updates</button>
+        {% if r.whatsapp_url %}
+        <a href="{{ r.whatsapp_url }}" target="_blank" class="btn" style="background:#25D366; color:white;">💬 Open WhatsApp Confirmation</a>
+        {% endif %}
+        <button type="button" class="btn btn--outline" onclick="closeModal('edit-repair-modal-{{ r.id }}')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
 {% else %}
 <div class="empty-state">
   <div class="empty-state__icon">🔧</div>

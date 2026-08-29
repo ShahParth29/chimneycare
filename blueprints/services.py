@@ -10,7 +10,7 @@ import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from supabase_client import get_supabase_client, get_admin_client
 from utils import (
-    login_required, generate_order_id, generate_service_id, sanitize_string,
+    login_required, generate_order_id, generate_booking_id, generate_service_id, sanitize_string,
     send_whatsapp_message, validate_email_strict, validate_phone_strict,
     validate_name_strict, validate_enum, validate_text_field
 )
@@ -145,7 +145,7 @@ def book_service():
     else:
         labour_charge = 299.0
 
-    order_id = generate_order_id()
+    order_id = generate_booking_id()
     service_id = generate_service_id()
 
     try:

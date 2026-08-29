@@ -61,56 +61,58 @@
           </div>
         </td>
       </tr>
-
-      <!-- Edit Technician Modal -->
-      <div class="modal-overlay" id="edit-tech-modal-{{ tech.id }}">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">Edit Technician: {{ tech.name }}</h3>
-            <button class="modal__close" onclick="closeModal('edit-tech-modal-{{ tech.id }}')">&times;</button>
-          </div>
-          <form method="post" action="{{ url_for('admin.edit_technician', tech_id=tech.id) }}" enctype="multipart/form-data">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="admin-form">
-              <div class="form-group">
-                <label class="form-label">Full Name *</label>
-                <input type="text" name="name" class="form-input" value="{{ tech.name }}" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Specialization</label>
-                <input type="text" name="specialization" class="form-input" value="{{ tech.specialization or '' }}" placeholder="e.g., Faber & Elica Expert">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Phone Number</label>
-                <input type="tel" name="phone" class="form-input" value="{{ tech.phone or '' }}" placeholder="+91 87340 02200">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" name="email" class="form-input" value="{{ tech.email or '' }}">
-              </div>
-              <div class="form-group form-group--full">
-                <label class="form-label">Reveal to Verified Customers</label>
-                <select name="reveal_status" class="form-select">
-                  <option value="false" {% if not tech.reveal_status %}selected{% endif %}>🔒 Hidden (Show only after telephonic confirmation)</option>
-                  <option value="true" {% if tech.reveal_status %}selected{% endif %}>✓ Revealed (Phone & details visible to customer)</option>
-                </select>
-              </div>
-              <div class="form-group form-group--full">
-                <label class="form-label">Update Profile Photo</label>
-                <input type="file" name="photo" accept="image/*">
-              </div>
-            </div>
-            <div class="mt-xl" style="display:flex; gap:var(--space-md);">
-              <button type="submit" class="btn btn--primary">Save Changes</button>
-              <button type="button" class="btn btn--outline" onclick="closeModal('edit-tech-modal-{{ tech.id }}')">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
       {% endfor %}
     </tbody>
   </table>
 </div>
+
+<!-- Edit Technician Modals (Rendered cleanly outside table) -->
+{% for tech in technicians %}
+<div class="modal-overlay" id="edit-tech-modal-{{ tech.id }}">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title">Edit Technician: {{ tech.name }}</h3>
+      <button class="modal__close" onclick="closeModal('edit-tech-modal-{{ tech.id }}')">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('admin.edit_technician', tech_id=tech.id) }}" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-form">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" name="name" class="form-input" value="{{ tech.name }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Specialization</label>
+          <input type="text" name="specialization" class="form-input" value="{{ tech.specialization or '' }}" placeholder="e.g., Faber & Elica Expert">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" name="phone" class="form-input" value="{{ tech.phone or '' }}" placeholder="+91 87340 02200">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-input" value="{{ tech.email or '' }}">
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Reveal to Verified Customers</label>
+          <select name="reveal_status" class="form-select">
+            <option value="false" {% if not tech.reveal_status %}selected{% endif %}>🔒 Hidden (Show only after telephonic confirmation)</option>
+            <option value="true" {% if tech.reveal_status %}selected{% endif %}>✓ Revealed (Phone & details visible to customer)</option>
+          </select>
+        </div>
+        <div class="form-group form-group--full">
+          <label class="form-label">Update Profile Photo</label>
+          <input type="file" name="photo" accept="image/*">
+        </div>
+      </div>
+      <div class="mt-xl" style="display:flex; gap:var(--space-md);">
+        <button type="submit" class="btn btn--primary">Save Changes</button>
+        <button type="button" class="btn btn--outline" onclick="closeModal('edit-tech-modal-{{ tech.id }}')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
 {% else %}
 <div class="empty-state">
   <div class="empty-state__icon">👷</div>

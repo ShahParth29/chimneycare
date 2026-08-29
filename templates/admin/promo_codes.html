@@ -50,59 +50,61 @@
           </div>
         </td>
       </tr>
-
-      <!-- Edit Promo Modal -->
-      <div class="modal-overlay" id="edit-promo-modal-{{ p.id }}">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">Edit Promo Code: {{ p.code }}</h3>
-            <button class="modal__close" onclick="closeModal('edit-promo-modal-{{ p.id }}')">&times;</button>
-          </div>
-          <form method="post" action="{{ url_for('admin.edit_promo_code', promo_id=p.id) }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="admin-form">
-              <div class="form-group">
-                <label class="form-label">Coupon Code *</label>
-                <input type="text" name="code" class="form-input" value="{{ p.code }}" style="text-transform:uppercase;" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Discount Type *</label>
-                <select name="discount_type" class="form-select" required>
-                  <option value="percentage" {% if p.discount_type == 'percentage' %}selected{% endif %}>Percentage (%)</option>
-                  <option value="fixed" {% if p.discount_type == 'fixed' %}selected{% endif %}>Fixed Amount (₹)</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Discount Value *</label>
-                <input type="number" name="value" class="form-input" min="0" step="1" value="{{ p.value }}" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Minimum Order Amount (₹)</label>
-                <input type="number" name="min_order_amount" class="form-input" min="0" step="50" value="{{ p.min_order_amount or 0 }}">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Maximum Total Uses</label>
-                <input type="number" name="max_uses" class="form-input" min="1" value="{{ p.max_uses or '' }}" placeholder="Leave blank for unlimited">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Status</label>
-                <select name="active" class="form-select">
-                  <option value="true" {% if p.active %}selected{% endif %}>Active</option>
-                  <option value="false" {% if not p.active %}selected{% endif %}>Inactive</option>
-                </select>
-              </div>
-            </div>
-            <div class="mt-xl" style="display:flex; gap:var(--space-md);">
-              <button type="submit" class="btn btn--primary">Save Changes</button>
-              <button type="button" class="btn btn--outline" onclick="closeModal('edit-promo-modal-{{ p.id }}')">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
       {% endfor %}
     </tbody>
   </table>
 </div>
+
+<!-- Edit Promo Modals (Rendered cleanly outside table) -->
+{% for p in promo_codes %}
+<div class="modal-overlay" id="edit-promo-modal-{{ p.id }}">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title">Edit Promo Code: {{ p.code }}</h3>
+      <button class="modal__close" onclick="closeModal('edit-promo-modal-{{ p.id }}')">&times;</button>
+    </div>
+    <form method="post" action="{{ url_for('admin.edit_promo_code', promo_id=p.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="admin-form">
+        <div class="form-group">
+          <label class="form-label">Coupon Code *</label>
+          <input type="text" name="code" class="form-input" value="{{ p.code }}" style="text-transform:uppercase;" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Discount Type *</label>
+          <select name="discount_type" class="form-select" required>
+            <option value="percentage" {% if p.discount_type == 'percentage' %}selected{% endif %}>Percentage (%)</option>
+            <option value="fixed" {% if p.discount_type == 'fixed' %}selected{% endif %}>Fixed Amount (₹)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Discount Value *</label>
+          <input type="number" name="value" class="form-input" min="0" step="1" value="{{ p.value }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Minimum Order Amount (₹)</label>
+          <input type="number" name="min_order_amount" class="form-input" min="0" step="50" value="{{ p.min_order_amount or 0 }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Maximum Total Uses</label>
+          <input type="number" name="max_uses" class="form-input" min="1" value="{{ p.max_uses or '' }}" placeholder="Leave blank for unlimited">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="active" class="form-select">
+            <option value="true" {% if p.active %}selected{% endif %}>Active</option>
+            <option value="false" {% if not p.active %}selected{% endif %}>Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-xl" style="display:flex; gap:var(--space-md);">
+        <button type="submit" class="btn btn--primary">Save Changes</button>
+        <button type="button" class="btn btn--outline" onclick="closeModal('edit-promo-modal-{{ p.id }}')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
 {% else %}
 <div class="empty-state">
   <div class="empty-state__icon">🏷️</div>
