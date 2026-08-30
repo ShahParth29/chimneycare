@@ -3,6 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TC3MCRB6RT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-TC3MCRB6RT');
+  </script>
+
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="description" content="{% block meta_description %}ChimneyCare — Professional chimney cleaning, repair, and installation services. Trusted by thousands of homeowners.{% endblock %}">
   <meta name="google-site-verification" content="_FviOtO3Z7yvOOnnvxWqNs556Oe-LdHMGkYITLCfYYM" />
