@@ -100,6 +100,84 @@ def health_check():
         "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     }), 200
 
+
+# ── SEO: Dynamic Sitemap & Robots.txt ────────────
+
+@app.route("/sitemap.xml", methods=["GET"])
+@limiter.exempt
+def sitemap():
+    """Dynamic XML sitemap for Google Search Console & AI Mode crawlers."""
+    base_url = "https://chimneycare.onrender.com"
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    # Public pages: (path, changefreq, priority)
+    pages = [
+        ("/",               "weekly",   "1.0"),
+        ("/services",       "weekly",   "0.9"),
+        ("/services/amc",   "weekly",   "0.8"),
+        ("/marketplace",    "daily",    "0.8"),
+        ("/repair",         "weekly",   "0.7"),
+        ("/about",          "monthly",  "0.6"),
+        ("/contact",        "monthly",  "0.6"),
+        ("/faq",            "monthly",  "0.7"),
+        ("/service-areas",  "monthly",  "0.5"),
+        ("/terms",          "yearly",   "0.3"),
+        ("/privacy",        "yearly",   "0.3"),
+    ]
+
+    xml_entries = []
+    for path, changefreq, priority in pages:
+        xml_entries.append(
+            f"  <url>\n"
+            f"    <loc>{base_url}{path}</loc>\n"
+            f"    <lastmod>{today}</lastmod>\n"
+            f"    <changefreq>{changefreq}</changefreq>\n"
+            f"    <priority>{priority}</priority>\n"
+            f"  </url>"
+        )
+
+    sitemap_xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "\n".join(xml_entries)
+        + "\n</urlset>"
+    )
+
+    response = app.response_class(sitemap_xml, mimetype="application/xml")
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return response
+
+
+@app.route("/robots.txt", methods=["GET"])
+@limiter.exempt
+def robots():
+    """Robots.txt — AI-friendly: allows all crawlers including Google-Extended."""
+    robots_txt = (
+        "# ChimneyCare — Robots.txt\n"
+        "# AI Mode Optimized: All crawlers welcome\n\n"
+        "User-agent: *\n"
+        "Allow: /\n\n"
+        "# Explicitly allow Google AI crawlers\n"
+        "User-agent: Googlebot\n"
+        "Allow: /\n\n"
+        "User-agent: Google-Extended\n"
+        "Allow: /\n\n"
+        "User-agent: Googlebot-News\n"
+        "Allow: /\n\n"
+        "# Block internal/admin paths\n"
+        "Disallow: /admin/\n"
+        "Disallow: /auth/\n"
+        "Disallow: /services/book\n"
+        "Disallow: /services/my-bookings\n"
+        "Disallow: /dashboard\n\n"
+        "# Sitemap\n"
+        "Sitemap: https://chimneycare.onrender.com/sitemap.xml\n"
+    )
+
+    response = app.response_class(robots_txt, mimetype="text/plain")
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
+
 # ── Template Context Processor ──────────────────
 
 @app.context_processor

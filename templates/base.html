@@ -6,12 +6,70 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="description" content="{% block meta_description %}ChimneyCare — Professional chimney cleaning, repair, and installation services. Trusted by thousands of homeowners.{% endblock %}">
   <meta name="google-site-verification" content="_FviOtO3Z7yvOOnnvxWqNs556Oe-LdHMGkYITLCfYYM" />
+
+  <!-- AI Mode & Rich Snippet Directives — allow Google to use large content excerpts -->
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://chimneycare.onrender.com{{ request.path }}">
+
   <title>{% block title %}ChimneyCare{% endblock %} — Professional Chimney Services</title>
-  
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:site_name" content="ChimneyCare by Sobhraj Enterprise Pvt Ltd">
+  <meta property="og:title" content="{% block og_title %}{{ self.title() }} — Professional Chimney Services{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}ChimneyCare — Certified kitchen chimney deep cleaning, repair, OEM spare parts, and AMC subscriptions in Ahmedabad & Gujarat.{% endblock %}">
+  <meta property="og:url" content="https://chimneycare.onrender.com{{ request.path }}">
+  <meta property="og:locale" content="en_IN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ self.og_title() }}">
+  <meta name="twitter:description" content="{{ self.og_description() }}">
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=5.0">
   {% block extra_css %}{% endblock %}
-  
+
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo-icon.svg') }}">
+
+  <!-- ═══ Site-Wide Structured Data (Organization + WebSite) ═══ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ChimneyCare",
+    "alternateName": "Sobhraj Enterprise Pvt Ltd — ChimneyCare Division",
+    "url": "https://chimneycare.onrender.com",
+    "logo": "https://chimneycare.onrender.com{{ url_for('static', filename='images/logo-icon.svg') }}",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+91-87340-02200",
+      "contactType": "customer service",
+      "areaServed": "IN",
+      "availableLanguage": ["English", "Hindi", "Gujarati"]
+    },
+    "email": "chimneycare.in@gmail.com",
+    "sameAs": [
+      "https://wa.me/918734002200"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ChimneyCare",
+    "url": "https://chimneycare.onrender.com",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://chimneycare.onrender.com/marketplace?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  {% block structured_data %}{% endblock %}
 </head>
 <body>
   {% block nav %}

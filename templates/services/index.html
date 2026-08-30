@@ -1,5 +1,79 @@
 {% extends "base.html" %}
 {% block title %}Services{% endblock %}
+{% block meta_description %}ChimneyCare professional kitchen chimney services — One-time deep cleaning (₹299 labour), AMC maintenance plans, and certified technician visits in Ahmedabad & Gujarat.{% endblock %}
+
+{% block structured_data %}
+<!-- Service Schema — Cleaning -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Kitchen Chimney Deep Cleaning",
+  "description": "Complete filter disassembly, chemical degreasing, motor and fan blade cleaning, oil collector tray servicing, duct and exhaust inspection, and exterior polish. Fixed labour rate of ₹299.",
+  "provider": {
+    "@type": "LocalBusiness",
+    "name": "ChimneyCare — Sobhraj Enterprise Pvt Ltd",
+    "telephone": "+91-87340-02200"
+  },
+  "areaServed": [
+    { "@type": "City", "name": "Ahmedabad" },
+    { "@type": "City", "name": "Gandhinagar" }
+  ],
+  "serviceType": "Chimney Cleaning",
+  "offers": {
+    "@type": "Offer",
+    "price": "699",
+    "priceCurrency": "INR",
+    "priceSpecification": {
+      "@type": "PriceSpecification",
+      "price": "699",
+      "priceCurrency": "INR",
+      "unitText": "per visit (₹499 service + ₹200 labour)"
+    },
+    "availability": "https://schema.org/InStock"
+  }
+}
+</script>
+
+<!-- Service Schema — AMC -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Chimney Annual Maintenance Contract (AMC)",
+  "description": "Scheduled deep cleaning visits with labour charges included. Available in 3-month (1 visit), 6-month (2 visits), and 12-month (4 visits) plans. Includes priority scheduling and spare parts discounts.",
+  "provider": {
+    "@type": "LocalBusiness",
+    "name": "ChimneyCare — Sobhraj Enterprise Pvt Ltd",
+    "telephone": "+91-87340-02200"
+  },
+  "areaServed": [
+    { "@type": "City", "name": "Ahmedabad" },
+    { "@type": "City", "name": "Gandhinagar" }
+  ],
+  "serviceType": "Chimney Maintenance",
+  "offers": {
+    "@type": "AggregateOffer",
+    "lowPrice": "999",
+    "highPrice": "4999",
+    "priceCurrency": "INR",
+    "offerCount": "3"
+  }
+}
+</script>
+
+<!-- BreadcrumbList Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://chimneycare.onrender.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Services", "item": "https://chimneycare.onrender.com/services" }
+  ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <section class="page-header">

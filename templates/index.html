@@ -3,6 +3,160 @@
 {% block title %}Professional Kitchen Chimney Cleaning, AMC & Repair — Sobhraj Enterprise Pvt Ltd{% endblock %}
 {% block meta_description %}ChimneyCare — Certified kitchen chimney deep cleaning, fixed-rate repairs, OEM spare parts, and AMC subscriptions across Ahmedabad, Gandhinagar, and Gujarat.{% endblock %}
 
+{% block structured_data %}
+<!-- LocalBusiness Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "ChimneyCare — Sobhraj Enterprise Pvt Ltd",
+  "image": "https://chimneycare.onrender.com{{ url_for('static', filename='images/hero.jpg') }}",
+  "url": "https://chimneycare.onrender.com",
+  "telephone": "+91-87340-02200",
+  "email": "chimneycare.in@gmail.com",
+  "priceRange": "₹299 – ₹15,000",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Ahmedabad",
+    "addressRegion": "Gujarat",
+    "addressCountry": "IN"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 23.0225,
+    "longitude": 72.5714
+  },
+  "areaServed": [
+    { "@type": "City", "name": "Ahmedabad" },
+    { "@type": "City", "name": "Gandhinagar" },
+    { "@type": "State", "name": "Gujarat" }
+  ],
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    "opens": "09:00",
+    "closes": "20:00"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "1250",
+    "bestRating": "5"
+  },
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Kitchen Chimney Services",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Kitchen Chimney Deep Cleaning",
+          "description": "Complete filter disassembly, chemical degreasing, motor and fan blade cleaning, oil collector tray servicing, duct inspection, and exterior polish.",
+          "provider": { "@type": "Organization", "name": "ChimneyCare" },
+          "areaServed": { "@type": "City", "name": "Ahmedabad" },
+          "serviceType": "Chimney Cleaning"
+        },
+        "price": "299",
+        "priceCurrency": "INR",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "price": "299",
+          "priceCurrency": "INR",
+          "unitText": "per visit"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Chimney Repair & OEM Diagnostics",
+          "description": "Full electrical and airflow diagnostics with genuine OEM parts replacement at catalog MRP. Fixed ₹350 diagnostic visit charge.",
+          "provider": { "@type": "Organization", "name": "ChimneyCare" },
+          "areaServed": { "@type": "City", "name": "Ahmedabad" },
+          "serviceType": "Chimney Repair"
+        },
+        "price": "350",
+        "priceCurrency": "INR"
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Annual Maintenance Contract (AMC)",
+          "description": "Scheduled deep cleaning visits, filter degreasing, priority technician dispatch, and emergency visit coverage. Plans from 3 to 12 months.",
+          "provider": { "@type": "Organization", "name": "ChimneyCare" },
+          "areaServed": { "@type": "City", "name": "Ahmedabad" },
+          "serviceType": "Chimney Maintenance"
+        },
+        "price": "1499",
+        "priceCurrency": "INR",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "price": "1499",
+          "priceCurrency": "INR",
+          "unitText": "starting from"
+        }
+      }
+    ]
+  }
+}
+</script>
+
+<!-- Review Schema -->
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "Review",
+    "itemReviewed": {
+      "@type": "LocalBusiness",
+      "name": "ChimneyCare"
+    },
+    "author": { "@type": "Person", "name": "Jignesh Patel" },
+    "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+    "reviewBody": "Booked the one-time deep cleaning for our Faber chimney. The technician arrived on time with proper degreasers and restored full suction. Fixed ₹299 rate was exactly as promised.",
+    "datePublished": "2026-06-15"
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Review",
+    "itemReviewed": {
+      "@type": "LocalBusiness",
+      "name": "ChimneyCare"
+    },
+    "author": { "@type": "Person", "name": "Pooja Shah" },
+    "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+    "reviewBody": "We subscribed to the 12-Month AMC plan for our kitchen. The scheduled reminder on WhatsApp and professional technician visits keep our kitchen smoke-free without having to follow up.",
+    "datePublished": "2026-07-02"
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Review",
+    "itemReviewed": {
+      "@type": "LocalBusiness",
+      "name": "ChimneyCare"
+    },
+    "author": { "@type": "Person", "name": "Amit Trivedi" },
+    "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+    "reviewBody": "Bought an Elica Filterless chimney through their marketplace with the old chimney exchange discount. Free installation was completed the next afternoon by Sobhraj Enterprise team.",
+    "datePublished": "2026-07-20"
+  }
+]
+</script>
+
+<!-- BreadcrumbList Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://chimneycare.onrender.com/" }
+  ]
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <!-- ═══ Hero ═══ -->
 <section class="hero">
