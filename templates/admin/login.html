@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Admin Login{% endblock %}
+{% block title %}Admin Portal{% endblock %}
 {% block nav %}{% endblock %}
 {% block footer %}{% endblock %}
 
@@ -11,24 +11,24 @@
       <span style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: white;">Chimney<span style="color: var(--orange-500);">Care</span></span>
     </a>
 
-    <p class="auth-card__subtitle">Admin Portal — authorized access only</p>
+    <p class="auth-card__subtitle">Management Portal — Authorized Personnel Only</p>
 
-    <form method="post" action="{{ url_for('auth.admin_login') }}" data-validate>
+    <form method="post" action="{{ url_for('auth.admin_login') }}" data-validate autocomplete="off">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       <div class="form-group">
-        <label class="form-label" for="email">Admin Email</label>
+        <label class="form-label" for="email">Admin Email / Username</label>
         <input type="email" id="email" name="email" class="form-input" 
-               placeholder="admin.chimneycare@gmail.com" required>
+               required autocomplete="username" spellcheck="false" autofocus>
       </div>
 
       <div class="form-group">
         <label class="form-label" for="password">Password</label>
         <input type="password" id="password" name="password" class="form-input" 
-               placeholder="Enter admin password" required>
+               required autocomplete="current-password">
       </div>
 
-      <button type="submit" class="btn btn--primary btn--full btn--lg">Sign In</button>
+      <button type="submit" class="btn btn--primary btn--full btn--lg">Sign In to Management</button>
     </form>
 
     <div class="auth-card__footer">

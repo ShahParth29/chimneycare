@@ -7,7 +7,12 @@ ChimneyCare is a full-stack, server-rendered web application built for chimney s
 - **Backend**: Python 3.x with Flask
 - **Frontend**: HTML5, Vanilla CSS3, Vanilla JavaScript, Jinja2 templates
 - **Database & Auth**: Supabase (PostgreSQL with Row Level Security, Supabase Auth, Supabase Storage, Supabase Realtime)
-- **Security**: Flask-WTF (CSRF protection), Flask-Limiter (Rate limiting)
+- **Security & Threat Defense**:
+  - Adaptive Threat Defense & Auto-Ban System (`security_defense.py`)
+  - Flask-WTF (CSRF protection)
+  - Flask-Limiter (Tiered rate limiting)
+  - Disguised Admin Endpoint (`/shobhrajmanager`)
+  - Honeypot scanning traps (`/admin`, `/.env`, `/wp-admin`)
 
 ## ✨ Core Features
 
@@ -26,13 +31,14 @@ ChimneyCare is a full-stack, server-rendered web application built for chimney s
   - Server-side promo code validation with rate limiting
   - Exchange trade-in evaluation
   - Order checkout flow up to "Order Placed" status
-- **Admin Portal (`/admin`)**:
-  - Centralized operations dashboard
+- **Admin & Management Portal (`/shobhrajmanager`)**:
+  - Disguised and hardened management dashboard
   - Technician management & reveal status toggling
   - AMC plan configuration
   - Repair parts & product catalogue manager
   - Promo code management with usage limits
   - Booking, repair, and order fulfillment status updates
+  - Two-Factor Authentication (TOTP 2FA) setup
 
 ## 🚀 Getting Started
 
@@ -69,6 +75,7 @@ ChimneyCare is a full-stack, server-rendered web application built for chimney s
    SUPABASE_ANON_KEY=your-anon-key
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
    FLASK_SECRET_KEY=your-flask-secret-key
+   ADMIN_URL_PREFIX=/shobhrajmanager
    ```
 
 5. **Run the Application**:
@@ -80,5 +87,7 @@ ChimneyCare is a full-stack, server-rendered web application built for chimney s
 ## 🔒 Security & Privacy
 
 - Strict Row Level Security (RLS) on all database tables.
+- Automated progressive rate limiting and IP auto-banning (5 failed attempts within 5 minutes results in a 15–30 min ban).
+- Honeypot traps on `/admin` and known scanner paths returning 404 and logging strikes.
 - No plain-text passwords or client-side calculation trusted.
 - Zero personal information or secrets committed.

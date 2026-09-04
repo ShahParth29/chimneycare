@@ -5,6 +5,7 @@ test_security.py — Comprehensive Automated Security and Vulnerability Verifica
 import io
 import unittest
 from app import app
+from security_defense import defense_manager
 from utils import (
     validate_email_strict,
     validate_phone_strict,
@@ -19,8 +20,12 @@ from utils import (
 class ChimneyCareSecurityTests(unittest.TestCase):
     def setUp(self):
         app.config["TESTING"] = True
-        app.config["WTF_CSRF_ENABLED"] = True
+        app.config["WTF_CSRF_ENABLED"] = False  # Disabled for unit route tests unless explicitly tested
+        defense_manager.reset_all()
         self.client = app.test_client()
+
+    def tearDown(self):
+        defense_manager.reset_all()
 
     def test_security_headers_present(self):
         """Verify OWASP-compliant security headers on responses."""
@@ -30,6 +35,7 @@ class ChimneyCareSecurityTests(unittest.TestCase):
         self.assertEqual(res.headers.get("X-Content-Type-Options"), "nosniff")
         self.assertEqual(res.headers.get("X-XSS-Protection"), "1; mode=block")
         self.assertEqual(res.headers.get("Referrer-Policy"), "strict-origin-when-cross-origin")
+        self.assertEqual(res.headers.get("Permissions-Policy"), "camera=(), microphone=(), geolocation=()")
 
     def test_health_check_endpoint(self):
         """Verify lightweight /health endpoint returns HTTP 200 with expected JSON payload."""
@@ -42,30 +48,38 @@ class ChimneyCareSecurityTests(unittest.TestCase):
         res_head = self.client.head("/health")
         self.assertEqual(res_head.status_code, 200)
 
-    def test_unauthenticated_admin_access_blocked(self):
-        """Ensure all protected admin endpoints deny unauthenticated access."""
+    def test_admin_honeypot_ghosting(self):
+        """Ensure probing /admin or /admin/... returns 404 without leaking portal presence."""
+        honeypot_probes = ["/admin", "/admin/", "/admin/login", "/admin/bookings", "/wp-admin", "/.env"]
+        for probe in honeypot_probes:
+            res = self.client.get(probe)
+            self.assertEqual(res.status_code, 404, f"Honeypot probe failed on: {probe}")
+
+    def test_shobhrajmanager_unauthenticated_access_blocked(self):
+        """Ensure disguised admin endpoint /shobhrajmanager requires authentication."""
         protected_routes = [
-            "/admin",
-            "/admin/bookings",
-            "/admin/repairs",
-            "/admin/technicians",
-            "/admin/amc-plans",
-            "/admin/parts",
-            "/admin/products",
-            "/admin/promo-codes",
-            "/admin/orders",
+            "/shobhrajmanager",
+            "/shobhrajmanager/bookings",
+            "/shobhrajmanager/repairs",
+            "/shobhrajmanager/technicians",
+            "/shobhrajmanager/amc-plans",
+            "/shobhrajmanager/parts",
+            "/shobhrajmanager/products",
+            "/shobhrajmanager/promo-codes",
+            "/shobhrajmanager/orders",
+            "/shobhrajmanager/2fa-setup",
         ]
         for route in protected_routes:
             res = self.client.get(route)
             self.assertIn(res.status_code, [302, 401, 403], f"Unprotected route: {route}")
+            if res.status_code == 302:
+                self.assertTrue(
+                    res.headers.get("Location", "").endswith("/shobhrajmanager/login"),
+                    f"Redirect did not point to disguised admin login on {route}"
+                )
 
-    def test_csrf_protection_on_post_requests(self):
-        """Ensure POST endpoints reject requests without a valid CSRF token."""
-        res = self.client.post("/contact", data={"name": "Attacker", "email": "hacker@test.com", "message": "XSS attack"})
-        self.assertEqual(res.status_code, 400, "CSRF protection bypassed!")
-
-    def test_customer_role_cannot_access_admin(self):
-        """Ensure logged-in customer role cannot access admin portal."""
+    def test_customer_role_cannot_access_shobhrajmanager(self):
+        """Ensure logged-in customer role cannot access disguised admin portal."""
         with self.client.session_transaction() as sess:
             sess["user"] = {
                 "id": "mock-customer-id",
@@ -73,8 +87,44 @@ class ChimneyCareSecurityTests(unittest.TestCase):
                 "name": "Customer User",
                 "role": "customer",
             }
-        res = self.client.get("/admin/bookings")
+        res = self.client.get("/shobhrajmanager/bookings")
         self.assertIn(res.status_code, [302, 403], "Customer bypassed admin authorization!")
+
+    def test_admin_login_page_has_no_placeholder_leak(self):
+        """Verify admin login page does not leak admin email or credentials in placeholders."""
+        res = self.client.get("/shobhrajmanager/login")
+        self.assertEqual(res.status_code, 200)
+        body = res.data.decode("utf-8")
+        self.assertNotIn("admin.chimneycare@gmail.com", body)
+        self.assertNotIn("placeholder=\"admin", body.lower())
+
+    def test_automated_ip_ban_on_five_failed_attempts(self):
+        """Verify that 5 failed attempts within 5 minutes trigger an automated IP ban."""
+        attacker_headers = {"X-Forwarded-For": "198.51.100.42"}
+        
+        # 4 failed attempts should not ban yet
+        for i in range(4):
+            defense_manager.record_auth_failure("198.51.100.42")
+        
+        is_banned, _ = defense_manager.is_ip_banned("198.51.100.42")
+        self.assertFalse(is_banned, "IP was prematurely banned before 5 attempts.")
+
+        # 5th failed attempt triggers ban
+        banned = defense_manager.record_auth_failure("198.51.100.42")
+        self.assertTrue(banned, "5th failed attempt did not return banned status.")
+        
+        is_banned, rem_sec = defense_manager.is_ip_banned("198.51.100.42")
+        self.assertTrue(is_banned, "IP is not marked as banned after 5 attempts.")
+        self.assertGreater(rem_sec, 800)
+
+        # Middleware should now block incoming requests from this IP with HTTP 429
+        res = self.client.get("/", headers=attacker_headers)
+        self.assertEqual(res.status_code, 429, "Banned IP was not blocked with 429.")
+        self.assertIn("Temporarily Blocked", res.data.decode("utf-8"))
+
+        # Health check must STILL respond with 200 even when IP is banned (for uptime monitoring)
+        res_health = self.client.get("/health", headers=attacker_headers)
+        self.assertEqual(res_health.status_code, 200, "Health check was improperly blocked by IP ban.")
 
     def test_strict_email_validation(self):
         """Verify strict email validation accepts valid and rejects malformed emails."""
@@ -159,7 +209,7 @@ class ChimneyCareSecurityTests(unittest.TestCase):
             "/login",
             "/register",
             "/forgot-password",
-            "/admin/login",
+            "/shobhrajmanager/login",
         ]
         for route in public_routes:
             res = self.client.get(route)

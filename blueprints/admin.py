@@ -23,10 +23,13 @@ from utils import (
 )
 
 logger = logging.getLogger("chimneycare.admin")
-admin_bp = Blueprint("admin", __name__)
+
+ADMIN_URL_PREFIX = os.environ.get("ADMIN_URL_PREFIX", "/shobhrajmanager")
+admin_bp = Blueprint("admin", __name__, url_prefix=ADMIN_URL_PREFIX)
 
 
-@admin_bp.route("/admin")
+@admin_bp.route("")
+@admin_bp.route("/")
 @admin_required
 def dashboard():
     """Admin dashboard with overview stats."""
@@ -87,7 +90,7 @@ def dashboard():
 #  Technician Management (Full CRUD)
 # ═══════════════════════════════════════════════════
 
-@admin_bp.route("/admin/technicians")
+@admin_bp.route("/technicians")
 @admin_required
 def technicians():
     sb = get_admin_client()
@@ -99,7 +102,7 @@ def technicians():
     return render_template("admin/technicians.html", technicians=techs)
 
 
-@admin_bp.route("/admin/technicians/add", methods=["POST"])
+@admin_bp.route("/technicians/add", methods=["POST"])
 @admin_required
 def add_technician():
     name = sanitize_string(request.form.get("name", ""))
@@ -145,7 +148,7 @@ def add_technician():
     return redirect(url_for("admin.technicians"))
 
 
-@admin_bp.route("/admin/technicians/<tech_id>/edit", methods=["POST"])
+@admin_bp.route("/technicians/<tech_id>/edit", methods=["POST"])
 @admin_required
 def edit_technician(tech_id):
     name = sanitize_string(request.form.get("name", ""))
@@ -187,7 +190,7 @@ def edit_technician(tech_id):
     return redirect(url_for("admin.technicians"))
 
 
-@admin_bp.route("/admin/technicians/<tech_id>/reveal", methods=["POST"])
+@admin_bp.route("/technicians/<tech_id>/reveal", methods=["POST"])
 @admin_required
 def toggle_reveal(tech_id):
     try:
@@ -204,7 +207,7 @@ def toggle_reveal(tech_id):
     return redirect(url_for("admin.technicians"))
 
 
-@admin_bp.route("/admin/technicians/<tech_id>/delete", methods=["POST"])
+@admin_bp.route("/technicians/<tech_id>/delete", methods=["POST"])
 @admin_required
 def delete_technician(tech_id):
     try:
@@ -220,7 +223,7 @@ def delete_technician(tech_id):
 #  AMC Plan Management (Full CRUD)
 # ═══════════════════════════════════════════════════
 
-@admin_bp.route("/admin/amc-plans")
+@admin_bp.route("/amc-plans")
 @admin_required
 def amc_plans():
     sb = get_admin_client()
@@ -232,7 +235,7 @@ def amc_plans():
     return render_template("admin/amc_plans.html", plans=plans)
 
 
-@admin_bp.route("/admin/amc-plans/add", methods=["POST"])
+@admin_bp.route("/amc-plans/add", methods=["POST"])
 @admin_required
 def add_amc_plan():
     tier = sanitize_string(request.form.get("tier", ""))
@@ -258,7 +261,7 @@ def add_amc_plan():
     return redirect(url_for("admin.amc_plans"))
 
 
-@admin_bp.route("/admin/amc-plans/<plan_id>/edit", methods=["POST"])
+@admin_bp.route("/amc-plans/<plan_id>/edit", methods=["POST"])
 @admin_required
 def edit_amc_plan(plan_id):
     tier = sanitize_string(request.form.get("tier", ""))
@@ -285,7 +288,7 @@ def edit_amc_plan(plan_id):
     return redirect(url_for("admin.amc_plans"))
 
 
-@admin_bp.route("/admin/amc-plans/<plan_id>/toggle", methods=["POST"])
+@admin_bp.route("/amc-plans/<plan_id>/toggle", methods=["POST"])
 @admin_required
 def toggle_amc_plan(plan_id):
     try:
@@ -300,7 +303,7 @@ def toggle_amc_plan(plan_id):
     return redirect(url_for("admin.amc_plans"))
 
 
-@admin_bp.route("/admin/amc-plans/<plan_id>/delete", methods=["POST"])
+@admin_bp.route("/amc-plans/<plan_id>/delete", methods=["POST"])
 @admin_required
 def delete_amc_plan(plan_id):
     try:
@@ -316,7 +319,7 @@ def delete_amc_plan(plan_id):
 #  Repair Parts Management (Full CRUD)
 # ═══════════════════════════════════════════════════
 
-@admin_bp.route("/admin/parts")
+@admin_bp.route("/parts")
 @admin_required
 def parts():
     sb = get_admin_client()
@@ -328,7 +331,7 @@ def parts():
     return render_template("admin/parts.html", parts=parts_data)
 
 
-@admin_bp.route("/admin/parts/add", methods=["POST"])
+@admin_bp.route("/parts/add", methods=["POST"])
 @admin_required
 def add_part():
     name = sanitize_string(request.form.get("name", ""))
@@ -354,7 +357,7 @@ def add_part():
     return redirect(url_for("admin.parts"))
 
 
-@admin_bp.route("/admin/parts/<part_id>/edit", methods=["POST"])
+@admin_bp.route("/parts/<part_id>/edit", methods=["POST"])
 @admin_required
 def edit_part(part_id):
     name = sanitize_string(request.form.get("name", ""))
@@ -381,7 +384,7 @@ def edit_part(part_id):
     return redirect(url_for("admin.parts"))
 
 
-@admin_bp.route("/admin/parts/<part_id>/toggle-stock", methods=["POST"])
+@admin_bp.route("/parts/<part_id>/toggle-stock", methods=["POST"])
 @admin_required
 def toggle_part_stock(part_id):
     try:
@@ -396,7 +399,7 @@ def toggle_part_stock(part_id):
     return redirect(url_for("admin.parts"))
 
 
-@admin_bp.route("/admin/parts/<part_id>/delete", methods=["POST"])
+@admin_bp.route("/parts/<part_id>/delete", methods=["POST"])
 @admin_required
 def delete_part(part_id):
     try:
@@ -412,7 +415,7 @@ def delete_part(part_id):
 #  Chimney Products Management (Full CRUD)
 # ═══════════════════════════════════════════════════
 
-@admin_bp.route("/admin/products")
+@admin_bp.route("/products")
 @admin_required
 def products():
     sb = get_admin_client()
@@ -424,7 +427,7 @@ def products():
     return render_template("admin/products.html", products=products_data)
 
 
-@admin_bp.route("/admin/products/add", methods=["POST"])
+@admin_bp.route("/products/add", methods=["POST"])
 @admin_required
 def add_product():
     brand = sanitize_string(request.form.get("brand", ""))
@@ -474,7 +477,7 @@ def add_product():
     return redirect(url_for("admin.products"))
 
 
-@admin_bp.route("/admin/products/<product_id>/edit", methods=["POST"])
+@admin_bp.route("/products/<product_id>/edit", methods=["POST"])
 @admin_required
 def edit_product(product_id):
     brand = sanitize_string(request.form.get("brand", ""), max_length=100)
@@ -521,7 +524,7 @@ def edit_product(product_id):
     return redirect(url_for("admin.products"))
 
 
-@admin_bp.route("/admin/products/<product_id>/delete", methods=["POST"])
+@admin_bp.route("/products/<product_id>/delete", methods=["POST"])
 @admin_required
 def delete_product(product_id):
     try:
@@ -537,7 +540,7 @@ def delete_product(product_id):
 #  Promo Codes Management (Full CRUD)
 # ═══════════════════════════════════════════════════
 
-@admin_bp.route("/admin/promo-codes")
+@admin_bp.route("/promo-codes")
 @admin_required
 def promo_codes():
     sb = get_admin_client()
@@ -549,7 +552,7 @@ def promo_codes():
     return render_template("admin/promo_codes.html", promos=promos)
 
 
-@admin_bp.route("/admin/promo-codes/add", methods=["POST"])
+@admin_bp.route("/promo-codes/add", methods=["POST"])
 @admin_required
 def add_promo_code():
     code = sanitize_string(request.form.get("code", "")).upper()
@@ -579,7 +582,7 @@ def add_promo_code():
     return redirect(url_for("admin.promo_codes"))
 
 
-@admin_bp.route("/admin/promo-codes/<promo_id>/edit", methods=["POST"])
+@admin_bp.route("/promo-codes/<promo_id>/edit", methods=["POST"])
 @admin_required
 def edit_promo_code(promo_id):
     code = sanitize_string(request.form.get("code", "")).upper()
@@ -606,7 +609,7 @@ def edit_promo_code(promo_id):
     return redirect(url_for("admin.promo_codes"))
 
 
-@admin_bp.route("/admin/promo-codes/<promo_id>/toggle", methods=["POST"])
+@admin_bp.route("/promo-codes/<promo_id>/toggle", methods=["POST"])
 @admin_required
 def toggle_promo(promo_id):
     try:
@@ -621,7 +624,7 @@ def toggle_promo(promo_id):
     return redirect(url_for("admin.promo_codes"))
 
 
-@admin_bp.route("/admin/promo-codes/<promo_id>/delete", methods=["POST"])
+@admin_bp.route("/promo-codes/<promo_id>/delete", methods=["POST"])
 @admin_required
 def delete_promo_code(promo_id):
     try:
@@ -695,7 +698,7 @@ def format_repair_whatsapp(r):
     )
 
 
-@admin_bp.route("/admin/bookings")
+@admin_bp.route("/bookings")
 @admin_required
 def bookings():
     sb = get_admin_client()
@@ -723,7 +726,7 @@ def bookings():
     return render_template("admin/bookings.html", bookings=all_bookings, technicians=techs)
 
 
-@admin_bp.route("/admin/bookings/<booking_id>/send-confirmation", methods=["POST"])
+@admin_bp.route("/bookings/<booking_id>/send-confirmation", methods=["POST"])
 @admin_required
 def send_booking_confirmation(booking_id):
     sb = get_admin_client()
@@ -744,7 +747,7 @@ def send_booking_confirmation(booking_id):
     return redirect(url_for("admin.bookings"))
 
 
-@admin_bp.route("/admin/bookings/<booking_id>/status", methods=["POST"])
+@admin_bp.route("/bookings/<booking_id>/status", methods=["POST"])
 @admin_required
 def update_booking_status(booking_id):
     new_status = sanitize_string(request.form.get("status", ""))
@@ -773,7 +776,7 @@ def update_booking_status(booking_id):
     return redirect(url_for("admin.bookings"))
 
 
-@admin_bp.route("/admin/repairs")
+@admin_bp.route("/repairs")
 @admin_required
 def repairs():
     sb = get_admin_client()
@@ -801,7 +804,7 @@ def repairs():
     return render_template("admin/repairs.html", repairs=all_repairs, technicians=techs)
 
 
-@admin_bp.route("/admin/repairs/<repair_id>/send-confirmation", methods=["POST"])
+@admin_bp.route("/repairs/<repair_id>/send-confirmation", methods=["POST"])
 @admin_required
 def send_repair_confirmation(repair_id):
     sb = get_admin_client()
@@ -822,7 +825,7 @@ def send_repair_confirmation(repair_id):
     return redirect(url_for("admin.repairs"))
 
 
-@admin_bp.route("/admin/repairs/<repair_id>/update", methods=["POST"])
+@admin_bp.route("/repairs/<repair_id>/update", methods=["POST"])
 @admin_required
 def update_repair(repair_id):
     status = sanitize_string(request.form.get("status", ""))
@@ -851,7 +854,7 @@ def update_repair(repair_id):
     return redirect(url_for("admin.repairs"))
 
 
-@admin_bp.route("/admin/orders")
+@admin_bp.route("/orders")
 @admin_required
 def orders():
     sb = get_admin_client()
@@ -868,7 +871,7 @@ def orders():
     return render_template("admin/orders.html", orders=all_orders)
 
 
-@admin_bp.route("/admin/orders/<order_id>/status", methods=["POST"])
+@admin_bp.route("/orders/<order_id>/status", methods=["POST"])
 @admin_required
 def update_order_status(order_id):
     new_status = sanitize_string(request.form.get("status", ""))
@@ -884,7 +887,7 @@ def update_order_status(order_id):
     return redirect(url_for("admin.orders"))
 
 
-@admin_bp.route("/admin/2fa-setup")
+@admin_bp.route("/2fa-setup")
 @admin_required
 def setup_2fa():
     """Admin 2FA QR code & Secret key viewer."""
@@ -921,4 +924,3 @@ def setup_2fa():
         secret_manual=admin_secret,
         backup_codes=backup_codes,
     )
-

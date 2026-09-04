@@ -2,7 +2,8 @@
 blueprints/auth.py — Authentication routes for ChimneyCare.
 
 Handles customer login/register, password recovery, admin login with optional OTP,
-and session management with strict schema validation and information leakage defenses.
+and session management with strict schema validation, IP defense monitoring,
+and information leakage defenses.
 """
 
 import os
@@ -18,9 +19,12 @@ from utils import (
     validate_password_strict,
     validate_name_strict,
 )
+from security_defense import defense_manager, get_real_client_ip
 
 logger = logging.getLogger("chimneycare.auth")
 auth_bp = Blueprint("auth", __name__)
+
+ADMIN_URL_PREFIX = os.environ.get("ADMIN_URL_PREFIX", "/shobhrajmanager")
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -34,6 +38,7 @@ def login():
             return redirect(url_for("services.dashboard"))
         return render_template("auth/login.html")
 
+    client_ip = get_real_client_ip()
     email = sanitize_string(request.form.get("email", ""), max_length=254).lower()
     password = request.form.get("password", "")
 
@@ -72,6 +77,9 @@ def login():
             flash("Administrator accounts cannot log into the Customer Portal. Please use the Admin Portal.", "error")
             return render_template("auth/login.html"), 403
 
+        # Login success: reset failure counter
+        defense_manager.record_auth_success(client_ip)
+
         session["user"] = {
             "id": user_id,
             "email": email,
@@ -88,7 +96,8 @@ def login():
         return redirect(next_url)
 
     except Exception as e:
-        logger.warning(f"Failed login attempt for {email}: {e}")
+        logger.warning(f"Failed login attempt for {email} from IP {client_ip}: {e}")
+        defense_manager.record_auth_failure(client_ip)
         flash("Invalid email or password.", "error")
         return render_template("auth/login.html"), 401
 
@@ -127,7 +136,6 @@ def register():
                 return redirect(url_for("admin.dashboard"))
             return redirect(url_for("services.dashboard"))
         return render_template("auth/register.html")
-
 
     name = sanitize_string(request.form.get("name", ""), max_length=100)
     email = sanitize_string(request.form.get("email", ""), max_length=254)
@@ -192,6 +200,8 @@ def register():
             "address": address,
         }).execute()
 
+        defense_manager.record_auth_success(get_real_client_ip())
+
         session["user"] = {
             "id": user_id,
             "email": email,
@@ -213,7 +223,7 @@ def register():
         return render_template("auth/register.html"), 400
 
 
-@auth_bp.route("/admin/login", methods=["GET", "POST"])
+@auth_bp.route(f"{ADMIN_URL_PREFIX}/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "GET":
         user = session.get("user")
@@ -221,14 +231,14 @@ def admin_login():
             return redirect(url_for("admin.dashboard"))
         return render_template("admin/login.html")
 
-
+    client_ip = get_real_client_ip()
     email = sanitize_string(request.form.get("email", ""), max_length=254).lower()
     password = request.form.get("password", "")
-
 
     is_valid_email, email_err = validate_email_strict(email)
     if not is_valid_email or not password:
         flash("Valid email and password are required.", "error")
+        defense_manager.record_auth_failure(client_ip)
         return render_template("admin/login.html"), 400
 
     try:
@@ -245,7 +255,8 @@ def admin_login():
         profile = admin_sb.table("profiles").select("*").eq("id", user_id).execute()
 
         if not profile.data or profile.data[0].get("role") != "admin":
-            logger.warning(f"Unauthorized admin login attempt by non-admin user {email}")
+            logger.warning(f"Unauthorized admin login attempt by non-admin user {email} from IP {client_ip}")
+            defense_manager.record_auth_failure(client_ip)
             flash("Access denied. Admin accounts only.", "error")
             sb.auth.sign_out()
             return render_template("admin/login.html"), 403
@@ -255,7 +266,6 @@ def admin_login():
         # ── Admin 2FA TOTP Verification ──
         admin_2fa_enabled = os.environ.get("ADMIN_2FA_ENABLED", "true").lower() in ("true", "1", "yes")
         if admin_2fa_enabled:
-            import time
             sb.auth.sign_out()
             session["pending_admin_2fa"] = {
                 "user_id": user_id,
@@ -267,6 +277,8 @@ def admin_login():
             }
             return redirect(url_for("auth.verify_otp"))
 
+        # Admin login direct success without 2FA
+        defense_manager.record_auth_success(client_ip)
         session["user"] = {
             "id": user_id,
             "email": email,
@@ -278,17 +290,18 @@ def admin_login():
         return redirect(url_for("admin.dashboard"))
 
     except Exception as e:
-        logger.warning(f"Failed admin login attempt for {email}: {e}")
+        logger.warning(f"Failed admin login attempt for {email} from IP {client_ip}: {e}")
+        defense_manager.record_auth_failure(client_ip)
         flash("Invalid administrator credentials.", "error")
         return render_template("admin/login.html"), 401
 
 
-@auth_bp.route("/admin/verify-otp", methods=["GET", "POST"])
+@auth_bp.route(f"{ADMIN_URL_PREFIX}/verify-otp", methods=["GET", "POST"])
 def verify_otp():
     """2FA OTP verification step for admin login."""
-    import time
     import pyotp
 
+    client_ip = get_real_client_ip()
     pending = session.get("pending_admin_2fa")
     if not pending or time.time() > pending.get("expires_at", 0):
         session.pop("pending_admin_2fa", None)
@@ -310,6 +323,7 @@ def verify_otp():
 
     if attempts > 5:
         session.pop("pending_admin_2fa", None)
+        defense_manager.record_auth_failure(client_ip)
         flash("Too many failed verification attempts. Please log in again.", "error")
         return redirect(url_for("auth.admin_login"))
 
@@ -329,11 +343,13 @@ def verify_otp():
             is_valid = True
 
     if not is_valid:
+        defense_manager.record_auth_failure(client_ip)
         remaining = 5 - attempts
         flash(f"Invalid verification code. {remaining} attempt(s) remaining.", "error")
         return render_template("admin/verify_otp.html"), 401
 
-    # Verification successful: promote to full session
+    # Verification successful: promote to full session and clear strikes
+    defense_manager.record_auth_success(client_ip)
     session.pop("pending_admin_2fa", None)
     session["user"] = {
         "id": pending["user_id"],
@@ -344,7 +360,6 @@ def verify_otp():
 
     flash("2FA Verification Successful. Welcome to the Admin Portal.", "success")
     return redirect(url_for("admin.dashboard"))
-
 
 
 @auth_bp.route("/logout", methods=["POST"])

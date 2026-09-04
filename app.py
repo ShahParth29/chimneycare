@@ -1,8 +1,9 @@
 """
 app.py — Flask entry point for ChimneyCare.
 
-Configures CSRF protection, tiered configurable rate limiting,
-security headers, error handling, and template context processors.
+Configures CSRF protection, adaptive threat defense, automated IP auto-ban system,
+tiered configurable rate limiting, OWASP security headers, error handling,
+and template context processors.
 """
 
 import os
@@ -23,7 +24,8 @@ logger = logging.getLogger("chimneycare.app")
 from flask import Flask, render_template, session, request, jsonify
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+
+from security_defense import init_security_defense, defense_manager, get_real_client_ip
 
 # ── App Factory ──────────────────────────────────
 
@@ -42,11 +44,15 @@ if os.environ.get("FLASK_ENV") == "production":
 
 csrf = CSRFProtect(app)
 
+# ── Initialize Adaptive Threat Defense & Auto-Ban ──
+
+init_security_defense(app)
+
 # ── Configurable Rate Limiter ────────────────────
 
 def get_auth_rate_limit_key():
-    """Dual-keying function: combines client IP + form identifier (email/phone)."""
-    ip = get_remote_address()
+    """Dual-keying function: combines real client IP + form identifier (email/phone)."""
+    ip = get_real_client_ip()
     form_id = request.form.get("email") or request.form.get("phone") or ""
     return f"{ip}:{form_id.strip().lower()}" if form_id else ip
 
@@ -57,7 +63,7 @@ RATELIMIT_AUTHENTICATED = os.environ.get("RATELIMIT_AUTHENTICATED", "120 per min
 RATELIMIT_API = os.environ.get("RATELIMIT_API", "30 per minute")
 
 limiter = Limiter(
-    get_remote_address,
+    get_real_client_ip,
     app=app,
     default_limits=[RATELIMIT_DEFAULT],
     storage_uri=os.environ.get("RATELIMIT_STORAGE_URI", "memory://"),
@@ -79,11 +85,12 @@ app.register_blueprint(admin_bp)
 
 # ── Apply Configurable Rate Limits ──────────────
 
-# Stricter Dual-Key Auth Limits (Brute-Force & Credential Stuffing Defense)
+# Dual-Key Auth Limits (Brute-Force & Credential Stuffing Defense)
 limiter.limit(RATELIMIT_AUTH, key_func=get_auth_rate_limit_key)(app.view_functions["auth.login"])
 limiter.limit(RATELIMIT_AUTH, key_func=get_auth_rate_limit_key)(app.view_functions["auth.register"])
 limiter.limit(RATELIMIT_AUTH, key_func=get_auth_rate_limit_key)(app.view_functions["auth.forgot_password"])
 limiter.limit(RATELIMIT_AUTH, key_func=get_auth_rate_limit_key)(app.view_functions["auth.admin_login"])
+limiter.limit(RATELIMIT_AUTH, key_func=get_auth_rate_limit_key)(app.view_functions["auth.verify_otp"])
 
 # API & Interactive Endpoint Limits
 limiter.limit(RATELIMIT_API)(app.view_functions["marketplace.validate_promo"])
@@ -151,10 +158,10 @@ def sitemap():
 @app.route("/robots.txt", methods=["GET"])
 @limiter.exempt
 def robots():
-    """Robots.txt — AI-friendly: allows all crawlers including Google-Extended."""
+    """Robots.txt — AI-friendly: allows all crawlers while protecting internal paths."""
     robots_txt = (
         "# ChimneyCare — Robots.txt\n"
-        "# AI Mode Optimized: All crawlers welcome\n\n"
+        "# AI Mode Optimized: All search crawlers welcome\n\n"
         "User-agent: *\n"
         "Allow: /\n\n"
         "# Explicitly allow Google AI crawlers\n"
@@ -164,8 +171,7 @@ def robots():
         "Allow: /\n\n"
         "User-agent: Googlebot-News\n"
         "Allow: /\n\n"
-        "# Block internal/admin paths\n"
-        "Disallow: /admin/\n"
+        "# Disallow internal user account actions\n"
         "Disallow: /auth/\n"
         "Disallow: /services/book\n"
         "Disallow: /services/my-bookings\n"
@@ -189,7 +195,7 @@ def inject_user():
 
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
-    logger.warning(f"CSRF Error: {e} from IP {get_remote_address()}")
+    logger.warning(f"CSRF Error: {e} from IP {get_real_client_ip()}")
     return render_template("errors/error.html",
         error_code=400,
         error_title="Security Verification Failed",
@@ -214,7 +220,7 @@ def not_found(e):
 
 @app.errorhandler(403)
 def forbidden(e):
-    logger.warning(f"403 Forbidden on {request.path} from IP {get_remote_address()}")
+    logger.warning(f"403 Forbidden on {request.path} from IP {get_real_client_ip()}")
     return render_template("errors/error.html",
         error_code=403,
         error_title="Access Denied",
@@ -223,7 +229,7 @@ def forbidden(e):
 
 @app.errorhandler(429)
 def ratelimit_handler(e):
-    logger.warning(f"429 Rate limit exceeded on {request.path} from IP {get_remote_address()}")
+    logger.warning(f"429 Rate limit exceeded on {request.path} from IP {get_real_client_ip()}")
     return render_template("errors/error.html",
         error_code=429,
         error_title="Too Many Requests",
@@ -249,6 +255,9 @@ def add_security_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    if os.environ.get("FLASK_ENV") == "production":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
     return response
 
 # ── Run ──────────────────────────────────────────
